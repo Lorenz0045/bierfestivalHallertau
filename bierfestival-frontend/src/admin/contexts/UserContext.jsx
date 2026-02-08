@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
-import keycloakService from '../services/keycloakService';
-import userService from '../services/userService';
+import keycloakService from '../../services/keycloakService';
+import userService from '../../services/userService';
 
 export const UserContext = createContext();
 

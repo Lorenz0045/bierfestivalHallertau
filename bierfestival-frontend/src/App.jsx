@@ -3,15 +3,19 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-
 import Navbar from './components/Navigation/Navbar'; // .jsx ist optional beim Import
 import Footer from './components/Footer/Footer';
 import HomePage from './pages/HomePage';
-import AccountPage from './pages/AccountPage';
-import LoginPage from './pages/LoginPage';
+import AccountPage from './admin/AccountPage';
+import LoginPage from './admin/LoginPage';
 
 import ScrollToTop from './components/UI/ScrollToTop';
 
 // Admin-Page Imports
 import AdminRoute from './components/Navigation/AdminRoute';
 import ProtectedRoute from './components/Navigation/ProtectedRoute';
-import AdminPage from './pages/AdminPage'; 
+import AdminPage from './admin/AdminPage'; 
+
+// leaflet styling
+import 'leaflet/dist/leaflet.css';
+
 
 function App() {
   return (
@@ -22,16 +26,8 @@ function App() {
         <main> {/* main content wird dynamisch über die simulierten Routen geladen */}
           <Routes>
             <Route path="/" element={<HomePage />} />
-                        <Route path="/login" element={<LoginPage />} />
-            {/* <Route path="/impressum" element={<ImpressumPage />} /> */}
-            <Route path="/account" element={<ProtectedRoute />}>
-              <Route path="" element={<AccountPage />} />
-            </Route>
-            {/* Admin Routes */}
+                        {/* Admin Routes */}
             <Route path="/admin" element={<AdminRoute />}>
-              <Route path="" element={<AdminPage />}> 
-                <Route index element={<Navigate to="dashboard" replace />} /> 
-              </Route>
             </Route>
             {/* Fallback-Route für nicht gefundene Pfade */}
             <Route path="*" element={<div>404 Seite nicht gefunden</div>} /> 

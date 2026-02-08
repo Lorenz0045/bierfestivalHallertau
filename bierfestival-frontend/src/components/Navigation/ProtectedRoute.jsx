@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useUser } from '../../contexts/UserContext';
+import { useUser } from '../../admin/contexts/UserContext';
 
 const ProtectedRoute = () => {
   const { isLoggedIn, loadingKeycloak } = useUser();

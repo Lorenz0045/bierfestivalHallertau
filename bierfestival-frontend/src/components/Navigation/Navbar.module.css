@@ -10,6 +10,11 @@
     
 }
 
+.leftGroup, .rightGroup {
+    display: flex;
+    gap: 20px; 
+}
+
 .logo {
     font-size: 40px;
     color: #e26a2c;

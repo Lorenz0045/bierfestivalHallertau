@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useUser } from '../../contexts/UserContext';
+import { useUser } from './contexts/UserContext';
 import styles from './LoginPage.module.css';
 
 const LoginPage = () => {
