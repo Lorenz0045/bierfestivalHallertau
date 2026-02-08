@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  bierfestival-frontend: # Service-Name, wichtig für die interne DNS-Auflösung in Docker
+    image: ghcr.io/lorenz0045/bierfestival-frontend:latest # zieht aktuellstes img aus github 
+    container_name: bierfestival-frontend 
+    restart: unless-stopped
+    expose: # Macht den Port nur für andere Container im selben Docker-Netzwerk verfügbar
+      - "80"
+    networks:
+      - nginx-proxy-manager 
+
+networks:
+  nginx-proxy-manager:
+    external: true 

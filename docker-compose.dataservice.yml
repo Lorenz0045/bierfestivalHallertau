@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  bierfestival-data-service:
+    image: ghcr.io/lorenz0045/bierfestival-data-service:latest # Das Image wird vom CI/CD-Workflow in die GitHub Container Registry gepusht.
+    container_name: bierfestival-data-service
+    restart: unless-stopped
+    environment:
+      # --- Datenbankverbindung ---
+      # Diese Variablen werden für Quarkus in application.properties injected
+      POSTGRES_USER: ${POSTGRES_USER:-bierfestival}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bierfestivalpassword123} # Unbedingt in .env ändern!
+      POSTGRES_DB: ${POSTGRES_DB:-bierfestival_data_db}
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://bierfestival-postgres-db:5432/${POSTGRES_DB:-bierfestival_data_db} # wichtig intern lauscht der db-container weiterhin auf 5432, nur extern auf 15432
+
+      # --- Keycloak JWT Validierung ---
+      # Diese Variablen füllen die Platzhalter in application.properties für mp.jwt.verify.*
+      KEYCLOAK_AUTH_SERVER_URL: ${KEYCLOAK_AUTH_SERVER_URL:-https://keycloak.qordio.de/realms/Aryuveda}
+      # Client-ID des Backends selbst.
+      KEYCLOAK_BACKEND_CLIENT_ID: ${KEYCLOAK_BACKEND_CLIENT_ID:-bierfestival-data-service}
+      
+      # --- Logging (optional) ---
+      QUARKUS_LOG_LEVEL: INFO # Mögliche Werte: DEBUG, INFO, WARN, ERROR
+      # QUARKUS_LOG_CATEGORY__IO_QUARKUS__LEVEL: DEBUG # Beispiel für spezifische Kategorie
+
+      # --- Hibernate ORM ---
+      QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: validate # Optionen: none, create, drop-and-create, drop, update, validate
+      QUARKUS_HIBERNATE_ORM_LOG_SQL: "false"
+
+    # 'expose' macht den Port nur für andere Container in denselben Netzwerken verfügbar
+    expose:
+      - "18080" # Der interne Port, auf dem Quarkus standardmäßig lauscht.
+    volumes:
+      - bierfestival_uploads_data:/deployments/uploads # Mapping des Volumes auf den Pfad im Container
+    networks:
+      - nginx-proxy-manager    # Erforderlich, damit Nginx den Service erreichen kann.
+      - bierfestival-backend-network # Erforderlich für die Kommunikation mit der Postgres-Datenbank.
+
+networks:
+  nginx-proxy-manager:
+    external: true # Dieses Netzwerk wird vom Nginx Proxy Manager Stack verwaltet oder manuell erstellt.
+  bierfestival-backend-network:
+    external: true # Dieses Netzwerk hast du für die Postgres-DB erstellt.
+
+volumes:
+  bierfestival_uploads_data: # Definition des Volumes für persistente Uploads
+    driver: local 

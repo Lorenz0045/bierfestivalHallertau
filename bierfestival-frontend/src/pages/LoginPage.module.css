@@ -1,0 +1,82 @@
+.loginPageContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh; 
+  padding: 20px;
+  text-align: center;
+}
+
+.loginFormWrapper {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  max-width: 450px;
+  width: 100%;
+}
+
+.loginFormWrapper h1 {
+  font-size: 2em;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.loginFormWrapper p {
+  font-size: 1em;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.actionButton {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  width: 100%;
+}
+
+.actionButton { 
+  background-color: #e26a2c; 
+  color: white;
+}
+
+.actionButton:hover {
+  background-color: #c75a20; 
+}
+
+.registerButton {
+  background-color: #003329;
+  color: white;
+}
+
+.registerButton:hover {
+  background-color: #00221c;
+}
+
+.infoText {
+  font-size: 0.9em;
+  color: #777;
+  margin-top: 20px;
+}
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  font-size: 1.2em;
+  color: #555;
+}

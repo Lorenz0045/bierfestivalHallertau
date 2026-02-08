@@ -1,0 +1,75 @@
+.carouselContainer {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    display: flex;
+    -webkit-overflow-scrolling: touch; 
+    scrollbar-width: none; 
+    position: relative; 
+    display: flex;
+    align-items: center;
+}
+
+.carouselContainer::-webkit-scrollbar {
+    display: none; 
+}
+
+.carouselTrack {
+    display: flex;
+    gap: 15px;
+    padding: 0 15px;
+}
+
+.tipCard {
+    flex: 0 0 80%; 
+    max-width: 220px; 
+    scroll-snap-align: center;
+    background-color: #f8f8f8;
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tipTitle {
+    font-size: 1.1em;
+    color: #003329;
+    font-weight: 600;
+    margin: 0;
+}
+
+.tipText {
+    font-size: 0.9em;
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.navButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.prevButton {
+    left: -20px;
+}
+
+.nextButton {
+    right: -20px;
+}
+
+@media (min-width: 769px) { 
+    .tipCard { flex-basis: 30%; }
+}

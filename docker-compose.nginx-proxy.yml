@@ -1,0 +1,25 @@
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - /opt/nginx-proxy-manager/data:/data
+      - /opt/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
+      # für Auslieferung von hochgeladenen Bildern von ayurly
+      # - ayurly-data-service_ayurly_uploads_data:/var/www/ayurly/uploads  # Der Pfad /var/www/ayurly/uploads ist der Pfad *innerhalb* des Nginx-Proxy-Manager-Containers -> entspricht alias forwarding in nginx config
+    networks:
+      - nginx-proxy-manager
+networks:
+  nginx-proxy-manager:
+    external: true
+
+volumes:
+  npm_data: {} # Leeres Mapping bedeutet: Docker erstellt dieses Volume mit Standardeinstellungen
+  npm_letsencrypt: {} # Ebenso
+  # ayurly-data-service_ayurly_uploads_data: # Korrekte Deklaration des externen Volumes
+    # external: true

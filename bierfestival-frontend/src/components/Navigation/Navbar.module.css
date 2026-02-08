@@ -1,0 +1,396 @@
+.navContainer {
+    padding: 0 100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+    
+}
+
+.logo {
+    font-size: 40px;
+    color: #e26a2c;
+    font-weight: 800;
+    padding-left: 14px;
+    text-decoration: none;
+}
+
+.links {
+    background-color: #D9D9D9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    border-radius: 30px;
+    width: 60%;
+    height: 40%; 
+}
+
+.link {
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    flex-grow: 1; 
+    height: 100%; 
+    border-radius: 30px; 
+    padding: 10px 14px;
+    font-size: 13pt;
+    color: #222222;
+    text-decoration: none;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    text-align: center;
+}
+
+.link:hover {
+    color: #fff;
+}
+
+.active {
+    background-color: #e26a2c; 
+    color: #fff;
+    border-radius: 30px; 
+}
+
+.login {
+    display: flex;
+    align-items: center;
+}
+
+.loginButton { 
+    padding: 10px 20px;
+    border: none;
+    margin-left: 14px;
+    cursor: pointer;
+    border-radius: 30px;
+    background-color: #D9D9D9;
+    font-size: 13pt;
+    color: #222222;
+    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.loginButton:hover {
+    background-color: #e26a2c;
+    color: #fff;
+}
+
+.mobileMenuIcon {
+    display: none; 
+    font-size: 28px; 
+    cursor: pointer;
+    color: #333;
+    z-index: 1002; 
+}
+
+.mobileMenuPopup {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    position: absolute;
+    top: 80px; 
+    left: 0;
+    right: 0;
+    background-color: #f8f8f8;
+    padding: 10px 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 1001; 
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.mobileMenuPopup .link { 
+    width: 90%;
+    justify-content: center;
+    background-color: transparent; 
+    padding: 15px 0;
+    border-radius: 8px; 
+    color: #333; 
+    height: auto; 
+    margin-bottom: 5px;
+}
+
+.mobileMenuPopup .link:hover {
+    background-color: #eee;
+    color: #e26a2c; 
+}
+
+.mobileMenuPopup .link.active {
+    background-color: #e26a2c !important;
+    color: #fff !important;
+}
+
+.mobileMenuLoginButton {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    background-color: #003329;
+    color: white;
+    margin-top: 10px;
+    width: 80%;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+.mobileMenuLoginButton:hover {
+    background-color: #00221c;
+}
+
+.links.open {
+    display: flex;
+}
+
+.login.hiddenOnMobileMenuOpen {
+    display: none;
+}
+
+.mobileBottomNav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    min-height: calc(55px + env(safe-area-inset-bottom)); 
+    background-color: #ffffff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000; 
+
+    padding-top: 9px; 
+    padding-bottom: env(safe-area-inset-bottom); 
+    
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+.mobileNavLink {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    text-decoration: none;
+    color: #757575; 
+    font-size: 0.75rem; 
+    padding: 5px 0;
+    transition: color 0.3s ease;
+    height: 100%;
+}
+
+.mobileNavIcon {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.mobileNavText {
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+.mobileNavLink.activeMobile,
+.mobileNavLink:hover {
+    color: #e26a2c;
+}
+
+.dropdownContainer {
+    position: relative;
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+}
+.dropdownMenu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translate(-50%, -10px);
+    background-color: #D9D9D9;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+    z-index: 1005;
+    border-radius: 20px;
+    opacity: 0;
+    pointer-events: none; 
+    transition: all 0.2s ease-out;
+}
+.dropdownContainer:hover .dropdownMenu {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto; 
+}
+.dropdownContainer::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -10px; 
+    height: 10px;
+    background-color: transparent; 
+}
+.dropdownLink {
+    color: #333;
+    background-color: #D9D9D9;
+    padding: 12px 20px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    font-size: 13pt;
+    border-radius: 30px;
+}
+.dropdownLink:hover {
+    color: white;
+}
+
+.activeDropdownLink {
+    background-color: #e26a2c; 
+    color: white;
+    border-radius: 30px;
+}
+
+.mobileDropdownContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.mobileDropdownToggle {
+    display: flex;
+    width: 90%;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    position: relative; 
+}
+.mobileDropdownToggle .link {
+    flex-grow: 1; 
+    text-align: center;
+    margin-bottom: 0;
+    display: block;
+}
+.mobileDropdownToggle button {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    color: #555;
+    position: absolute; 
+    right: 0; 
+    padding: 15px; 
+}
+.mobileSubMenu {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    margin: 5px auto 10px auto;
+    background-color: #e9ecef; 
+    border-radius: 8px;
+}
+.mobileSubLink {
+    color: #444;
+    padding: 12px 15px;
+    text-decoration: none;
+    display: block; 
+    text-align: center; 
+    border-radius: 5px;
+}
+
+.activeMobileSubLink {
+    background-color: #e26a2c;
+    color: #fff;
+}
+.mobileSubLink:hover {
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .links,
+    .navContainer > .login { 
+        display: none;
+    }
+    
+    .mobileBottomNav {
+        display: flex;
+    }
+    
+    
+    .navContainer {
+        padding: 0 20px;
+        height: 80px;
+    }
+
+    .logo {
+        font-size: 30px;
+        padding-left: 0;
+    }
+
+    .mobileMenuIcon {
+        display: block; 
+    }
+
+    .links {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        background-color: #f8f8f8;
+        flex-direction: column;
+        padding: 10px 0;
+        display: none; 
+        width: 100%;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        z-index: 1000; 
+        border-radius: 0; 
+    }
+
+    .link { 
+        width: 100%;
+        justify-content: center;
+        background-color: #f8f8f8;
+        padding: 15px 0;
+        border-radius: 0; 
+        color: #333; 
+        height: auto; 
+    }
+
+    .link:hover {
+        background-color: #eee;
+        color: #e26a2c; 
+    }
+
+    .link.active {
+        background-color: #e26a2c !important;
+        color: #fff !important;
+    }
+
+    .login {
+    }
+
+    .login.visibleOnMobile {
+        display: flex;
+        flex-direction: column; 
+        align-items: center;
+        width: 100%;
+        padding: 15px 0;
+        background-color: #f8f8f8;
+    }
+
+    .login.visibleOnMobile .loginButton { 
+        margin-left: 0;
+        margin-bottom: 10px; 
+        width: 80%; 
+        text-align: center;
+    }
+    .login.visibleOnMobile .loginButton:last-child {
+        margin-bottom: 0;
+    }
+
+    .navContainer > .login { 
+        display: none;
+    }
+
+}

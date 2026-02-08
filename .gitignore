@@ -1,0 +1,37 @@
+# Lokale Umgebungs-Konfigurationsdateien
+.env
+*.env
+.env.*
+!/.env.example 
+
+# IDE-spezifische Dateien
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+nbproject/
+build/
+.DS_Store
+
+# Build-Verzeichnisse und Ausgaben
+/ayurly-frontend/dist/
+/ayurly-frontend/node_modules/
+/ayurly-data-service/target/
+/ayurly-data-service/bin/ # Falls vorhanden
+
+# Log-Dateien
+*.log
+logs/
+
+# Temporäre Dateien
+*.tmp
+*~
+*.swp
+
+# Spezifische Dateien mit Secrets (falls du sie anders nennst)
+# secret.properties
+# credentials.json
+
+# Upload-Verzeichnisse (falls sie lokal im Projektpfad wären, was aber für Docker-Volumes anders gehandhabt wird)
+# uploads/

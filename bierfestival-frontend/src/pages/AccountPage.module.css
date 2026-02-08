@@ -1,0 +1,154 @@
+.AccountContainer {
+    width: 100%;
+    padding: 20px 120px;
+    display: flex;
+    flex-direction: column;
+}
+
+.profileCard {
+    flex: 2;
+    display: flex;
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    gap: 50px;
+    padding: 30px;
+}
+
+.profileImage {
+    width: 35%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profileWrapper {
+    display: flex;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
+.profileContent {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.name h2 {
+    font-size: 30pt;
+    color: #333;
+    line-height: 1.1;
+}
+
+.name h2:first-child {
+    font-size: 35pt;
+    color: #e26a2c;
+    font-weight: bold;
+}
+
+.userInfo {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 13pt;
+}
+
+.settings {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 13pt;
+    color: grey;
+    cursor: pointer;
+    align-self: flex-start;
+    height: fit-content;
+}
+
+.settings:hover {
+    color: #e26a2c;
+}
+
+.logoutButton {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    background-color: white;
+    border: none;
+    color: black;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13pt;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.logoutButton:hover {
+    color: #e26a2c;
+    ;
+    border-color: #e53935;
+}
+
+.row>.disabledCard {
+    display: none;
+}
+
+
+
+@media (min-width: 1600px) and (max-width: 1800px) {
+    .profileImage {
+        width: 45%;
+    }
+}
+
+@media (min-width: 1400px) and (max-width: 1600px) {
+    .profileImage {
+        width: 48%;
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1400px) {
+    .profileImage {
+        width: 40%;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 880px) {
+    .profileImage {
+        width: 40%;
+    }
+}
+
+@media (max-width: 1400px) {
+    .AccountContainer {
+        padding: 20px 40px;
+    }
+
+    .profileCard {
+        min-width: unset;
+    }
+}
+
+@media (max-width: 768px) {
+    .profileCard {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+    
+    .profileWrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .settings {
+        margin-top: 10px
+    }
+
+    .AccountContainer {
+        width: 100%;
+        padding: 20px 20px;
+    }
+
+}

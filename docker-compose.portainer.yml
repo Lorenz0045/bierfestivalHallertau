@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "8000:8000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    restart: unless-stopped
+    networks:
+      - nginx-proxy-manager
+networks:
+  nginx-proxy-manager:
+    external: true
+
+volumes:
+  portainer_data:
+
+
+
+

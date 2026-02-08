@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  bierfestival-postgres-db:
+    image: postgres:16-alpine # Aktuelle stabile Postgres-Version, Alpine für geringere Größe
+    container_name: bierfestival-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bierfestival}  # Standardwert, wenn nicht in .env gesetzt
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bierfestivalpassword123} # Standardwert, wenn nicht in .env gesetzt
+      POSTGRES_DB: ${POSTGRES_DB:-bierfestival_data_db}          # Standardwert, wenn nicht in .env gesetzt
+    volumes:
+      - _postgres_data:/var/lib/postgresql/data # Persistentes Volume
+    ports:
+      - "15432:5432" # Exponiere den Port nach außen (optional, wenn nur intern erreichbar)
+                                    # Der Standardwert wird verwendet, wenn POSTGRES_PORT nicht in .env gesetzt ist
+    networks:
+      - bierfestival-backend-network # Verbindet mit dem externen Netzwerk
+
+volumes:
+  bierfestival_postgres_data: # Definiert das Volume für persistente Daten
+    driver: local # Oder ein anderer Volume-Treiber deiner Wahl
+
+networks:
+  bierfestival-backend-network: # Definiert das Netzwerk, das auch vom Backend genutzt wird
+    external: true # Wichtig: Dieses Netzwerk muss extern erstellt werden oder von einer anderen Compose-Datei
+                   # oder manuell über `docker network create bierfestival-backend-network`
