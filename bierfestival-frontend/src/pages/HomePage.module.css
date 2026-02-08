@@ -4,7 +4,7 @@
 
 /* Container füllt den Rest des Bildschirms (abzüglich Navbar) */
 .mapWrapper {
-    height: calc(100vh - 70px); /* Pass die 70px an deine Navbar-Höhe an */
+    height: calc(100vh - 120px); 
     width: 100%;
     position: relative;
     z-index: 1; /* Damit die Karte nicht über Dropdowns liegt */
@@ -74,6 +74,6 @@
 @media (max-width: 768px) {
     .mapWrapper {
         /* Mobile: 100vh - Navbar Unten (inkl. Safe Area) */
-        height: calc(100vh - 60px - env(safe-area-inset-bottom));
+        height: calc(100vh - 120px - env(safe-area-inset-bottom));
     }
 }

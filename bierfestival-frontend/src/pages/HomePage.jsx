@@ -22,7 +22,7 @@ const UserLocationMarker = () => {
         // 1. Beim Starten: Standort abfragen & beobachten (watch: true)
         map.locate({ 
             setView: true, // Zoomt am Anfang automatisch hin
-            maxZoom: 16,
+            maxZoom: 20,
             watch: true,   // Live-Update wenn man läuft
             enableHighAccuracy: true 
         });
