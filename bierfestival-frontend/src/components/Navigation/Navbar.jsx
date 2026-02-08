@@ -6,7 +6,7 @@ import {
     FaRoute,        // Anreise
     FaMapMarkedAlt, // Lageplan (Zentrum)
     FaCalendarAlt,  // Programm
-    FaGift          // Schenken
+    FaBeer          // Schenken
 } from 'react-icons/fa';
 
 const Navbar = () => {
@@ -32,7 +32,7 @@ const Navbar = () => {
                         <FaCalendarAlt /> <span>Programm</span>
                     </NavLink>
                     <NavLink to="/schenken" className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}>
-                        <FaGift /> <span>Schenken</span>
+                        <FaBeer /> <span>Schenken</span>
                     </NavLink>
                 </div>
             </nav>
@@ -52,7 +52,7 @@ const Navbar = () => {
                 {/* Der Haupt-Button (Mitte) */}
                 <NavLink to="/" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
                     <FaMapMarkedAlt className={styles.icon} />
-                    <span className={styles.label}>Karte</span>
+                    <span className={styles.label}>Lageplan</span>
                 </NavLink>
 
                 <NavLink to="/programm" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
@@ -61,7 +61,7 @@ const Navbar = () => {
                 </NavLink>
 
                 <NavLink to="/schenken" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
-                    <FaGift className={styles.icon} />
+                    <FaBeer className={styles.icon} />
                     <span className={styles.label}>Schenken</span>
                 </NavLink>
             </nav>
