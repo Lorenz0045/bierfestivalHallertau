@@ -16,3 +16,10 @@
     width: 100%;
     background-color: #e5e5e5;
 }
+
+@media (max-width: 768px) {
+    .mapWrapper {
+        /* Mobile: 100vh - Navbar Unten (inkl. Safe Area) */
+        height: calc(100vh - 60px - env(safe-area-inset-bottom));
+    }
+}

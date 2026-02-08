@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import { 
@@ -6,61 +6,65 @@ import {
     FaRoute,        // Anreise
     FaMapMarkedAlt, // Lageplan (Zentrum)
     FaCalendarAlt,  // Programm
-    FaGift,         // Schenken
-    FaBars, FaTimes // Mobile Menu
+    FaGift          // Schenken
 } from 'react-icons/fa';
 
 const Navbar = () => {
-    const [menuOpen, setMenuOpen] = useState(false);
-
-    const toggleMenu = () => setMenuOpen(!menuOpen);
-    const closeMenu = () => setMenuOpen(false);
-
     return (
         <>
-            <nav className={styles.navContainer}>
-                
-                {/* --- LINKS (1 & 2) --- */}
-                <div className={styles.leftGroup}>
+            {/* --- DESKTOP NAVBAR (Oben) --- */}
+            <nav className={styles.desktopNav}>
+                <div className={styles.desktopGroup}>
                     <NavLink to="/suche" className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}>
-                        <FaSearch /> <span className={styles.linkText}>Suche</span>
+                        <FaSearch /> <span>Suche</span>
                     </NavLink>
                     <NavLink to="/anreise" className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}>
-                        <FaRoute /> <span className={styles.linkText}>Anreise</span>
+                        <FaRoute /> <span>Anreise</span>
                     </NavLink>
                 </div>
 
-                {/* --- ZENTRUM (3) - Lageplan / Landing --- */}
-                <NavLink to="/" className={styles.logo} onClick={closeMenu}>
-                    <FaMapMarkedAlt /> <span className={styles.logoText}>Lageplan</span>
+                <NavLink to="/" className={styles.desktopLogo}>
+                    <FaMapMarkedAlt /> <span>Lageplan</span>
                 </NavLink>
 
-                {/* --- RECHTS (4 & 5) --- */}
-                <div className={styles.rightGroup}>
+                <div className={styles.desktopGroup}>
                     <NavLink to="/programm" className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}>
-                        <FaCalendarAlt /> <span className={styles.linkText}>Programm</span>
+                        <FaCalendarAlt /> <span>Programm</span>
                     </NavLink>
                     <NavLink to="/schenken" className={({ isActive }) => `${styles.link} ${isActive ? styles.active : ''}`}>
-                        <FaGift /> <span className={styles.linkText}>Schenken</span>
+                        <FaGift /> <span>Schenken</span>
                     </NavLink>
-                </div>
-
-                {/* --- Mobile Toggle --- */}
-                <div className={styles.mobileMenuIcon} onClick={toggleMenu}>
-                    {menuOpen ? <FaTimes /> : <FaBars />}
                 </div>
             </nav>
 
-            {/* --- Mobile Menu Overlay --- */}
-            {menuOpen && (
-                <div className={styles.mobileMenuPopup}>
-                    <NavLink to="/" onClick={closeMenu} className={styles.link}>Lageplan</NavLink>
-                    <NavLink to="/anreise" onClick={closeMenu} className={styles.link}>Anreise</NavLink>
-                    <NavLink to="/suche" onClick={closeMenu} className={styles.link}>Suche</NavLink>
-                    <NavLink to="/programm" onClick={closeMenu} className={styles.link}>Programm</NavLink>
-                    <NavLink to="/schenken" onClick={closeMenu} className={styles.link}>Schenken</NavLink>
-                </div>
-            )}
+            {/* --- MOBILE BOTTOM BAR (Unten, App-Style) --- */}
+            <nav className={styles.mobileNav}>
+                <NavLink to="/suche" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
+                    <FaSearch className={styles.icon} />
+                    <span className={styles.label}>Suche</span>
+                </NavLink>
+                
+                <NavLink to="/anreise" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
+                    <FaRoute className={styles.icon} />
+                    <span className={styles.label}>Anreise</span>
+                </NavLink>
+
+                {/* Der Haupt-Button (Mitte) */}
+                <NavLink to="/" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
+                    <FaMapMarkedAlt className={styles.icon} />
+                    <span className={styles.label}>Karte</span>
+                </NavLink>
+
+                <NavLink to="/programm" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
+                    <FaCalendarAlt className={styles.icon} />
+                    <span className={styles.label}>Programm</span>
+                </NavLink>
+
+                <NavLink to="/schenken" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
+                    <FaGift className={styles.icon} />
+                    <span className={styles.label}>Schenken</span>
+                </NavLink>
+            </nav>
         </>
     );
 };
