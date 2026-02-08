@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { useUser } from '../contexts/UserContext';
+import { useUser } from '../../contexts/UserContext';
 import styles from './AccountPage.module.css';
 import { FaEnvelope, FaCog, FaUser, FaSignOutAlt,  } from 'react-icons/fa';
 

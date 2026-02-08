@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styles from './AdminPage.module.css';
+import { UserProvider } from './contexts/UserContext';
 
 const AdminPage = () => {
   const location = useLocation();
@@ -28,6 +29,7 @@ const AdminPage = () => {
 
 
   return (
+    <UserProvider> {/* UserContext umschließt alles */}
     <div className={styles.adminContainer}>
       <header className={styles.adminHeader}>
         <h1>Admin Dashboard</h1>
@@ -74,6 +76,7 @@ const AdminPage = () => {
         <Outlet />
       </main>
     </div>
+    </UserProvider>
   );
 };
 

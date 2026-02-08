@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useUser } from '../contexts/UserContext';
+import { useUser } from '../../contexts/UserContext';
 import styles from './LoginPage.module.css';
 
 const LoginPage = () => {
@@ -37,7 +37,7 @@ const LoginPage = () => {
   return (
     <div className={styles.loginPageContainer}>
       <div className={styles.loginFormWrapper}>
-        <h1>Willkommen bei qordio</h1>
+        <h1>Willkommen bei der Admin Oberfläche des Hallertauer Bierfestivals</h1>
         <p>Bitte melde dich an oder erstelle ein neues Konto, um fortzufahren.</p>
         <div className={styles.buttonGroup}>
           <button onClick={handleLoginClick} className={styles.actionButton}>
