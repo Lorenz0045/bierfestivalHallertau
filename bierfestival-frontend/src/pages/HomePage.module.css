@@ -2,15 +2,14 @@
     
 }
 
-/* Container füllt den Rest des Bildschirms (abzüglich Navbar) */
 .mapWrapper {
     height: calc(100vh - 120px); 
     width: 100%;
     position: relative;
-    z-index: 1; /* Damit die Karte nicht über Dropdowns liegt */
+    z-index: 1; 
 }
 
-/* WICHTIG: Leaflet braucht explizite Höhe */
+/* WICHTIG: Leaflet braucht explizite Höhe und Hintergrund farbe, damit es die größe einnimmt und die karte drüber rendert... */
 .mapContainer {
     height: 100%;
     width: 100%;
@@ -18,24 +17,22 @@
 }
 
 :global(.leaflet-control-attribution) {
-    background: rgba(255, 255, 255, 0.7) !important; /* Halb-Transparent */
-    font-size: 10px !important; /* Klein, aber noch lesbar */
+    background: rgba(255, 255, 255, 0.7) !important;
+    font-size: 10px !important;
     padding: 0 4px !important;
     color: #555 !important;
     text-decoration: none !important;
 }
 
 :global(.leaflet-control-attribution a) {
-    color: #333 !important; /* Links dunkelgrau statt knallblau */
+    color: #333 !important;
 }
 
-/* ... dein existierender Code ... */
 
-/* Der blaue Punkt (Pulsierend) */
 .userLocationDot {
     width: 20px;
     height: 20px;
-    background-color: #4285F4; /* Google Blue */
+    background-color: #4285F4; 
     border: 3px solid white;
     border-radius: 50%;
     box-shadow: 0 0 8px rgba(0,0,0,0.4);
@@ -48,12 +45,49 @@
     100% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0); }
 }
 
+.controlsContainer {
+    position: absolute;
+    bottom: 30px; 
+    right: 15px;
+    z-index: 1000; 
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+}
+
+.mapButton {
+    background: white;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    transition: all 0.2s ease;
+}
+
+.mapButton:active {
+    background: #f0f0f0;
+    transform: scale(0.95);
+}
+
+.activeButton {
+    color: #4285F4;
+    background: #e8f0fe;
+    border: 2px solid #4285F4;
+}
+
 /* Ein Button unten rechts über der Map */
 .locateButton {
     position: absolute;
-    bottom: 20px; /* Über den Credits */
+    bottom: 20px;
     right: 20px;
-    z-index: 999; /* Über der Karte */
+    z-index: 999; 
     background: white;
     border: none;
     padding: 10px;
@@ -73,7 +107,6 @@
 
 @media (max-width: 768px) {
     .mapWrapper {
-        /* Mobile: 100vh - Navbar Unten (inkl. Safe Area) */
         height: calc(100vh - 120px - env(safe-area-inset-bottom));
     }
 }

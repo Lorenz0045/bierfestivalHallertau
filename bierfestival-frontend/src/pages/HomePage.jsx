@@ -2,93 +2,122 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Polygon, Popup, LayersControl, AttributionControl, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css'; 
-import { FaCrosshairs } from 'react-icons/fa'; // Icon für den Button
+import { FaLocationArrow, FaBeer } from 'react-icons/fa'; // Neue Icons
 import styles from './HomePage.module.css';
 
-// --- Definition des CSS-Icons (Blauer Punkt) ---
+// --- Icon Definition (Blauer Punkt) ---
 const userIcon = L.divIcon({
-    className: styles.userLocationDot, // Zugriff auf Module CSS Klasse
+    className: styles.userLocationDot,
     iconSize: [20, 20],
-    iconAnchor: [10, 10], // Mitte des Punktes
+    iconAnchor: [10, 10],
     popupAnchor: [0, -10]
 });
 
-// --- Komponente: Handhabt Geolocation ---
-const UserLocationMarker = () => {
+// --- Neue Komponente: MapControls ---
+// Vereint Standort-Toggle und Festival-Jump
+const MapControls = ({ festivalCoords }) => {
     const [position, setPosition] = useState(null);
+    const [isTracking, setIsTracking] = useState(false); // Default: Aus
     const map = useMap();
 
+    // Effekt: Reagiert auf den "isTracking" Schalter
     useEffect(() => {
-        // 1. Beim Starten: Standort abfragen & beobachten (watch: true)
-        map.locate({ 
-            setView: true, // Zoomt am Anfang automatisch hin
-            maxZoom: 25,
-            watch: true,   // Live-Update wenn man läuft
-            enableHighAccuracy: true 
-        });
-
-        // 2. Event Listener: Wenn Standort gefunden
+        // Event Handler definieren
         const onLocationFound = (e) => {
             setPosition(e.latlng);
-            // map.flyTo(e.latlng, map.getZoom()); // Optional: Verfolgen
         };
-
-        // 3. Event Listener: Wenn Fehler (z.B. User verweigert)
+        
         const onLocationError = (e) => {
-            console.warn("Standort Zugriff verweigert oder nicht verfügbar", e.message);
+            console.warn("GPS Fehler:", e.message);
+            setIsTracking(false); // Bei Fehler ausschalten
         };
 
         map.on('locationfound', onLocationFound);
         map.on('locationerror', onLocationError);
 
+        if (isTracking) {
+            // Tracking starten
+            map.locate({ 
+                watch: true, 
+                enableHighAccuracy: true 
+            });
+        } else {
+            // Tracking stoppen
+            map.stopLocate();
+            setPosition(null); // Punkt entfernen, wenn aus
+        }
+
         return () => {
             map.off('locationfound', onLocationFound);
             map.off('locationerror', onLocationError);
-            map.stopLocate(); // GPS aus, wenn Komponente entladen wird (Batterie sparen)
+            map.stopLocate();
         };
-    }, [map]);
+    }, [map, isTracking]);
 
-    // Funktion für den "Zentrieren" Button
-    const handleRecenter = () => {
-        if (position) {
-            map.flyTo(position, 25);
+    // Button 1: Tracking umschalten
+    const toggleTracking = () => {
+        if (!isTracking) {
+            setIsTracking(true);
+            // Optional: Beim Einschalten einmal kurz hinzoomen
+            map.locate({ setView: true, maxZoom: 18 });
         } else {
-            // Versuch es neu zu starten
-            map.locate({ setView: true, maxZoom: 25 }); 
+            setIsTracking(false);
         }
+    };
+
+    // Button 2: Zum Festival fliegen
+    const goToFestival = () => {
+        // Wir schalten das Tracking lieber aus, sonst kämpft es gegen den FlyTo
+        setIsTracking(false); 
+        map.flyTo(festivalCoords, 18, {
+            duration: 1.5 // Schöne Flug-Animation (Sekunden)
+        });
     };
 
     return (
         <>
-            {/* Der Blaue Punkt auf der Karte */}
-            {position && (
+            {/* Der Blaue Punkt (nur sichtbar wenn Tracking an + Position gefunden) */}
+            {isTracking && position && (
                 <Marker position={position} icon={userIcon}>
                     <Popup>Du bist hier</Popup>
                 </Marker>
             )}
 
-            {/* Button zum Zentrieren (schwebend über der Karte) */}
-            <button 
-                className={styles.locateButton} 
-                onClick={handleRecenter}
-                title="Meinen Standort finden"
-            >
-                <FaCrosshairs />
-            </button>
+            {/* Die Buttons unten rechts */}
+            <div className={styles.controlsContainer}>
+                
+                {/* 1. Zum Festival Button */}
+                <button 
+                    className={styles.mapButton} 
+                    onClick={goToFestival}
+                    title="Zum Festival springen"
+                >
+                    <FaBeer /> {/* Bier-Icon für das Festival */}
+                </button>
+
+                {/* 2. GPS Toggle Button */}
+                <button 
+                    className={`${styles.mapButton} ${isTracking ? styles.activeButton : ''}`} 
+                    onClick={toggleTracking}
+                    title={isTracking ? "Standort deaktivieren" : "Standort aktivieren"}
+                >
+                    <FaLocationArrow />
+                </button>
+            </div>
         </>
     );
 };
 
 const HomePage = () => {
-  // Fallback, falls GPS abgelehnt wird
-    const centerPosition = [48.50555005218888, 11.75895927999904]; // Latitude, Longitude
+    // Attenkirchen Koordinaten
+    const festivalPosition = [48.50555005218888, 11.75895927999904];
 
-    // Ein einfaches Viereck (Polygon), das eine "Area" markiert
+    // Das lila Test-Zelt (Polygon)
     const stageArea = [
-        [48.50555, 11.75896],  // Startpunkt (dein Zentrum)
-        [48.50600, 11.75896],  // Etwas nach Norden
-        [48.50600, 11.76000],  // Etwas nach Osten
-        [48.50555, 11.76000],  // Zurück nach Süden
+        [48.50555, 11.75896], 
+        [48.50600, 11.75896], 
+        [48.50600, 11.76000], 
+        [48.50555, 11.76000], 
     ];
 
     const stageStyle = { color: 'purple', fillColor: 'purple', fillOpacity: 0.4 };
@@ -97,50 +126,43 @@ const HomePage = () => {
         <div className={styles.mapWrapper}>
             <MapContainer 
                 attributionControl={false}
-                center={centerPosition} 
-                zoom={25} 
-                scrollWheelZoom={true} 
+                center={festivalPosition} 
+                zoom={17} 
+                zoomControl={false} // Zoom Buttons ausblenden für cleaneren Look (optional)
                 className={styles.mapContainer}
             >
-              <AttributionControl prefix={false} position="bottomright" />
-                <LayersControl position="topright">
-                    
-                    {/* Option 1: Standard Straßenkarte (Standard ausgewählt) */}
+                <AttributionControl prefix={false} position="bottomleft" /> {/* Links verschoben wegen Buttons rechts */}
+                
+                <LayersControl position="topright"> {/* Oben links, damit es nicht mit Buttons kollidiert */}
                     <LayersControl.BaseLayer checked name="Straßenkarte">
                         <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            attribution='&copy; OpenStreetMap'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            maxNativeZoom={19}
+                            maxZoom={25}
                         />
                     </LayersControl.BaseLayer>
-
-                    {/* Option 2: Satellit (Esri World Imagery) */}
                     <LayersControl.BaseLayer name="Satellit">
                         <TileLayer
-                            attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                            attribution='Tiles &copy; Esri'
                             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                            maxNativeZoom={18} 
+                            maxZoom={25}
                         />
                     </LayersControl.BaseLayer>
-
                 </LayersControl>
 
-                <UserLocationMarker />
+                {/* Hier unsere neuen Controls einbinden und Koordinaten übergeben */}
+                <MapControls festivalCoords={festivalPosition} />
 
-                {/* Das lila Test-Zelt */}
                 <Polygon pathOptions={stageStyle} positions={stageArea}>
                     <Popup>
                         <div style={{ textAlign: 'center' }}>
-                            <strong>📍 Dein Standort-Test</strong><br/>
-                            Koordinaten: 48.505, 11.759<br/>
-                            <em style={{fontSize: '0.8rem'}}>Funktioniert!</em>
+                            <strong>📍 Festzelt Attenkirchen</strong><br/>
+                            Hier spielt die Musik!
                         </div>
                     </Popup>
                 </Polygon>
-
-                {/* --- SPÄTER: Marker mit Icons ---
-                <Marker position={[48.1355, 11.5500]} icon={beerIcon}>
-                    <Popup>Bierausschank Mitte</Popup>
-                </Marker> 
-                */}
 
             </MapContainer>
         </div>
