@@ -22,7 +22,7 @@ const UserLocationMarker = () => {
         // 1. Beim Starten: Standort abfragen & beobachten (watch: true)
         map.locate({ 
             setView: true, // Zoomt am Anfang automatisch hin
-            maxZoom: 20,
+            maxZoom: 25,
             watch: true,   // Live-Update wenn man läuft
             enableHighAccuracy: true 
         });
@@ -51,10 +51,10 @@ const UserLocationMarker = () => {
     // Funktion für den "Zentrieren" Button
     const handleRecenter = () => {
         if (position) {
-            map.flyTo(position, 16);
+            map.flyTo(position, 25);
         } else {
             // Versuch es neu zu starten
-            map.locate({ setView: true, maxZoom: 16 }); 
+            map.locate({ setView: true, maxZoom: 25 }); 
         }
     };
 
@@ -98,7 +98,7 @@ const HomePage = () => {
             <MapContainer 
                 attributionControl={false}
                 center={centerPosition} 
-                zoom={20} 
+                zoom={25} 
                 scrollWheelZoom={true} 
                 className={styles.mapContainer}
             >
