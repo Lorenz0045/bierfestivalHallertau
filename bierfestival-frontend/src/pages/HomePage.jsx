@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Polygon, Popup, LayersControl, AttributionControl, Marker, useMap } from 'react-leaflet';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Polygon, Popup, LayersControl, AttributionControl, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css'; 
-import { FaLocationArrow, FaBeer } from 'react-icons/fa'; // Neue Icons
+import { FaLocationArrow, FaBeer } from 'react-icons/fa'; 
 import styles from './HomePage.module.css';
 
 // --- Icon Definition (Blauer Punkt) ---
@@ -13,93 +13,97 @@ const userIcon = L.divIcon({
     popupAnchor: [0, -10]
 });
 
-// --- Neue Komponente: MapControls ---
-// Vereint Standort-Toggle und Festival-Jump
+// --- Komponente: MapControls ---
 const MapControls = ({ festivalCoords }) => {
-    const [position, setPosition] = useState(null);
-    const [isTracking, setIsTracking] = useState(false); // Default: Aus
+    const [userPosition, setUserPosition] = useState(null);
+    const [isFollowing, setIsFollowing] = useState(false); // Verfolgen wir gerade?
     const map = useMap();
 
-    // Effekt: Reagiert auf den "isTracking" Schalter
+    // 1. Initiale GPS-Abfrage (läuft IMMER im Hintergrund)
     useEffect(() => {
-        // Event Handler definieren
+        map.locate({ 
+            watch: true, 
+            enableHighAccuracy: true 
+        });
+
         const onLocationFound = (e) => {
-            setPosition(e.latlng);
+            setUserPosition(e.latlng);
         };
-        
+
         const onLocationError = (e) => {
             console.warn("GPS Fehler:", e.message);
-            setIsTracking(false); // Bei Fehler ausschalten
         };
 
         map.on('locationfound', onLocationFound);
         map.on('locationerror', onLocationError);
-
-        if (isTracking) {
-            // Tracking starten
-            map.locate({ 
-                watch: true, 
-                enableHighAccuracy: true 
-            });
-        } else {
-            // Tracking stoppen
-            map.stopLocate();
-            setPosition(null); // Punkt entfernen, wenn aus
-        }
 
         return () => {
             map.off('locationfound', onLocationFound);
             map.off('locationerror', onLocationError);
             map.stopLocate();
         };
-    }, [map, isTracking]);
+    }, [map]);
 
-    // Button 1: Tracking umschalten
-    const toggleTracking = () => {
-        if (!isTracking) {
-            setIsTracking(true);
-            // Optional: Beim Einschalten einmal kurz hinzoomen
-            map.locate({ setView: true, maxZoom: 18 });
+    // 2. Effekt: Wenn sich die Position ändert UND wir im "Following"-Modus sind
+    useEffect(() => {
+        if (isFollowing && userPosition) {
+            // Wir bewegen die Karte sanft zum User, behalten aber den aktuellen Zoom bei
+            // (außer beim ersten Klick, das macht die handleLocateClick Funktion)
+            map.panTo(userPosition, { animate: true, duration: 1.0 });
+        }
+    }, [userPosition, isFollowing, map]);
+
+    // 3. Event Listener: Wenn der User die Karte manuell verschiebt -> Tracking aus!
+    // Wir nutzen useMapEvents für sauberere React-Integration
+    useMapEvents({
+        dragstart: () => {
+            // Sobald der User zieht (Drag), stoppen wir das automatische Verfolgen
+            setIsFollowing(false);
+        },
+        // Zoom-Events ignorieren wir absichtlich, damit Zoomen das Tracking NICHT beendet.
+    });
+
+    // Button 1: Tracking aktivieren (Click)
+    const handleLocateClick = () => {
+        if (userPosition) {
+            setIsFollowing(true);
+            // Anforderung: "Ziemlich nah rangezoomt werden"
+            map.flyTo(userPosition, 18, { duration: 1.5 });
         } else {
-            setIsTracking(false);
+            // Falls noch keine Position da ist, versuchen wir es zu erzwingen
+            alert("Suche Standort...");
+            map.locate({ setView: true, maxZoom: 18 });
         }
     };
 
-    // Button 2: Zum Festival fliegen
-    const goToFestival = () => {
-        // Wir schalten das Tracking lieber aus, sonst kämpft es gegen den FlyTo
-        setIsTracking(false); 
-        map.flyTo(festivalCoords, 18, {
-            duration: 1.5 // Schöne Flug-Animation (Sekunden)
-        });
+    // Button 2: Zum Festival
+    const handleFestivalClick = () => {
+        setIsFollowing(false); // Tracking aus, wir wollen ja wegsehen
+        map.flyTo(festivalCoords, 17, { duration: 1.5 });
     };
 
     return (
         <>
-            {/* Der Blaue Punkt (nur sichtbar wenn Tracking an + Position gefunden) */}
-            {isTracking && position && (
-                <Marker position={position} icon={userIcon}>
+            {/* Der Punkt ist IMMER da, wenn Position bekannt */}
+            {userPosition && (
+                <Marker position={userPosition} icon={userIcon}>
                     <Popup>Du bist hier</Popup>
                 </Marker>
             )}
 
-            {/* Die Buttons unten rechts */}
             <div className={styles.controlsContainer}>
-                
-                {/* 1. Zum Festival Button */}
+                {/* Zum Festival */}
                 <button 
                     className={styles.mapButton} 
-                    onClick={goToFestival}
-                    title="Zum Festival springen"
+                    onClick={handleFestivalClick}
                 >
-                    <FaBeer /> {/* Bier-Icon für das Festival */}
+                    <FaBeer />
                 </button>
 
-                {/* 2. GPS Toggle Button */}
+                {/* Zum User (Toggle-Optik, aber Verhalten wie beschrieben) */}
                 <button 
-                    className={`${styles.mapButton} ${isTracking ? styles.activeButton : ''}`} 
-                    onClick={toggleTracking}
-                    title={isTracking ? "Standort deaktivieren" : "Standort aktivieren"}
+                    className={`${styles.mapButton} ${isFollowing ? styles.activeButton : ''}`} 
+                    onClick={handleLocateClick}
                 >
                     <FaLocationArrow />
                 </button>
@@ -108,18 +112,18 @@ const MapControls = ({ festivalCoords }) => {
     );
 };
 
+// --- Haupt-Page ---
 const HomePage = () => {
     // Attenkirchen Koordinaten
     const festivalPosition = [48.50555005218888, 11.75895927999904];
 
-    // Das lila Test-Zelt (Polygon)
+    // Dein Test-Rechteck
     const stageArea = [
         [48.50555, 11.75896], 
         [48.50600, 11.75896], 
         [48.50600, 11.76000], 
         [48.50555, 11.76000], 
     ];
-
     const stageStyle = { color: 'purple', fillColor: 'purple', fillOpacity: 0.4 };
 
     return (
@@ -128,12 +132,12 @@ const HomePage = () => {
                 attributionControl={false}
                 center={festivalPosition} 
                 zoom={17} 
-                zoomControl={false} // Zoom Buttons ausblenden für cleaneren Look (optional)
+                zoomControl={false} 
                 className={styles.mapContainer}
             >
-                <AttributionControl prefix={false} position="bottomleft" /> {/* Links verschoben wegen Buttons rechts */}
+                <AttributionControl prefix={false} position="bottomleft" />
                 
-                <LayersControl position="topright"> {/* Oben links, damit es nicht mit Buttons kollidiert */}
+                <LayersControl position="topleft">
                     <LayersControl.BaseLayer checked name="Straßenkarte">
                         <TileLayer
                             attribution='&copy; OpenStreetMap'
@@ -152,7 +156,6 @@ const HomePage = () => {
                     </LayersControl.BaseLayer>
                 </LayersControl>
 
-                {/* Hier unsere neuen Controls einbinden und Koordinaten übergeben */}
                 <MapControls festivalCoords={festivalPosition} />
 
                 <Polygon pathOptions={stageStyle} positions={stageArea}>
