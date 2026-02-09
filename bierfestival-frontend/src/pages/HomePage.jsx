@@ -65,12 +65,19 @@ const MapControls = ({ festivalCoords }) => {
 
     // Button 1: Tracking aktivieren (Click)
     const handleLocateClick = () => {
+        // FALL A: Wir folgen bereits -> BEENDEN
+        if (isFollowing) {
+            setIsFollowing(false);
+            return; // Hier abbrechen
+        }
+
+        // FALL B: Wir folgen noch nicht -> STARTEN
         if (userPosition) {
             setIsFollowing(true);
-            // Anforderung: "Ziemlich nah rangezoomt werden"
+            // Hart ranzoomen beim Aktivieren
             map.flyTo(userPosition, 18, { duration: 1.5 });
         } else {
-            // Falls noch keine Position da ist, versuchen wir es zu erzwingen
+            // Falls noch keine Position da ist (GPS lädt noch)
             alert("Suche Standort...");
             map.locate({ setView: true, maxZoom: 18 });
         }
