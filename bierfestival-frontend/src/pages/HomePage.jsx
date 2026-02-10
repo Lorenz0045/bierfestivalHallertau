@@ -144,7 +144,7 @@ const HomePage = () => {
             >
                 <AttributionControl prefix={false} position="bottomleft" />
                 
-                <LayersControl position="topleft">
+                <LayersControl position="topright">
                     <LayersControl.BaseLayer checked name="Straßenkarte">
                         <TileLayer
                             attribution='&copy; OpenStreetMap'
