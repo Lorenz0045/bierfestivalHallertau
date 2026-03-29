@@ -1,5 +1,7 @@
 package de.qordio.app.dataservice.entity.masterdata;
 
+import java.math.BigDecimal;
+
 import de.qordio.app.dataservice.entity.lookups.BeerType;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
@@ -32,10 +34,10 @@ public class Beer extends PanacheEntityBase {
     public BeerType beerType;
 
     @Column(name = "alcohol_percentage")
-    public Double alcoholPercentage;
+    public BigDecimal alcoholPercentage;
 
     @Column(name = "original_gravity")
-    public Double originalGravity;
+    public BigDecimal originalGravity;
 
     @Column(name = "is_non_alcoholic")
     public Boolean isNonAlcoholic = false;
@@ -46,5 +48,5 @@ public class Beer extends PanacheEntityBase {
     public Integer ratingCount = 0;
 
     @Column(name = "rating_average")
-    public Double ratingAverage = 0.0;
+    public BigDecimal ratingAverage = new BigDecimal("0.00");
 }
