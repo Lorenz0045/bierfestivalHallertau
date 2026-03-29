@@ -15,13 +15,15 @@ services:
 
       # --- Keycloak JWT Validierung ---
       # Diese Variablen füllen die Platzhalter in application.properties für mp.jwt.verify.*
-      KEYCLOAK_AUTH_SERVER_URL: ${KEYCLOAK_AUTH_SERVER_URL:-https://keycloak.qordio.de/realms/Aryuveda}
+      KEYCLOAK_AUTH_SERVER_URL: ${KEYCLOAK_AUTH_SERVER_URL:-https://keycloak.qordio.de/realms/bierfestival}
       # Client-ID des Backends selbst.
       KEYCLOAK_BACKEND_CLIENT_ID: ${KEYCLOAK_BACKEND_CLIENT_ID:-bierfestival-data-service}
       
       # --- Logging (optional) ---
       QUARKUS_LOG_LEVEL: INFO # Mögliche Werte: DEBUG, INFO, WARN, ERROR
       # QUARKUS_LOG_CATEGORY__IO_QUARKUS__LEVEL: DEBUG # Beispiel für spezifische Kategorie
+
+      vQUARKUS_HTTP_ACCESS_LOG_ENABLED: "true"
 
       # --- Hibernate ORM ---
       QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: validate # Optionen: none, create, drop-and-create, drop, update, validate
