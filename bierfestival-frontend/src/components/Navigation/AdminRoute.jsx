@@ -7,17 +7,16 @@ const AdminRoute = () => {
     const { keycloakInstance, loadingKeycloak } = useUser();
 
     if (loadingKeycloak) {
-        return <div style={{ padding: '2rem' }}>Prüfe Authentifizierung...</div>;
+        return <div className="admin-loading">Verifying authentication...</div>;
     }
 
     if (!keycloakInstance?.authenticated) {
-        // Hier ist der entscheidende Fix für Localhost!
-        keycloakService.login({ redirectUri: window.location.origin + '/admin/analytics' });
-        return <div style={{ padding: '2rem' }}>Leite zum Login weiter...</div>;
+        keycloakService.login();
+        return <div className="admin-loading">Redirecting to login...</div>;
     }
 
     if (!keycloakInstance.hasRealmRole('admin')) {
-        return <div style={{ padding: '2rem', color: 'red' }}>Zugriff verweigert. Admin-Rechte erforderlich.</div>;
+        return <div className="admin-error">Access denied. Administrator privileges required.</div>;
     }
 
     return <Outlet />;
