@@ -16,15 +16,15 @@ const MasterDataPage = () => {
       <header className={styles.header}>
         <h1>Stammdatenpflege</h1>
         <nav className={styles.subNav}>
-          <NavLink to="breweries" className={({isActive}) => isActive ? styles.active : ''}>Brauereien</NavLink>
-          <NavLink to="beers" className={({isActive}) => isActive ? styles.active : ''}>Biere</NavLink>
-          <NavLink to="sponsors" className={({isActive}) => isActive ? styles.active : ''}>Sponsoren</NavLink>
-          <NavLink to="gastronomy" className={({isActive}) => isActive ? styles.active : ''}>Gastronomie</NavLink>
-          <NavLink to="taverns" className={({isActive}) => isActive ? styles.active : ''}>Schenken</NavLink>
-          <NavLink to="stages" className={({isActive}) => isActive ? styles.active : ''}>Bühnen</NavLink>
-          <NavLink to="events" className={({isActive}) => isActive ? styles.active : ''}>Programm</NavLink>
-          <NavLink to="facilities" className={({isActive}) => isActive ? styles.active : ''}>Einrichtungen</NavLink>
-          <NavLink to="lookups" className={({isActive}) => isActive ? styles.active : ''}>Lookups</NavLink>
+          <NavLink to="/admin/master-data/breweries" className={({isActive}) => isActive ? styles.active : ''}>Brauereien</NavLink>
+          <NavLink to="/admin/master-data/beers" className={({isActive}) => isActive ? styles.active : ''}>Biere</NavLink>
+          <NavLink to="/admin/master-data/sponsors" className={({isActive}) => isActive ? styles.active : ''}>Sponsoren</NavLink>
+          <NavLink to="/admin/master-data/gastronomy" className={({isActive}) => isActive ? styles.active : ''}>Gastronomie</NavLink>
+          <NavLink to="/admin/master-data/taverns" className={({isActive}) => isActive ? styles.active : ''}>Schenken</NavLink>
+          <NavLink to="/admin/master-data/stages" className={({isActive}) => isActive ? styles.active : ''}>Bühnen</NavLink>
+          <NavLink to="/admin/master-data/events" className={({isActive}) => isActive ? styles.active : ''}>Programm</NavLink>
+          <NavLink to="/admin/master-data/facilities" className={({isActive}) => isActive ? styles.active : ''}>Einrichtungen</NavLink>
+          <NavLink to="/admin/master-data/lookups" className={({isActive}) => isActive ? styles.active : ''}>Lookups</NavLink>
         </nav>
       </header>
 
