@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import DataTable from '../components/DataTable';
 import GenericFormModal from '../components/GenericFormModal';
-import apiService from '../../services/apiService';
+import apiRequest from '../../services/apiService';
+import { useUser } from '../contexts/UserContext';
+
+const API_BASE_URL = '/api/sponsors';
 
 const SponsorManager = () => {
+    const { keycloakInstance } = useUser();
     const [sponsors, setSponsors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,12 +17,7 @@ const SponsorManager = () => {
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'city', label: 'Ort' },
-        { 
-            key: 'website', 
-            label: 'Website',
-            sortable: false,
-            render: (val) => val ? <a href={val} target="_blank" rel="noreferrer">Link</a> : '-'
-        }
+        { key: 'website', label: 'Website', sortable: false, render: (val) => val ? <a href={val} target="_blank" rel="noreferrer">Link</a> : '-' }
     ];
 
     const formFields = [
@@ -28,21 +27,22 @@ const SponsorManager = () => {
         { name: 'description', label: 'Beschreibung', type: 'text' }
     ];
 
-    useEffect(() => {
-        loadSponsors();
-    }, []);
-
-    const loadSponsors = async () => {
+    const loadSponsors = useCallback(async () => {
+        if (!keycloakInstance?.token) return;
         setLoading(true);
         try {
-            const data = await apiService.get('/api/sponsors');
-            setSponsors(data);
+            const data = await apiRequest(API_BASE_URL, 'GET', null, keycloakInstance.token);
+            setSponsors(data || []);
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [keycloakInstance]);
+
+    useEffect(() => {
+        loadSponsors();
+    }, [loadSponsors]);
 
     const handleCreateNew = () => {
         setEditingItem(null);
@@ -55,9 +55,10 @@ const SponsorManager = () => {
     };
 
     const handleDelete = async (item) => {
+        if (!keycloakInstance?.token) return;
         if (window.confirm(`Sponsor "${item.name}" wirklich löschen?`)) {
             try {
-                await apiService.delete(`/api/sponsors/${item.id}`);
+                await apiRequest(`${API_BASE_URL}/${item.id}`, 'DELETE', null, keycloakInstance.token);
                 loadSponsors();
             } catch (error) {
                 console.error(error);
@@ -66,11 +67,12 @@ const SponsorManager = () => {
     };
 
     const handleFormSubmit = async (formData) => {
+        if (!keycloakInstance?.token) return;
         try {
             if (editingItem && editingItem.id) {
-                await apiService.put(`/api/sponsors/${editingItem.id}`, formData);
+                await apiRequest(`${API_BASE_URL}/${editingItem.id}`, 'PUT', formData, keycloakInstance.token);
             } else {
-                await apiService.post('/api/sponsors', formData);
+                await apiRequest(API_BASE_URL, 'POST', formData, keycloakInstance.token);
             }
             setIsModalOpen(false);
             loadSponsors();
@@ -89,9 +91,7 @@ const SponsorManager = () => {
                     + Neuer Sponsor
                 </button>
             </div>
-            
             <DataTable columns={columns} data={sponsors} onEdit={handleEdit} onDelete={handleDelete} />
-
             <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Sponsor bearbeiten' : 'Neuer Sponsor'} fields={formFields} initialData={editingItem} />
         </div>
     );

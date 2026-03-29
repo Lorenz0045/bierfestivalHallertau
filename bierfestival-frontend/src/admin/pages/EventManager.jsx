@@ -1,9 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import DataTable from '../components/DataTable';
 import GenericFormModal from '../components/GenericFormModal';
-import apiService from '../../services/apiService';
+import apiRequest from '../../services/apiService';
+import { useUser } from '../contexts/UserContext';
+
+const API_EVENTS = '/api/events';
+const API_STAGES = '/api/stages';
 
 const EventManager = () => {
+    const { keycloakInstance } = useUser();
     const [events, setEvents] = useState([]);
     const [stages, setStages] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,16 +19,8 @@ const EventManager = () => {
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Event Name' },
         { key: 'dayName', label: 'Tag' },
-        { 
-            key: 'startTime', 
-            label: 'Startzeit',
-            render: (val) => new Date(val).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })
-        },
-        { 
-            key: 'stage', 
-            label: 'Bühne',
-            render: (_, row) => row.stage?.name || '-'
-        }
+        { key: 'startTime', label: 'Startzeit', render: (val) => new Date(val).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) },
+        { key: 'stage', label: 'Bühne', render: (_, row) => row.stage?.name || '-' }
     ];
 
     const formFields = [
@@ -32,34 +29,29 @@ const EventManager = () => {
         { name: 'startTime', label: 'Startzeit', type: 'datetime-local', required: true },
         { name: 'endTime', label: 'Endzeit', type: 'datetime-local', required: true },
         { name: 'description', label: 'Beschreibung', type: 'text' },
-        { 
-            name: 'stageId', 
-            label: 'Bühne', 
-            type: 'select', 
-            options: stages.map(s => ({ id: s.id, name: s.name })),
-            required: true
-        }
+        { name: 'stageId', label: 'Bühne', type: 'select', options: stages.map(s => ({ id: s.id, name: s.name })), required: true }
     ];
 
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
+        if (!keycloakInstance?.token) return;
         setLoading(true);
         try {
             const [eventsData, stagesData] = await Promise.all([
-                apiService.get('/api/events'),
-                apiService.get('/api/stages')
+                apiRequest(API_EVENTS, 'GET', null, keycloakInstance.token),
+                apiRequest(API_STAGES, 'GET', null, keycloakInstance.token)
             ]);
-            setEvents(eventsData);
-            setStages(stagesData);
+            setEvents(eventsData || []);
+            setStages(stagesData || []);
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [keycloakInstance]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const handleCreateNew = () => {
         setEditingItem(null);
@@ -78,9 +70,10 @@ const EventManager = () => {
     };
 
     const handleDelete = async (item) => {
+        if (!keycloakInstance?.token) return;
         if(window.confirm(`Event "${item.name}" wirklich löschen?`)) {
             try {
-                await apiService.delete(`/api/events/${item.id}`);
+                await apiRequest(`${API_EVENTS}/${item.id}`, 'DELETE', null, keycloakInstance.token);
                 loadData();
             } catch (error) {
                 console.error(error);
@@ -89,6 +82,7 @@ const EventManager = () => {
     };
 
     const handleFormSubmit = async (formData) => {
+        if (!keycloakInstance?.token) return;
         const payload = {
             ...formData,
             stage: { id: parseInt(formData.stageId) }
@@ -96,9 +90,9 @@ const EventManager = () => {
 
         try {
             if (editingItem && editingItem.id) {
-                await apiService.put(`/api/events/${editingItem.id}`, payload);
+                await apiRequest(`${API_EVENTS}/${editingItem.id}`, 'PUT', payload, keycloakInstance.token);
             } else {
-                await apiService.post('/api/events', payload);
+                await apiRequest(API_EVENTS, 'POST', payload, keycloakInstance.token);
             }
             setIsModalOpen(false);
             loadData();
@@ -117,9 +111,7 @@ const EventManager = () => {
                     + Neues Event
                 </button>
             </div>
-            
             <DataTable columns={columns} data={events} onEdit={handleEdit} onDelete={handleDelete} />
-
             <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Event bearbeiten' : 'Neues Event anlegen'} fields={formFields} initialData={editingItem} />
         </div>
     );

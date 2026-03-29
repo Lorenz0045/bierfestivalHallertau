@@ -1,9 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import DataTable from '../components/DataTable';
 import GenericFormModal from '../components/GenericFormModal';
-import apiService from '../../services/apiService';
+import apiRequest from '../../services/apiService';
+import { useUser } from '../contexts/UserContext';
+
+const API_BEER_TYPES = '/api/beer-types';
+const API_FACILITY_TYPES = '/api/facility-types';
 
 const LookupManager = () => {
+    const { keycloakInstance } = useUser();
     const [beerTypes, setBeerTypes] = useState([]);
     const [facilityTypes, setFacilityTypes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -34,25 +39,26 @@ const LookupManager = () => {
         { name: 'iconName', label: 'Icon-Bezeichnung', type: 'text' }
     ];
 
-    useEffect(() => {
-        loadLookups();
-    }, []);
-
-    const loadLookups = async () => {
+    const loadLookups = useCallback(async () => {
+        if (!keycloakInstance?.token) return;
         setLoading(true);
         try {
             const [beersRes, facilitiesRes] = await Promise.all([
-                apiService.get('/api/beer-types'),
-                apiService.get('/api/facility-types')
+                apiRequest(API_BEER_TYPES, 'GET', null, keycloakInstance.token),
+                apiRequest(API_FACILITY_TYPES, 'GET', null, keycloakInstance.token)
             ]);
-            setBeerTypes(beersRes);
-            setFacilityTypes(facilitiesRes);
+            setBeerTypes(beersRes || []);
+            setFacilityTypes(facilitiesRes || []);
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [keycloakInstance]);
+
+    useEffect(() => {
+        loadLookups();
+    }, [loadLookups]);
 
     const handleCreateBeerType = () => {
         setEditingBeerType(null);
@@ -65,9 +71,10 @@ const LookupManager = () => {
     };
 
     const handleDeleteBeerType = async (item) => {
+        if (!keycloakInstance?.token) return;
         if (window.confirm(`Biersorte "${item.name}" wirklich löschen?`)) {
             try {
-                await apiService.delete(`/api/beer-types/${item.id}`);
+                await apiRequest(`${API_BEER_TYPES}/${item.id}`, 'DELETE', null, keycloakInstance.token);
                 loadLookups();
             } catch (error) {
                 console.error(error);
@@ -76,11 +83,12 @@ const LookupManager = () => {
     };
 
     const handleBeerTypeSubmit = async (formData) => {
+        if (!keycloakInstance?.token) return;
         try {
             if (editingBeerType && editingBeerType.id) {
-                await apiService.put(`/api/beer-types/${editingBeerType.id}`, formData);
+                await apiRequest(`${API_BEER_TYPES}/${editingBeerType.id}`, 'PUT', formData, keycloakInstance.token);
             } else {
-                await apiService.post('/api/beer-types', formData);
+                await apiRequest(API_BEER_TYPES, 'POST', formData, keycloakInstance.token);
             }
             setIsBeerModalOpen(false);
             loadLookups();
@@ -100,9 +108,10 @@ const LookupManager = () => {
     };
 
     const handleDeleteFacilityType = async (item) => {
+        if (!keycloakInstance?.token) return;
         if (window.confirm(`Einrichtungsart "${item.name}" wirklich löschen?`)) {
             try {
-                await apiService.delete(`/api/facility-types/${item.id}`);
+                await apiRequest(`${API_FACILITY_TYPES}/${item.id}`, 'DELETE', null, keycloakInstance.token);
                 loadLookups();
             } catch (error) {
                 console.error(error);
@@ -111,11 +120,12 @@ const LookupManager = () => {
     };
 
     const handleFacilityTypeSubmit = async (formData) => {
+        if (!keycloakInstance?.token) return;
         try {
             if (editingFacilityType && editingFacilityType.id) {
-                await apiService.put(`/api/facility-types/${editingFacilityType.id}`, formData);
+                await apiRequest(`${API_FACILITY_TYPES}/${editingFacilityType.id}`, 'PUT', formData, keycloakInstance.token);
             } else {
-                await apiService.post('/api/facility-types', formData);
+                await apiRequest(API_FACILITY_TYPES, 'POST', formData, keycloakInstance.token);
             }
             setIsFacilityModalOpen(false);
             loadLookups();

@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import DataTable from '../components/DataTable';
 import GenericFormModal from '../components/GenericFormModal';
-import apiService from '../../services/apiService';
+import apiRequest from '../../services/apiService';
+import { useUser } from '../contexts/UserContext';
+
+const API_BASE_URL = '/api/gastronomies';
 
 const GastronomyManager = () => {
+    const { keycloakInstance } = useUser();
     const [gastronomies, setGastronomies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,12 +18,7 @@ const GastronomyManager = () => {
         { key: 'name', label: 'Name' },
         { key: 'category', label: 'Kategorie' },
         { key: 'city', label: 'Ort' },
-        { 
-            key: 'website', 
-            label: 'Website',
-            sortable: false,
-            render: (val) => val ? <a href={val} target="_blank" rel="noreferrer">Link</a> : '-'
-        }
+        { key: 'website', label: 'Website', sortable: false, render: (val) => val ? <a href={val} target="_blank" rel="noreferrer">Link</a> : '-' }
     ];
 
     const formFields = [
@@ -29,21 +28,22 @@ const GastronomyManager = () => {
         { name: 'website', label: 'Website', type: 'text' }
     ];
 
-    useEffect(() => {
-        loadGastronomies();
-    }, []);
-
-    const loadGastronomies = async () => {
+    const loadGastronomies = useCallback(async () => {
+        if (!keycloakInstance?.token) return;
         setLoading(true);
         try {
-            const data = await apiService.get('/api/gastronomies');
-            setGastronomies(data);
+            const data = await apiRequest(API_BASE_URL, 'GET', null, keycloakInstance.token);
+            setGastronomies(data || []);
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [keycloakInstance]);
+
+    useEffect(() => {
+        loadGastronomies();
+    }, [loadGastronomies]);
 
     const handleCreateNew = () => {
         setEditingItem(null);
@@ -56,9 +56,10 @@ const GastronomyManager = () => {
     };
 
     const handleDelete = async (item) => {
+        if (!keycloakInstance?.token) return;
         if(window.confirm(`Gastronomie "${item.name}" wirklich löschen?`)) {
             try {
-                await apiService.delete(`/api/gastronomies/${item.id}`);
+                await apiRequest(`${API_BASE_URL}/${item.id}`, 'DELETE', null, keycloakInstance.token);
                 loadGastronomies();
             } catch (error) {
                 console.error(error);
@@ -67,11 +68,12 @@ const GastronomyManager = () => {
     };
 
     const handleFormSubmit = async (formData) => {
+        if (!keycloakInstance?.token) return;
         try {
             if (editingItem && editingItem.id) {
-                await apiService.put(`/api/gastronomies/${editingItem.id}`, formData);
+                await apiRequest(`${API_BASE_URL}/${editingItem.id}`, 'PUT', formData, keycloakInstance.token);
             } else {
-                await apiService.post('/api/gastronomies', formData);
+                await apiRequest(API_BASE_URL, 'POST', formData, keycloakInstance.token);
             }
             setIsModalOpen(false);
             loadGastronomies();
@@ -90,9 +92,7 @@ const GastronomyManager = () => {
                     + Neue Gastronomie
                 </button>
             </div>
-            
             <DataTable columns={columns} data={gastronomies} onEdit={handleEdit} onDelete={handleDelete} />
-
             <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Gastronomie bearbeiten' : 'Neue Gastronomie anlegen'} fields={formFields} initialData={editingItem} />
         </div>
     );

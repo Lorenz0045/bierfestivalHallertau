@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import DataTable from '../components/DataTable';
 import GenericFormModal from '../components/GenericFormModal';
-import apiService from '../../services/apiService';
+import apiRequest from '../../services/apiService';
+import { useUser } from '../contexts/UserContext';
+
+const API_BASE_URL = '/api/taverns';
 
 const TavernManager = () => {
+    const { keycloakInstance } = useUser();
     const [taverns, setTaverns] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,11 +16,7 @@ const TavernManager = () => {
     const columns = [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name der Schenke' },
-        { 
-            key: 'imgUrl', 
-            label: 'Bild-URL',
-            render: (val) => val ? <img src={val} alt="Schenke" style={{ height: '30px', borderRadius: '4px' }} /> : '-'
-        }
+        { key: 'imgUrl', label: 'Bild-URL', render: (val) => val ? <img src={val} alt="Schenke" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
     ];
 
     const formFields = [
@@ -24,21 +24,22 @@ const TavernManager = () => {
         { name: 'imgUrl', label: 'Bild-URL', type: 'text' }
     ];
 
-    useEffect(() => {
-        loadTaverns();
-    }, []);
-
-    const loadTaverns = async () => {
+    const loadTaverns = useCallback(async () => {
+        if (!keycloakInstance?.token) return;
         setLoading(true);
         try {
-            const data = await apiService.get('/api/taverns');
-            setTaverns(data);
+            const data = await apiRequest(API_BASE_URL, 'GET', null, keycloakInstance.token);
+            setTaverns(data || []);
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [keycloakInstance]);
+
+    useEffect(() => {
+        loadTaverns();
+    }, [loadTaverns]);
 
     const handleCreateNew = () => {
         setEditingItem(null);
@@ -51,9 +52,10 @@ const TavernManager = () => {
     };
 
     const handleDelete = async (item) => {
+        if (!keycloakInstance?.token) return;
         if(window.confirm(`Schenke "${item.name}" wirklich löschen?`)) {
             try {
-                await apiService.delete(`/api/taverns/${item.id}`);
+                await apiRequest(`${API_BASE_URL}/${item.id}`, 'DELETE', null, keycloakInstance.token);
                 loadTaverns();
             } catch (error) {
                 console.error(error);
@@ -62,11 +64,12 @@ const TavernManager = () => {
     };
 
     const handleFormSubmit = async (formData) => {
+        if (!keycloakInstance?.token) return;
         try {
             if (editingItem && editingItem.id) {
-                await apiService.put(`/api/taverns/${editingItem.id}`, formData);
+                await apiRequest(`${API_BASE_URL}/${editingItem.id}`, 'PUT', formData, keycloakInstance.token);
             } else {
-                await apiService.post('/api/taverns', formData);
+                await apiRequest(API_BASE_URL, 'POST', formData, keycloakInstance.token);
             }
             setIsModalOpen(false);
             loadTaverns();
@@ -85,9 +88,7 @@ const TavernManager = () => {
                     + Neue Schenke
                 </button>
             </div>
-            
             <DataTable columns={columns} data={taverns} onEdit={handleEdit} onDelete={handleDelete} />
-
             <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Schenke bearbeiten' : 'Neue Schenke anlegen'} fields={formFields} initialData={editingItem} />
         </div>
     );
