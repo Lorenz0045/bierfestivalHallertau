@@ -1,0 +1,86 @@
+CREATE TABLE beer_type (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE brewery (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    city VARCHAR(255),
+    region VARCHAR(255),
+    is_hallertau BOOLEAN DEFAULT false,
+    website VARCHAR(255)
+);
+
+CREATE TABLE beer (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    brewery_id BIGINT REFERENCES brewery(id) ON DELETE CASCADE,
+    beer_type_id BIGINT REFERENCES beer_type(id) ON DELETE SET NULL,
+    alcohol_percentage DECIMAL(4,2),
+    original_gravity DECIMAL(4,2),
+    is_non_alcoholic BOOLEAN DEFAULT false,
+    description VARCHAR(150),
+    rating_count INT DEFAULT 0,
+    rating_average DECIMAL(3,2) DEFAULT 0.00
+);
+
+CREATE TABLE sponsor (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    city VARCHAR(255),
+    website VARCHAR(255),
+    description VARCHAR(150)
+);
+
+-- POI (Points of Interest) Tables with Map Coordinates
+
+CREATE TABLE tavern (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    img_url VARCHAR(500),
+    lat DOUBLE PRECISION,
+    lon DOUBLE PRECISION
+);
+
+CREATE TABLE tavern_beer (
+    tavern_id BIGINT REFERENCES tavern(id) ON DELETE CASCADE,
+    beer_id BIGINT REFERENCES beer(id) ON DELETE CASCADE,
+    PRIMARY KEY (tavern_id, beer_id)
+);
+
+CREATE TABLE gastronomy (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    city VARCHAR(255),
+    category VARCHAR(100),
+    website VARCHAR(255),
+    lat DOUBLE PRECISION,
+    lon DOUBLE PRECISION
+);
+
+CREATE TABLE stage (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    lat DOUBLE PRECISION,
+    lon DOUBLE PRECISION
+);
+
+CREATE TABLE event (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    day_name VARCHAR(50),
+    description VARCHAR(150),
+    stage_id BIGINT REFERENCES stage(id) ON DELETE CASCADE
+);
+
+-- Simple POIs
+CREATE TABLE facility (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    type VARCHAR(50) NOT NULL, -- e.g., 'WC', 'OFFICE', 'BUS_STOP'
+    name VARCHAR(255) NOT NULL,
+    lat DOUBLE PRECISION,
+    lon DOUBLE PRECISION
+);
