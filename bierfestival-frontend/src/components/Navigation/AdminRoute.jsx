@@ -1,31 +1,24 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useUser } from '../../admin/contexts/UserContext';
+import keycloakService from '../../services/keycloakService';
 
 const AdminRoute = () => {
     const { keycloakInstance, loadingKeycloak } = useUser();
 
-    // Zustand 1: Keycloak lädt noch. Zeige eine Ladeanzeige.
-    // Prüfung von '!keycloakInstance' fängt den Moment ab, in dem das Laden zwar fertig ist, die Instanz aber noch nicht im State angekommen ist.
-    if (loadingKeycloak || !keycloakInstance) {
-        return <div>Lade Benutzerinformationen...</div>;
+    if (loadingKeycloak) {
+        return <div className="admin-loading">Verifying authentication...</div>;
     }
 
-    // Zustand 2: Laden beendet, Instanz ist da.
-    const isAuthenticated = keycloakInstance.authenticated;
-    const isAdmin = isAuthenticated && keycloakInstance.hasRealmRole('admin');
-
-    // Zustand 2a: Nicht authentifiziert -> zur Login-Seite.
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
+    if (!keycloakInstance?.authenticated) {
+        keycloakService.login();
+        return <div className="admin-loading">Redirecting to login...</div>;
     }
 
-    // Zustand 2b: Authentifiziert, aber kein Admin -> zu Account
-    if (!isAdmin) {
-        return <Navigate to="/account" replace />;
+    if (!keycloakInstance.hasRealmRole('admin')) {
+        return <div className="admin-error">Access denied. Administrator privileges required.</div>;
     }
 
-    // Zustand 2c: Authentifiziert und Admin -> Zugriff gewähren.
     return <Outlet />;
 };
 
