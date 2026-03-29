@@ -62,8 +62,8 @@ const initKeycloak = (onAuthenticated, onAuthError) => {
   };
 };
 
-const login = () => kc.login();
-const logout = (redirectUri = window.location.origin) => kc.logout({ redirectUri });
+const login = (options) => kc.login(options);
+const logout = (options) => kc.logout(options);
 const register = () => kc.register();
 const accountManagement = () => kc.accountManagement(); 
 

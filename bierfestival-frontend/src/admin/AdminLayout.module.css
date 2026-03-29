@@ -10,6 +10,7 @@
   border-right: 1px solid #e9ecef;
   display: flex;
   flex-direction: column;
+  justify-content: space-between; 
 }
 
 .brand {
@@ -65,6 +66,28 @@
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
+}
+
+.logoutWrapper {
+  padding: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.logoutButton {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: transparent;
+  color: #e63946;
+  border: 1px solid #e63946;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #e63946;
+  color: #ffffff;
 }
 
 @media (max-width: 768px) {
