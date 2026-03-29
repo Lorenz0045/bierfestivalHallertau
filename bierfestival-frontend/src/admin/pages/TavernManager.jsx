@@ -3,40 +3,36 @@ import DataTable from '../components/DataTable';
 import GenericFormModal from '../components/GenericFormModal';
 import apiService from '../../services/apiService';
 
-const SponsorManager = () => {
-    const [sponsors, setSponsors] = useState([]);
+const TavernManager = () => {
+    const [taverns, setTaverns] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
 
     const columns = [
         { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Name' },
-        { key: 'city', label: 'Ort' },
+        { key: 'name', label: 'Name der Schenke' },
         { 
-            key: 'website', 
-            label: 'Website',
-            sortable: false,
-            render: (val) => val ? <a href={val} target="_blank" rel="noreferrer">Link</a> : '-'
+            key: 'imgUrl', 
+            label: 'Bild-URL',
+            render: (val) => val ? <img src={val} alt="Schenke" style={{ height: '30px', borderRadius: '4px' }} /> : '-'
         }
     ];
 
     const formFields = [
-        { name: 'name', label: 'Sponsor Name', type: 'text', required: true },
-        { name: 'city', label: 'Ort', type: 'text' },
-        { name: 'website', label: 'Website', type: 'text' },
-        { name: 'description', label: 'Beschreibung', type: 'text' }
+        { name: 'name', label: 'Name der Schenke', type: 'text', required: true },
+        { name: 'imgUrl', label: 'Bild-URL', type: 'text' }
     ];
 
     useEffect(() => {
-        loadSponsors();
+        loadTaverns();
     }, []);
 
-    const loadSponsors = async () => {
+    const loadTaverns = async () => {
         setLoading(true);
         try {
-            const data = await apiService.get('/api/sponsors');
-            setSponsors(data);
+            const data = await apiService.get('/api/taverns');
+            setTaverns(data);
         } catch (error) {
             console.error(error);
         } finally {
@@ -55,10 +51,10 @@ const SponsorManager = () => {
     };
 
     const handleDelete = async (item) => {
-        if (window.confirm(`Sponsor "${item.name}" wirklich löschen?`)) {
+        if(window.confirm(`Schenke "${item.name}" wirklich löschen?`)) {
             try {
-                await apiService.delete(`/api/sponsors/${item.id}`);
-                loadSponsors();
+                await apiService.delete(`/api/taverns/${item.id}`);
+                loadTaverns();
             } catch (error) {
                 console.error(error);
             }
@@ -68,12 +64,12 @@ const SponsorManager = () => {
     const handleFormSubmit = async (formData) => {
         try {
             if (editingItem && editingItem.id) {
-                await apiService.put(`/api/sponsors/${editingItem.id}`, formData);
+                await apiService.put(`/api/taverns/${editingItem.id}`, formData);
             } else {
-                await apiService.post('/api/sponsors', formData);
+                await apiService.post('/api/taverns', formData);
             }
             setIsModalOpen(false);
-            loadSponsors();
+            loadTaverns();
         } catch (error) {
             console.error(error);
         }
@@ -84,17 +80,17 @@ const SponsorManager = () => {
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ color: '#1b4332', margin: 0 }}>Sponsoren verwalten</h2>
+                <h2 style={{ color: '#1b4332', margin: 0 }}>Schenken verwalten</h2>
                 <button onClick={handleCreateNew} style={{ background: '#2d6a4f', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                    + Neuer Sponsor
+                    + Neue Schenke
                 </button>
             </div>
             
-            <DataTable columns={columns} data={sponsors} onEdit={handleEdit} onDelete={handleDelete} />
+            <DataTable columns={columns} data={taverns} onEdit={handleEdit} onDelete={handleDelete} />
 
-            <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Sponsor bearbeiten' : 'Neuer Sponsor'} fields={formFields} initialData={editingItem} />
+            <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Schenke bearbeiten' : 'Neue Schenke anlegen'} fields={formFields} initialData={editingItem} />
         </div>
     );
 };
 
-export default SponsorManager;
+export default TavernManager;

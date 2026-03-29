@@ -3,6 +3,11 @@ import BreweryManager from './pages/BreweryManager';
 import BeerManager from './pages/BeerManager';
 import SponsorManager from './pages/SponsorManager';
 import LookupManager from './pages/LookupManager';
+import GastronomyManager from './pages/GastronomyManager';
+import StageManager from './pages/StageManager';
+import TavernManager from './pages/TavernManager';
+import EventManager from './pages/EventManager';
+import FacilityManager from './pages/FacilityManager';
 import styles from './MasterDataPage.module.css';
 
 const MasterDataPage = () => {
@@ -14,6 +19,11 @@ const MasterDataPage = () => {
           <NavLink to="breweries" className={({isActive}) => isActive ? styles.active : ''}>Brauereien</NavLink>
           <NavLink to="beers" className={({isActive}) => isActive ? styles.active : ''}>Biere</NavLink>
           <NavLink to="sponsors" className={({isActive}) => isActive ? styles.active : ''}>Sponsoren</NavLink>
+          <NavLink to="gastronomy" className={({isActive}) => isActive ? styles.active : ''}>Gastronomie</NavLink>
+          <NavLink to="taverns" className={({isActive}) => isActive ? styles.active : ''}>Schenken</NavLink>
+          <NavLink to="stages" className={({isActive}) => isActive ? styles.active : ''}>Bühnen</NavLink>
+          <NavLink to="events" className={({isActive}) => isActive ? styles.active : ''}>Programm</NavLink>
+          <NavLink to="facilities" className={({isActive}) => isActive ? styles.active : ''}>Einrichtungen</NavLink>
           <NavLink to="lookups" className={({isActive}) => isActive ? styles.active : ''}>Lookups</NavLink>
         </nav>
       </header>
@@ -24,6 +34,11 @@ const MasterDataPage = () => {
           <Route path="breweries" element={<BreweryManager />} />
           <Route path="beers" element={<BeerManager />} />
           <Route path="sponsors" element={<SponsorManager />} />
+          <Route path="gastronomy" element={<GastronomyManager />} />
+          <Route path="taverns" element={<TavernManager />} />
+          <Route path="stages" element={<StageManager />} />
+          <Route path="events" element={<EventManager />} />
+          <Route path="facilities" element={<FacilityManager />} />
           <Route path="lookups" element={<LookupManager />} />
         </Routes>
       </div>

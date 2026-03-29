@@ -3,8 +3,8 @@ import DataTable from '../components/DataTable';
 import GenericFormModal from '../components/GenericFormModal';
 import apiService from '../../services/apiService';
 
-const SponsorManager = () => {
-    const [sponsors, setSponsors] = useState([]);
+const GastronomyManager = () => {
+    const [gastronomies, setGastronomies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
@@ -12,6 +12,7 @@ const SponsorManager = () => {
     const columns = [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
+        { key: 'category', label: 'Kategorie' },
         { key: 'city', label: 'Ort' },
         { 
             key: 'website', 
@@ -22,21 +23,21 @@ const SponsorManager = () => {
     ];
 
     const formFields = [
-        { name: 'name', label: 'Sponsor Name', type: 'text', required: true },
+        { name: 'name', label: 'Name der Gastronomie', type: 'text', required: true },
+        { name: 'category', label: 'Kategorie (z.B. Bayerisch)', type: 'text' },
         { name: 'city', label: 'Ort', type: 'text' },
-        { name: 'website', label: 'Website', type: 'text' },
-        { name: 'description', label: 'Beschreibung', type: 'text' }
+        { name: 'website', label: 'Website', type: 'text' }
     ];
 
     useEffect(() => {
-        loadSponsors();
+        loadGastronomies();
     }, []);
 
-    const loadSponsors = async () => {
+    const loadGastronomies = async () => {
         setLoading(true);
         try {
-            const data = await apiService.get('/api/sponsors');
-            setSponsors(data);
+            const data = await apiService.get('/api/gastronomies');
+            setGastronomies(data);
         } catch (error) {
             console.error(error);
         } finally {
@@ -55,10 +56,10 @@ const SponsorManager = () => {
     };
 
     const handleDelete = async (item) => {
-        if (window.confirm(`Sponsor "${item.name}" wirklich löschen?`)) {
+        if(window.confirm(`Gastronomie "${item.name}" wirklich löschen?`)) {
             try {
-                await apiService.delete(`/api/sponsors/${item.id}`);
-                loadSponsors();
+                await apiService.delete(`/api/gastronomies/${item.id}`);
+                loadGastronomies();
             } catch (error) {
                 console.error(error);
             }
@@ -68,12 +69,12 @@ const SponsorManager = () => {
     const handleFormSubmit = async (formData) => {
         try {
             if (editingItem && editingItem.id) {
-                await apiService.put(`/api/sponsors/${editingItem.id}`, formData);
+                await apiService.put(`/api/gastronomies/${editingItem.id}`, formData);
             } else {
-                await apiService.post('/api/sponsors', formData);
+                await apiService.post('/api/gastronomies', formData);
             }
             setIsModalOpen(false);
-            loadSponsors();
+            loadGastronomies();
         } catch (error) {
             console.error(error);
         }
@@ -84,17 +85,17 @@ const SponsorManager = () => {
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ color: '#1b4332', margin: 0 }}>Sponsoren verwalten</h2>
+                <h2 style={{ color: '#1b4332', margin: 0 }}>Gastronomie verwalten</h2>
                 <button onClick={handleCreateNew} style={{ background: '#2d6a4f', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                    + Neuer Sponsor
+                    + Neue Gastronomie
                 </button>
             </div>
             
-            <DataTable columns={columns} data={sponsors} onEdit={handleEdit} onDelete={handleDelete} />
+            <DataTable columns={columns} data={gastronomies} onEdit={handleEdit} onDelete={handleDelete} />
 
-            <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Sponsor bearbeiten' : 'Neuer Sponsor'} fields={formFields} initialData={editingItem} />
+            <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Gastronomie bearbeiten' : 'Neue Gastronomie anlegen'} fields={formFields} initialData={editingItem} />
         </div>
     );
 };
 
-export default SponsorManager;
+export default GastronomyManager;

@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import DataTable from '../components/DataTable';
+import GenericFormModal from '../components/GenericFormModal';
 import apiService from '../../services/apiService';
 
 const BreweryManager = () => {
     const [breweries, setBreweries] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState(null);
 
     const columns = [
         { key: 'id', label: 'ID' },
@@ -24,6 +27,14 @@ const BreweryManager = () => {
         }
     ];
 
+    const formFields = [
+        { name: 'name', label: 'Name der Brauerei', type: 'text', required: true },
+        { name: 'city', label: 'Ort', type: 'text' },
+        { name: 'region', label: 'Region', type: 'text' },
+        { name: 'website', label: 'Website', type: 'text' },
+        { name: 'isHallertau', label: 'Kommt aus der Hallertau?', type: 'checkbox' }
+    ];
+
     useEffect(() => {
         loadBreweries();
     }, []);
@@ -31,25 +42,47 @@ const BreweryManager = () => {
     const loadBreweries = async () => {
         setLoading(true);
         try {
-            // Hinweis: Setzt voraus, dass du apiService.get('/api/breweries') implementiert hast
             const data = await apiService.get('/api/breweries');
             setBreweries(data);
         } catch (error) {
-            console.error("Fehler beim Laden der Brauereien:", error);
+            console.error(error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleEdit = (brewery) => {
-        console.log("Edit:", brewery);
-        // TODO: Modal zum Bearbeiten öffnen
+    const handleCreateNew = () => {
+        setEditingItem(null);
+        setIsModalOpen(true);
     };
 
-    const handleDelete = (brewery) => {
+    const handleEdit = (brewery) => {
+        setEditingItem(brewery);
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = async (brewery) => {
         if(window.confirm(`Brauerei "${brewery.name}" wirklich löschen?`)) {
-            console.log("Delete:", brewery.id);
-            // TODO: apiService.delete aufrufen und Liste aktualisieren
+            try {
+                await apiService.delete(`/api/breweries/${brewery.id}`);
+                loadBreweries();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    };
+
+    const handleFormSubmit = async (formData) => {
+        try {
+            if (editingItem && editingItem.id) {
+                await apiService.put(`/api/breweries/${editingItem.id}`, formData);
+            } else {
+                await apiService.post('/api/breweries', formData);
+            }
+            setIsModalOpen(false);
+            loadBreweries();
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -60,6 +93,7 @@ const BreweryManager = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h2 style={{ color: '#1b4332', margin: 0 }}>Brauereien verwalten</h2>
                 <button 
+                    onClick={handleCreateNew}
                     style={{ background: '#2d6a4f', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
                 >
                     + Neue Brauerei
@@ -71,6 +105,15 @@ const BreweryManager = () => {
                 data={breweries} 
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+            />
+
+            <GenericFormModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleFormSubmit}
+                title={editingItem ? 'Brauerei bearbeiten' : 'Neue Brauerei anlegen'}
+                fields={formFields}
+                initialData={editingItem}
             />
         </div>
     );
