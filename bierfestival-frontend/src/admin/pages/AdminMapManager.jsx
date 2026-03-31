@@ -205,8 +205,7 @@ const AdminMapManager = () => {
                 )}
                 
                 <BaseMap 
-                    className={styles.map} 
-                    style={{ height: '100%', minHeight: 'calc(100vh - 80px)', width: '100%' }} 
+                    className={styles.map}  
                 >
                     <MapClickHandler onMapClick={handleMapClick} />
                     
