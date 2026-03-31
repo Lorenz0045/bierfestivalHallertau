@@ -25,10 +25,10 @@ const LookupManager = () => {
             title: 'Biersorte',
             columns: [
                 { key: 'id', label: 'ID' },
-                { key: 'name', label: 'Name der Biersorte' }
+                { key: 'name', label: 'Name' }
             ],
             fields: [
-                { name: 'name', label: 'Name der Biersorte', type: 'text', required: true }
+                { name: 'name', label: 'Name', type: 'text', required: true }
             ]
         },
         [TABS.FACILITY_TYPES]: {
@@ -54,7 +54,7 @@ const LookupManager = () => {
             title: 'Gastronomie-Kategorie',
             columns: [
                 { key: 'id', label: 'ID' },
-                { key: 'name', label: 'Kategorie-Bezeichnung' }
+                { key: 'name', label: 'Kategorie' }
             ],
             fields: [
                 { name: 'name', label: 'Kategorie-Bezeichnung', type: 'text', required: true }

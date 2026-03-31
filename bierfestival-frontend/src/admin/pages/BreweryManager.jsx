@@ -30,7 +30,7 @@ const BreweryManager = () => {
     ];
 
     const formFields = [
-        { name: 'name', label: 'Name der Brauerei', type: 'text', required: true },
+        { name: 'name', label: 'Name', type: 'text', required: true },
         { name: 'city', label: 'Ort', type: 'text' },
         { name: 'region', label: 'Region', type: 'text' },
         { name: 'website', label: 'Website', type: 'text' },

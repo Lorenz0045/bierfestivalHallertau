@@ -28,7 +28,7 @@ const BeerManager = () => {
     ];
 
     const formFields = [
-        { name: 'name', label: 'Name des Bieres', type: 'text', required: true },
+        { name: 'name', label: 'Name', type: 'text', required: true },
         { name: 'breweryId', label: 'Brauerei', type: 'select', options: breweries.map(b => ({ id: b.id, name: b.name })), required: true },
         { name: 'beerTypeId', label: 'Biersorte', type: 'select', options: beerTypes.map(t => ({ id: t.id, name: t.name })) },
         { name: 'alcoholPercentage', label: 'Alkoholgehalt (%)', type: 'number', step: '0.1' },

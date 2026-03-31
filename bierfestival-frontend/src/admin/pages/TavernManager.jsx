@@ -21,7 +21,7 @@ const TavernManager = () => {
 
     const columns = [
         { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Name der Schenke' },
+        { key: 'name', label: 'Name' },
         { 
             key: 'imgUrl', 
             label: 'Icon', 
@@ -45,7 +45,7 @@ const TavernManager = () => {
     ];
 
     const formFields = [
-        { name: 'name', label: 'Name der Schenke', type: 'text', required: true },
+        { name: 'name', label: 'Name', type: 'text', required: true },
         { name: 'imgUrl', label: 'Icon', type: 'image' }
     ];
 

@@ -17,7 +17,7 @@ const FacilityManager = () => {
 
     const columns = [
         { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Name / Bezeichnung' },
+        { key: 'name', label: 'Name' },
         { key: 'facilityType', label: 'Art der Einrichtung', render: (_, row) => row.facilityType?.name || '-' },
         { 
             key: 'imgUrl', 
@@ -32,7 +32,7 @@ const FacilityManager = () => {
     ];
 
     const formFields = [
-        { name: 'name', label: 'Name / Bezeichnung', type: 'text', required: true },
+        { name: 'name', label: 'Name', type: 'text', required: true },
         { name: 'facilityTypeId', label: 'Art der Einrichtung', type: 'select', options: facilityTypes.map(ft => ({ id: ft.id, name: ft.name })), required: true },
         { name: 'imgUrl', label: 'Spezifisches Icon (Überschreibt Standard)', type: 'image' }
     ];

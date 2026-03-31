@@ -29,7 +29,7 @@ const SponsorManager = () => {
     ];
 
     const formFields = [
-        { name: 'name', label: 'Sponsor Name', type: 'text', required: true },
+        { name: 'name', label: 'Name', type: 'text', required: true },
         { name: 'city', label: 'Ort', type: 'text' },
         { name: 'website', label: 'Website', type: 'text' },
         { name: 'description', label: 'Beschreibung', type: 'text' },

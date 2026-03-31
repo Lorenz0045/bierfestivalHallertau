@@ -17,7 +17,7 @@ const EventManager = () => {
 
     const columns = [
         { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Event Name' },
+        { key: 'name', label: 'Name' },
         { key: 'dayName', label: 'Tag' },
         { key: 'startTime', label: 'Startzeit', render: (val) => new Date(val).toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit' }) },
         { key: 'endTime', label: 'Endzeit', render: (val) => new Date(val).toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit' }) },
@@ -25,7 +25,7 @@ const EventManager = () => {
     ];
 
     const formFields = [
-        { name: 'name', label: 'Event Name', type: 'text', required: true },
+        { name: 'name', label: 'Name', type: 'text', required: true },
         { name: 'dayName', label: 'Tag (z.B. Freitag)', type: 'text' },
         { name: 'startTime', label: 'Startzeit', type: 'datetime-local', required: true },
         { name: 'endTime', label: 'Endzeit', type: 'datetime-local', required: true },

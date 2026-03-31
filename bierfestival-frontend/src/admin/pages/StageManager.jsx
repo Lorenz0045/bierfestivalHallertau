@@ -15,12 +15,12 @@ const StageManager = () => {
 
     const columns = [
         { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Bühnenname' },
+        { key: 'name', label: 'Name' },
         { key: 'imgUrl', label: 'Icon', sortable: false, render: (val) => val ? <img src={val} alt="Bühne" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
     ];
 
     const formFields = [
-        { name: 'name', label: 'Bühnenname', type: 'text', required: true },
+        { name: 'name', label: 'Name', type: 'text', required: true },
         { name: 'imgUrl', label: 'Icon', type: 'image' }
     ];
 
