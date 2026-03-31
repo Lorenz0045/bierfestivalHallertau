@@ -27,7 +27,12 @@ const LookupManager = () => {
     const facilityTypeColumns = [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Einrichtungsart' },
-        { key: 'iconName', label: 'Icon-Bezeichnung' }
+        { 
+            key: 'imgUrl', 
+            label: 'Standard-Bild', 
+            sortable: false,
+            render: (val) => val ? <img src={val} alt="Icon" style={{ height: '30px', borderRadius: '4px' }} /> : '-' 
+        }
     ];
 
     const beerTypeFields = [
@@ -36,7 +41,7 @@ const LookupManager = () => {
 
     const facilityTypeFields = [
         { name: 'name', label: 'Einrichtungsart', type: 'text', required: true },
-        { name: 'iconName', label: 'Icon-Bezeichnung', type: 'text' }
+        { name: 'imgUrl', label: 'Standard-Bild (Upload)', type: 'image' }
     ];
 
     const loadLookups = useCallback(async () => {

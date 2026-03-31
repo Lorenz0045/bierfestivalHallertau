@@ -18,12 +18,23 @@ const FacilityManager = () => {
     const columns = [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name / Bezeichnung' },
-        { key: 'facilityType', label: 'Art der Einrichtung', render: (_, row) => row.facilityType?.name || '-' }
+        { key: 'facilityType', label: 'Art der Einrichtung', render: (_, row) => row.facilityType?.name || '-' },
+        { 
+            key: 'imgUrl', 
+            label: 'Bild / Icon', 
+            sortable: false,
+            render: (_, row) => {
+                // Fallback-Logik: Nimm das eigene Bild, sonst das der Art
+                const imgSrc = row.imgUrl || row.facilityType?.imgUrl;
+                return imgSrc ? <img src={imgSrc} alt="Facility" style={{ height: '30px', borderRadius: '4px' }} /> : '-';
+            }
+        }
     ];
 
     const formFields = [
         { name: 'name', label: 'Name / Bezeichnung', type: 'text', required: true },
-        { name: 'facilityTypeId', label: 'Art der Einrichtung', type: 'select', options: facilityTypes.map(ft => ({ id: ft.id, name: ft.name })), required: true }
+        { name: 'facilityTypeId', label: 'Art der Einrichtung', type: 'select', options: facilityTypes.map(ft => ({ id: ft.id, name: ft.name })), required: true },
+        { name: 'imgUrl', label: 'Spezifisches Bild (Überschreibt Standard)', type: 'image' }
     ];
 
     const loadData = useCallback(async () => {
