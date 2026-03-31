@@ -53,8 +53,25 @@
 .placeBtn { background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
 .activeItem .placeBtn { background: #3b82f6; color: white; }
 
-.mapArea { flex: 1; position: relative; }
-.map { height: 100%; width: 100%; }
+.mapArea { 
+    flex: 1; 
+    position: relative; 
+    display: flex; 
+    flex-direction: column;
+    height: 100%;
+    min-height: 500px; 
+}
+.map { 
+    flex: 1;
+    height: 100% !important; 
+    width: 100%; 
+    z-index: 1;
+    background-color: #e5e5e5;
+}
+
+:global(.leaflet-control-container) {
+    z-index: 900 !important;
+}
 
 .mapPlacementMode .map { cursor: crosshair !important; }
 
