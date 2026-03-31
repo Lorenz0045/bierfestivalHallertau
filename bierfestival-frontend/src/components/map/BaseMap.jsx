@@ -2,12 +2,13 @@ import React from 'react';
 import { MapContainer, TileLayer, LayersControl, AttributionControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const BaseMap = ({ center = [48.50555, 11.75896], zoom = 17, children, className }) => {
+const BaseMap = ({ center = [48.50555, 11.75896], zoom = 17, children, className, style }) => {
     return (
         <MapContainer 
             center={center} 
             zoom={zoom} 
             className={className} 
+            style={style}
             attributionControl={false} 
             zoomControl={false}
         >

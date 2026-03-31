@@ -204,7 +204,10 @@ const AdminMapManager = () => {
                     </div>
                 )}
                 
-                <BaseMap className={styles.map}>
+                <BaseMap 
+                    className={styles.map} 
+                    style={{ height: '100%', minHeight: 'calc(100vh - 80px)', width: '100%' }} 
+                >
                     <MapClickHandler onMapClick={handleMapClick} />
                     
                     {placedPois.map(poi => (
