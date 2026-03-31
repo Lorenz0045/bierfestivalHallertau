@@ -38,7 +38,7 @@ const GastronomyManager = () => {
     const formFields = [
         { name: 'name', label: 'Name', type: 'text', required: true },
         { name: 'typeId', label: 'Kategorie', type: 'select', options: gastronomyTypes.map(t => ({ id: t.id, name: t.name })), required: true },
-        { name: 'city', label: 'Stadt', type: 'text' },
+        { name: 'city', label: 'Ort', type: 'text' },
         { name: 'website', label: 'Website', type: 'text' },
         { name: 'imgUrl', label: 'Bild (Upload)', type: 'image' }
     ];
