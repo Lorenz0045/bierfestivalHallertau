@@ -4,169 +4,165 @@ import GenericFormModal from '../components/GenericFormModal';
 import apiRequest from '../../services/apiService';
 import { useUser } from '../contexts/UserContext';
 
-const API_BEER_TYPES = '/api/beer-types';
-const API_FACILITY_TYPES = '/api/facility-types';
+const TABS = {
+    BEER_TYPES: 'BEER_TYPES',
+    FACILITY_TYPES: 'FACILITY_TYPES',
+    GASTRONOMY_TYPES: 'GASTRONOMY_TYPES'
+};
 
 const LookupManager = () => {
     const { keycloakInstance } = useUser();
-    const [beerTypes, setBeerTypes] = useState([]);
-    const [facilityTypes, setFacilityTypes] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState(TABS.BEER_TYPES);
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState(null);
 
-    const [isBeerModalOpen, setIsBeerModalOpen] = useState(false);
-    const [editingBeerType, setEditingBeerType] = useState(null);
-
-    const [isFacilityModalOpen, setIsFacilityModalOpen] = useState(false);
-    const [editingFacilityType, setEditingFacilityType] = useState(null);
-
-    const beerTypeColumns = [
-        { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Biersorte' }
-    ];
-
-    const facilityTypeColumns = [
-        { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Einrichtungsart' },
-        { 
-            key: 'imgUrl', 
-            label: 'Standard-Bild', 
-            sortable: false,
-            render: (val) => val ? <img src={val} alt="Icon" style={{ height: '30px', borderRadius: '4px' }} /> : '-' 
+    // Konfiguration der einzelnen Tabs
+    const configs = {
+        [TABS.BEER_TYPES]: {
+            endpoint: '/api/beer-types',
+            title: 'Biersorte',
+            columns: [
+                { key: 'id', label: 'ID' },
+                { key: 'name', label: 'Name der Biersorte' }
+            ],
+            fields: [
+                { name: 'name', label: 'Name der Biersorte', type: 'text', required: true }
+            ]
+        },
+        [TABS.FACILITY_TYPES]: {
+            endpoint: '/api/facility-types',
+            title: 'Einrichtungsart',
+            columns: [
+                { key: 'id', label: 'ID' },
+                { key: 'name', label: 'Einrichtungsart' },
+                { 
+                    key: 'imgUrl', 
+                    label: 'Standard-Bild', 
+                    sortable: false,
+                    render: (val) => val ? <img src={val} alt="Icon" style={{ height: '30px', borderRadius: '4px' }} /> : '-' 
+                }
+            ],
+            fields: [
+                { name: 'name', label: 'Einrichtungsart', type: 'text', required: true },
+                { name: 'imgUrl', label: 'Standard-Bild (Upload)', type: 'image' }
+            ]
+        },
+        [TABS.GASTRONOMY_TYPES]: {
+            endpoint: '/api/gastronomy-types',
+            title: 'Gastronomie-Kategorie',
+            columns: [
+                { key: 'id', label: 'ID' },
+                { key: 'name', label: 'Kategorie-Bezeichnung' }
+            ],
+            fields: [
+                { name: 'name', label: 'Kategorie-Bezeichnung', type: 'text', required: true }
+            ]
         }
-    ];
+    };
 
-    const beerTypeFields = [
-        { name: 'name', label: 'Biersorte', type: 'text', required: true }
-    ];
+    const activeConfig = configs[activeTab];
 
-    const facilityTypeFields = [
-        { name: 'name', label: 'Einrichtungsart', type: 'text', required: true },
-        { name: 'imgUrl', label: 'Standard-Bild (Upload)', type: 'image' }
-    ];
-
-    const loadLookups = useCallback(async () => {
+    const loadData = useCallback(async () => {
         if (!keycloakInstance?.token) return;
         setLoading(true);
         try {
-            const [beersRes, facilitiesRes] = await Promise.all([
-                apiRequest(API_BEER_TYPES, 'GET', null, keycloakInstance.token),
-                apiRequest(API_FACILITY_TYPES, 'GET', null, keycloakInstance.token)
-            ]);
-            setBeerTypes(beersRes || []);
-            setFacilityTypes(facilitiesRes || []);
+            const result = await apiRequest(activeConfig.endpoint, 'GET', null, keycloakInstance.token);
+            setData(result || []);
         } catch (error) {
-            console.error(error);
+            console.error(`Fehler beim Laden von ${activeConfig.title}:`, error);
         } finally {
             setLoading(false);
         }
-    }, [keycloakInstance]);
+    }, [activeTab, keycloakInstance]);
 
     useEffect(() => {
-        loadLookups();
-    }, [loadLookups]);
+        loadData();
+    }, [loadData]);
 
-    const handleCreateBeerType = () => {
-        setEditingBeerType(null);
-        setIsBeerModalOpen(true);
+    const handleCreateNew = () => {
+        setEditingItem(null);
+        setIsModalOpen(true);
     };
 
-    const handleEditBeerType = (item) => {
-        setEditingBeerType(item);
-        setIsBeerModalOpen(true);
+    const handleEdit = (item) => {
+        setEditingItem(item);
+        setIsModalOpen(true);
     };
 
-    const handleDeleteBeerType = async (item) => {
+    const handleDelete = async (item) => {
         if (!keycloakInstance?.token) return;
-        if (window.confirm(`Biersorte "${item.name}" wirklich löschen?`)) {
+        if (window.confirm(`${activeConfig.title} "${item.name}" wirklich löschen?`)) {
             try {
-                await apiRequest(`${API_BEER_TYPES}/${item.id}`, 'DELETE', null, keycloakInstance.token);
-                loadLookups();
+                await apiRequest(`${activeConfig.endpoint}/${item.id}`, 'DELETE', null, keycloakInstance.token);
+                loadData();
             } catch (error) {
                 console.error(error);
+                alert('Fehler beim Löschen. Eventuell wird dieser Eintrag noch in der Datenbank verwendet.');
             }
         }
     };
 
-    const handleBeerTypeSubmit = async (formData) => {
+    const handleFormSubmit = async (formData) => {
         if (!keycloakInstance?.token) return;
         try {
-            if (editingBeerType && editingBeerType.id) {
-                await apiRequest(`${API_BEER_TYPES}/${editingBeerType.id}`, 'PUT', formData, keycloakInstance.token);
+            if (editingItem && editingItem.id) {
+                await apiRequest(`${activeConfig.endpoint}/${editingItem.id}`, 'PUT', formData, keycloakInstance.token);
             } else {
-                await apiRequest(API_BEER_TYPES, 'POST', formData, keycloakInstance.token);
+                await apiRequest(activeConfig.endpoint, 'POST', formData, keycloakInstance.token);
             }
-            setIsBeerModalOpen(false);
-            loadLookups();
+            setIsModalOpen(false);
+            loadData();
         } catch (error) {
             console.error(error);
+            alert('Fehler beim Speichern.');
         }
     };
-
-    const handleCreateFacilityType = () => {
-        setEditingFacilityType(null);
-        setIsFacilityModalOpen(true);
-    };
-
-    const handleEditFacilityType = (item) => {
-        setEditingFacilityType(item);
-        setIsFacilityModalOpen(true);
-    };
-
-    const handleDeleteFacilityType = async (item) => {
-        if (!keycloakInstance?.token) return;
-        if (window.confirm(`Einrichtungsart "${item.name}" wirklich löschen?`)) {
-            try {
-                await apiRequest(`${API_FACILITY_TYPES}/${item.id}`, 'DELETE', null, keycloakInstance.token);
-                loadLookups();
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    };
-
-    const handleFacilityTypeSubmit = async (formData) => {
-        if (!keycloakInstance?.token) return;
-        try {
-            if (editingFacilityType && editingFacilityType.id) {
-                await apiRequest(`${API_FACILITY_TYPES}/${editingFacilityType.id}`, 'PUT', formData, keycloakInstance.token);
-            } else {
-                await apiRequest(API_FACILITY_TYPES, 'POST', formData, keycloakInstance.token);
-            }
-            setIsFacilityModalOpen(false);
-            loadLookups();
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    if (loading) return <div>Lade Daten...</div>;
 
     return (
         <div>
-            <h2 style={{ color: '#1b4332', marginBottom: '2rem' }}>Kategorien & Lookups</h2>
-
-            <div style={{ marginBottom: '4rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 style={{ color: '#495057', margin: 0 }}>Biersorten</h3>
-                    <button onClick={handleCreateBeerType} style={{ background: '#2d6a4f', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>
-                        + Sorte hinzufügen
-                    </button>
-                </div>
-                <DataTable columns={beerTypeColumns} data={beerTypes} onEdit={handleEditBeerType} onDelete={handleDeleteBeerType} />
+            {/* Tab-Navigation */}
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                <button 
+                    onClick={() => setActiveTab(TABS.BEER_TYPES)} 
+                    style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: activeTab === TABS.BEER_TYPES ? 'bold' : 'normal', borderBottom: activeTab === TABS.BEER_TYPES ? '3px solid #2d6a4f' : 'none' }}>
+                    Biersorten
+                </button>
+                <button 
+                    onClick={() => setActiveTab(TABS.FACILITY_TYPES)} 
+                    style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: activeTab === TABS.FACILITY_TYPES ? 'bold' : 'normal', borderBottom: activeTab === TABS.FACILITY_TYPES ? '3px solid #2d6a4f' : 'none' }}>
+                    Einrichtungsarten
+                </button>
+                <button 
+                    onClick={() => setActiveTab(TABS.GASTRONOMY_TYPES)} 
+                    style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: activeTab === TABS.GASTRONOMY_TYPES ? 'bold' : 'normal', borderBottom: activeTab === TABS.GASTRONOMY_TYPES ? '3px solid #2d6a4f' : 'none' }}>
+                    Gastronomie-Kategorien
+                </button>
             </div>
 
-            <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 style={{ color: '#495057', margin: 0 }}>Einrichtungen (Map Icons)</h3>
-                    <button onClick={handleCreateFacilityType} style={{ background: '#2d6a4f', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>
-                        + Einrichtung hinzufügen
-                    </button>
-                </div>
-                <DataTable columns={facilityTypeColumns} data={facilityTypes} onEdit={handleEditFacilityType} onDelete={handleDeleteFacilityType} />
+            {/* Header mit Neu-Button */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h2 style={{ color: '#1b4332', margin: 0 }}>{activeConfig.title} verwalten</h2>
+                <button onClick={handleCreateNew} style={{ background: '#2d6a4f', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                    + Neu
+                </button>
             </div>
 
-            <GenericFormModal isOpen={isBeerModalOpen} onClose={() => setIsBeerModalOpen(false)} onSubmit={handleBeerTypeSubmit} title={editingBeerType ? 'Biersorte bearbeiten' : 'Neue Biersorte'} fields={beerTypeFields} initialData={editingBeerType} />
-            <GenericFormModal isOpen={isFacilityModalOpen} onClose={() => setIsFacilityModalOpen(false)} onSubmit={handleFacilityTypeSubmit} title={editingFacilityType ? 'Einrichtungsart bearbeiten' : 'Neue Einrichtungsart'} fields={facilityTypeFields} initialData={editingFacilityType} />
+            {/* Tabelle */}
+            {loading ? <div>Lade Daten...</div> : (
+                <DataTable columns={activeConfig.columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
+            )}
+
+            {/* Modal */}
+            <GenericFormModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                onSubmit={handleFormSubmit} 
+                title={editingItem ? `${activeConfig.title} bearbeiten` : `Neue ${activeConfig.title} anlegen`} 
+                fields={activeConfig.fields} 
+                initialData={editingItem} 
+            />
         </div>
     );
 };
