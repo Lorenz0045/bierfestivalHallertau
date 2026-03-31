@@ -2,7 +2,6 @@
     display: flex;
     height: calc(100vh - 80px); 
     background: #f1f5f9;
-    overflow: hidden; 
 }
 
 .sidebar {
@@ -58,6 +57,13 @@
     display: flex;
     height: calc(100vh - 80px); 
     background: #f1f5f9;
+}
+
+.mapArea { 
+    flex: 1; 
+    /* WICHTIG: Das ist der Anker für die absolute Positionierung der Map */
+    position: relative; 
+    /* Kein height: 100% mehr nötig, flex: 1 regelt die Breite/Höhe */
 }
 
 .map { 
