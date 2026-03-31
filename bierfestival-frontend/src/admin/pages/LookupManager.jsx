@@ -39,14 +39,14 @@ const LookupManager = () => {
                 { key: 'name', label: 'Einrichtungsart' },
                 { 
                     key: 'imgUrl', 
-                    label: 'Standard-Bild', 
+                    label: 'Standard-Icon', 
                     sortable: false,
                     render: (val) => val ? <img src={val} alt="Icon" style={{ height: '30px', borderRadius: '4px' }} /> : '-' 
                 }
             ],
             fields: [
                 { name: 'name', label: 'Einrichtungsart', type: 'text', required: true },
-                { name: 'imgUrl', label: 'Standard-Bild (Upload)', type: 'image' }
+                { name: 'imgUrl', label: 'Standard-Icon', type: 'image' }
             ]
         },
         [TABS.GASTRONOMY_TYPES]: {

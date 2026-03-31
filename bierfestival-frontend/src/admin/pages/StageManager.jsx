@@ -16,12 +16,12 @@ const StageManager = () => {
     const columns = [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Bühnenname' },
-        { key: 'imgUrl', label: 'Bühnen-Bild', sortable: false, render: (val) => val ? <img src={val} alt="Bühne" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
+        { key: 'imgUrl', label: 'Icon', sortable: false, render: (val) => val ? <img src={val} alt="Bühne" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
     ];
 
     const formFields = [
         { name: 'name', label: 'Bühnenname', type: 'text', required: true },
-        { name: 'imgUrl', label: 'Bild (Upload)', type: 'image' }
+        { name: 'imgUrl', label: 'Icon', type: 'image' }
     ];
 
     const loadStages = useCallback(async () => {

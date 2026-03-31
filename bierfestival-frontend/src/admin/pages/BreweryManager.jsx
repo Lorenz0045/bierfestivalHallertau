@@ -26,7 +26,7 @@ const BreweryManager = () => {
         { key: 'region', label: 'Region' },
         { key: 'isHallertau', label: 'Hallertau', render: (val) => val ? 'Ja' : 'Nein' },
         { key: 'website', label: 'Website', render: (val) => renderExternalLink(val) },
-        { key: 'imgUrl', label: 'Bild', sortable: false, render: (val) => val ? <img src={val} alt="Brauerei" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
+        { key: 'imgUrl', label: 'Logo', sortable: false, render: (val) => val ? <img src={val} alt="Brauerei" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
     ];
 
     const formFields = [
@@ -35,7 +35,7 @@ const BreweryManager = () => {
         { name: 'region', label: 'Region', type: 'text' },
         { name: 'website', label: 'Website', type: 'text' },
         { name: 'isHallertau', label: 'Kommt aus der Hallertau?', type: 'checkbox' },
-        { name: 'imgUrl', label: 'Logo / Bild', type: 'image' }
+        { name: 'imgUrl', label: 'Logo', type: 'image' }
     ];
 
     const loadBreweries = useCallback(async () => {

@@ -29,7 +29,7 @@ const GastronomyManager = () => {
         { key: 'website', label: 'Website', render: (val) => renderExternalLink(val) },
         { 
             key: 'imgUrl', 
-            label: 'Bild', 
+            label: 'Icon', 
             sortable: false, 
             render: (val) => val ? <img src={val} alt="Gastro" style={{ height: '30px', borderRadius: '4px' }} /> : '-' 
         }
@@ -40,7 +40,7 @@ const GastronomyManager = () => {
         { name: 'typeId', label: 'Kategorie', type: 'select', options: gastronomyTypes.map(t => ({ id: t.id, name: t.name })), required: true },
         { name: 'city', label: 'Ort', type: 'text' },
         { name: 'website', label: 'Website', type: 'text' },
-        { name: 'imgUrl', label: 'Bild (Upload)', type: 'image' }
+        { name: 'imgUrl', label: 'Icon', type: 'image' }
     ];
 
     const loadData = useCallback(async () => {

@@ -33,7 +33,7 @@ const SponsorManager = () => {
         { name: 'city', label: 'Ort', type: 'text' },
         { name: 'website', label: 'Website', type: 'text' },
         { name: 'description', label: 'Beschreibung', type: 'text' },
-        { name: 'imgUrl', label: 'Sponsor-Logo', type: 'image' }
+        { name: 'imgUrl', label: 'Logo', type: 'image' }
     ];
 
     const loadSponsors = useCallback(async () => {

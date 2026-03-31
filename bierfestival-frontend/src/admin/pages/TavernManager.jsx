@@ -24,7 +24,7 @@ const TavernManager = () => {
         { key: 'name', label: 'Name der Schenke' },
         { 
             key: 'imgUrl', 
-            label: 'Bild', 
+            label: 'Icon', 
             sortable: false, 
             render: (val) => val ? <img src={val} alt="Schenke" style={{ height: '30px', borderRadius: '4px' }} /> : '-' 
         },
@@ -46,7 +46,7 @@ const TavernManager = () => {
 
     const formFields = [
         { name: 'name', label: 'Name der Schenke', type: 'text', required: true },
-        { name: 'imgUrl', label: 'Bild (Upload)', type: 'image' }
+        { name: 'imgUrl', label: 'Icon', type: 'image' }
     ];
 
     const loadData = useCallback(async () => {
