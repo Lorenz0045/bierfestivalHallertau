@@ -22,4 +22,7 @@ public class Sponsor extends PanacheEntityBase {
     public String city;
     public String website;
     public String description;
+    
+    @Column(name = "img_url")
+    public String imgUrl;
 }
