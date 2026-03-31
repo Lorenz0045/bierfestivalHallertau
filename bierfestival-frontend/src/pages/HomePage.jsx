@@ -92,12 +92,6 @@ const HomePage = () => {
     const [pois, setPois] = useState([]);
     const festivalPosition = [48.50555005218888, 11.75895927999904];
 
-    const stageArea = [
-        [48.50555, 11.75896], [48.50600, 11.75896], 
-        [48.50600, 11.76000], [48.50555, 11.76000], 
-    ];
-    const stageStyle = { color: 'purple', fillColor: 'purple', fillOpacity: 0.4 };
-
     // 1. Lade alle platzierten POIs aus dem Cache (schnell für normale User)
     useEffect(() => {
         const loadMapData = async () => {
@@ -138,18 +132,9 @@ const HomePage = () => {
                 
                 {/* 3. Deine Custom Controls (GPS etc.) als Kind-Element übergeben */}
                 <MapControls festivalCoords={festivalPosition} />
+                
 
-                {/* 4. Das Festzelt-Polygon */}
-                <Polygon pathOptions={stageStyle} positions={stageArea}>
-                    <Popup>
-                        <div style={{ textAlign: 'center' }}>
-                            <strong>📍 Festzelt Attenkirchen</strong><br/>
-                            Hier spielt die Musik!
-                        </div>
-                    </Popup>
-                </Polygon>
-
-                {/* 5. Alle POIs dynamisch rendern */}
+                {/* 4. Alle POIs dynamisch rendern */}
                 {pois.map(poi => (
                     <Marker 
                         key={`${poi.type}-${poi.id}`} 
