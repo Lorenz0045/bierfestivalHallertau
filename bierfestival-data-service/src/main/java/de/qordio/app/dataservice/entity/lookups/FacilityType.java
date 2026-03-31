@@ -16,9 +16,9 @@ public class FacilityType extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     public String name;
 
-    @Column(name = "icon_name")
-    public String iconName;
+    @Column(name = "img_url")
+    public String imgUrl;
 }

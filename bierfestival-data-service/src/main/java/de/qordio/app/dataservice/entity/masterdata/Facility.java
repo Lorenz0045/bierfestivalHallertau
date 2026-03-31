@@ -20,12 +20,15 @@ public class Facility extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "facility_type_id", nullable = false)
-    public FacilityType facilityType;
-
     @Column(nullable = false)
     public String name;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "facility_type_id")
+    public FacilityType facilityType;
+
+    @Column(name = "img_url")
+    public String imgUrl;
 
     public Double lat;
     public Double lon;

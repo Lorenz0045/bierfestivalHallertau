@@ -5,16 +5,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import de.qordio.app.dataservice.entity.lookups.FacilityType;
 import de.qordio.app.dataservice.entity.masterdata.Facility;
+import de.qordio.app.dataservice.service.FileService;
 import io.quarkus.panache.common.Sort;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -32,13 +33,17 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "Facilities (POIs)")
+@Tag(name = "Facilities")
 public class FacilityResource {
+
+    @Inject
+    FileService fileService;
 
     public static class FacilityDto {
         public Long id;
         public String name;
         public FacilityTypeResource.FacilityTypeDto facilityType;
+        public String imgUrl;
         public Double lat;
         public Double lon;
 
@@ -48,6 +53,7 @@ public class FacilityResource {
             dto.id = entity.id;
             dto.name = entity.name;
             dto.facilityType = FacilityTypeResource.FacilityTypeDto.fromEntity(entity.facilityType);
+            dto.imgUrl = entity.imgUrl;
             dto.lat = entity.lat;
             dto.lon = entity.lon;
             return dto;
@@ -57,6 +63,7 @@ public class FacilityResource {
     public static class FacilityCreateUpdateDto {
         public String name;
         public FacilityTypeIdDto facilityType;
+        public String imgUrl;
         public Double lat;
         public Double lon;
 
@@ -67,14 +74,13 @@ public class FacilityResource {
     @PermitAll
     public List<FacilityDto> getAll() {
         return Facility.listAll(Sort.by("name")).stream()
-                .map(entity -> FacilityDto.fromEntity((Facility) entity))
+                .map(e -> FacilityDto.fromEntity((Facility) e))
                 .collect(Collectors.toList());
     }
 
     @POST
     @RolesAllowed("admin")
     @Transactional
-    @Operation(summary = "Create Facility")
     @SecurityRequirement(name = "jwtAuth")
     public Response create(@Valid FacilityCreateUpdateDto dto) {
         Facility entity = new Facility();
@@ -87,14 +93,20 @@ public class FacilityResource {
     @Path("/{id}")
     @RolesAllowed("admin")
     @Transactional
-    @Operation(summary = "Update Facility")
     @SecurityRequirement(name = "jwtAuth")
     public Response update(@PathParam("id") Long id, @Valid FacilityCreateUpdateDto dto) {
         Optional<Facility> existingOpt = Facility.findByIdOptional(id);
         if (existingOpt.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
         
         Facility existing = existingOpt.get();
+        String oldImageUrl = existing.imgUrl;
+        
         mapDtoToEntity(dto, existing);
+
+        if (oldImageUrl != null && !oldImageUrl.equals(existing.imgUrl)) {
+            fileService.deleteFile(oldImageUrl);
+        }
+
         return Response.ok(FacilityDto.fromEntity(existing)).build();
     }
 
@@ -102,14 +114,22 @@ public class FacilityResource {
     @Path("/{id}")
     @RolesAllowed("admin")
     @Transactional
-    @Operation(summary = "Delete Facility")
     @SecurityRequirement(name = "jwtAuth")
     public Response delete(@PathParam("id") Long id) {
-        return Facility.deleteById(id) ? Response.noContent().build() : Response.status(Response.Status.NOT_FOUND).build();
+        Optional<Facility> opt = Facility.findByIdOptional(id);
+        if (opt.isPresent()) {
+            Facility entity = opt.get();
+            String imageUrl = entity.imgUrl;
+            entity.delete();
+            if (imageUrl != null) fileService.deleteFile(imageUrl);
+            return Response.noContent().build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     private void mapDtoToEntity(FacilityCreateUpdateDto dto, Facility entity) {
         entity.name = dto.name;
+        entity.imgUrl = dto.imgUrl;
         entity.lat = dto.lat;
         entity.lon = dto.lon;
 
