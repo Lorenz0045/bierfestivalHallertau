@@ -25,7 +25,7 @@ const GastronomyManager = () => {
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'type', label: 'Typ', render: (_, row) => row.type?.name || '-' },
-        { key: 'city', label: 'Stadt' },
+        { key: 'city', label: 'Ort' },
         { key: 'website', label: 'Website', render: (val) => renderExternalLink(val) },
         { 
             key: 'imgUrl', 
