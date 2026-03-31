@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Polygon, Popup, LayersControl, AttributionControl, Marker, useMap, useMapEvents } from 'react-leaflet';
+import React, { useState, useEffect } from 'react';
+import { Marker, Popup, Polygon, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css'; 
+import BaseMap from '../components/map/BaseMap';
+import { fetchCachedData } from '../services/cacheService';
+import { createPoiIcon } from '../components/map/IconFactory';
 import { FaLocationArrow, FaBeer } from 'react-icons/fa'; 
 import styles from './HomePage.module.css';
 
-// --- Icon Definition (Blauer Punkt) ---
+// --- Icon Definition (Blauer Punkt für User) ---
 const userIcon = L.divIcon({
     className: styles.userLocationDot,
     iconSize: [20, 20],
@@ -13,26 +15,16 @@ const userIcon = L.divIcon({
     popupAnchor: [0, -10]
 });
 
-// --- Komponente: MapControls ---
+// --- Komponente: MapControls  ---
 const MapControls = ({ festivalCoords }) => {
     const [userPosition, setUserPosition] = useState(null);
-    const [isFollowing, setIsFollowing] = useState(false); // Verfolgen wir gerade?
+    const [isFollowing, setIsFollowing] = useState(false);
     const map = useMap();
 
-    // 1. Initiale GPS-Abfrage (läuft IMMER im Hintergrund)
     useEffect(() => {
-        map.locate({ 
-            watch: true, 
-            enableHighAccuracy: true 
-        });
-
-        const onLocationFound = (e) => {
-            setUserPosition(e.latlng);
-        };
-
-        const onLocationError = (e) => {
-            console.warn("GPS Fehler:", e.message);
-        };
+        map.locate({ watch: true, enableHighAccuracy: true });
+        const onLocationFound = (e) => setUserPosition(e.latlng);
+        const onLocationError = (e) => console.warn("GPS Fehler:", e.message);
 
         map.on('locationfound', onLocationFound);
         map.on('locationerror', onLocationError);
@@ -44,70 +36,46 @@ const MapControls = ({ festivalCoords }) => {
         };
     }, [map]);
 
-    // 2. Effekt: Wenn sich die Position ändert UND wir im "Following"-Modus sind
     useEffect(() => {
         if (isFollowing && userPosition) {
-            // Wir bewegen die Karte sanft zum User, behalten aber den aktuellen Zoom bei
-            // (außer beim ersten Klick, das macht die handleLocateClick Funktion)
             map.panTo(userPosition, { animate: true, duration: 1.0 });
         }
     }, [userPosition, isFollowing, map]);
 
-    // 3. Event Listener: Wenn der User die Karte manuell verschiebt -> Tracking aus!
-    // Wir nutzen useMapEvents für sauberere React-Integration
     useMapEvents({
-        dragstart: () => {
-            // Sobald der User zieht (Drag), stoppen wir das automatische Verfolgen
-            setIsFollowing(false);
-        },
-        // Zoom-Events ignorieren wir absichtlich, damit Zoomen das Tracking NICHT beendet.
+        dragstart: () => setIsFollowing(false),
     });
 
-    // Button 1: Tracking aktivieren (Click)
     const handleLocateClick = () => {
-        // FALL A: Wir folgen bereits -> BEENDEN
         if (isFollowing) {
             setIsFollowing(false);
-            return; // Hier abbrechen
+            return;
         }
-
-        // FALL B: Wir folgen noch nicht -> STARTEN
         if (userPosition) {
             setIsFollowing(true);
-            // Hart ranzoomen beim Aktivieren
             map.flyTo(userPosition, 18, { duration: 1.5 });
         } else {
-            // Falls noch keine Position da ist (GPS lädt noch)
             alert("Suche Standort...");
             map.locate({ setView: true, maxZoom: 18 });
         }
     };
 
-    // Button 2: Zum Festival
     const handleFestivalClick = () => {
-        setIsFollowing(false); // Tracking aus, wir wollen ja wegsehen
+        setIsFollowing(false);
         map.flyTo(festivalCoords, 17, { duration: 1.5 });
     };
 
     return (
         <>
-            {/* Der Punkt ist IMMER da, wenn Position bekannt */}
             {userPosition && (
                 <Marker position={userPosition} icon={userIcon}>
                     <Popup>Du bist hier</Popup>
                 </Marker>
             )}
-
             <div className={styles.controlsContainer}>
-                {/* Zum Festival */}
-                <button 
-                    className={styles.mapButton} 
-                    onClick={handleFestivalClick}
-                >
+                <button className={styles.mapButton} onClick={handleFestivalClick}>
                     <FaBeer />
                 </button>
-
-                {/* Zum User (Toggle-Optik, aber Verhalten wie beschrieben) */}
                 <button 
                     className={`${styles.mapButton} ${isFollowing ? styles.activeButton : ''}`} 
                     onClick={handleLocateClick}
@@ -121,50 +89,57 @@ const MapControls = ({ festivalCoords }) => {
 
 // --- Haupt-Page ---
 const HomePage = () => {
-    // Attenkirchen Koordinaten
+    const [pois, setPois] = useState([]);
     const festivalPosition = [48.50555005218888, 11.75895927999904];
 
-    // Dein Test-Rechteck
     const stageArea = [
-        [48.50555, 11.75896], 
-        [48.50600, 11.75896], 
-        [48.50600, 11.76000], 
-        [48.50555, 11.76000], 
+        [48.50555, 11.75896], [48.50600, 11.75896], 
+        [48.50600, 11.76000], [48.50555, 11.76000], 
     ];
     const stageStyle = { color: 'purple', fillColor: 'purple', fillOpacity: 0.4 };
 
+    // 1. Lade alle platzierten POIs aus dem Cache (schnell für normale User)
+    useEffect(() => {
+        const loadMapData = async () => {
+            const endpoints = [
+                { type: 'tavern', url: '/api/taverns' },
+                { type: 'stage', url: '/api/stages' },
+                { type: 'gastronomy', url: '/api/gastronomies' },
+                { type: 'facility', url: '/api/facilities' }
+            ];
+
+            let allPlacedPois = [];
+            
+            for (const ep of endpoints) {
+                try {
+                    // Nutzt den zentralen Cache, feuert das Backend also nur 1x am Tag ab!
+                    const data = await fetchCachedData(ep.url);
+                    if (data) {
+                        // Filtere nur die heraus, die auch Koordinaten haben
+                        const placed = data
+                            .filter(item => item.lat && item.lon)
+                            .map(item => ({ ...item, type: ep.type }));
+                        allPlacedPois = [...allPlacedPois, ...placed];
+                    }
+                } catch (error) {
+                    console.error(`Map: Fehler beim Laden von ${ep.url}`, error);
+                }
+            }
+            setPois(allPlacedPois);
+        };
+
+        loadMapData();
+    }, []);
+
     return (
         <div className={styles.mapWrapper}>
-            <MapContainer 
-                attributionControl={false}
-                center={festivalPosition} 
-                zoom={17} 
-                zoomControl={false} 
-                className={styles.mapContainer}
-            >
-                <AttributionControl prefix={false} position="bottomleft" />
+            
+            <BaseMap center={festivalPosition} zoom={17} className={styles.mapContainer}>
                 
-                <LayersControl position="topright">
-                    <LayersControl.BaseLayer checked name="Straßenkarte">
-                        <TileLayer
-                            attribution='&copy; OpenStreetMap'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            maxNativeZoom={19}
-                            maxZoom={25}
-                        />
-                    </LayersControl.BaseLayer>
-                    <LayersControl.BaseLayer name="Satellit">
-                        <TileLayer
-                            attribution='Tiles &copy; Esri'
-                            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                            maxNativeZoom={18} 
-                            maxZoom={25}
-                        />
-                    </LayersControl.BaseLayer>
-                </LayersControl>
-
+                {/* 3. Deine Custom Controls (GPS etc.) als Kind-Element übergeben */}
                 <MapControls festivalCoords={festivalPosition} />
 
+                {/* 4. Das Festzelt-Polygon */}
                 <Polygon pathOptions={stageStyle} positions={stageArea}>
                     <Popup>
                         <div style={{ textAlign: 'center' }}>
@@ -174,7 +149,47 @@ const HomePage = () => {
                     </Popup>
                 </Polygon>
 
-            </MapContainer>
+                {/* 5. Alle POIs dynamisch rendern */}
+                {pois.map(poi => (
+                    <Marker 
+                        key={`${poi.type}-${poi.id}`} 
+                        position={[poi.lat, poi.lon]}
+                        icon={createPoiIcon(poi)}
+                    >
+                        <Popup>
+                            <div style={{ textAlign: 'center', minWidth: '150px' }}>
+                                {/* Falls ein Bild existiert, zeigen wir es im Popup klein an */}
+                                {poi.imgUrl && (
+                                    <img 
+                                        src={poi.imgUrl} 
+                                        alt={poi.name} 
+                                        style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }} 
+                                    />
+                                )}
+                                <strong style={{ display: 'block', fontSize: '1.1rem', color: '#1b4332' }}>{poi.name}</strong>
+                                
+                                {/* Kategorie-spezifische Zusätze */}
+                                {poi.type === 'gastronomy' && poi.type && <span style={{ color: '#64748b' }}>{poi.type.name}</span>}
+                                {poi.type === 'facility' && poi.facilityType && <span style={{ color: '#64748b' }}>{poi.facilityType.name}</span>}
+                                
+                                {/* Quickinfo: Biere bei Schenken */}
+                                {poi.type === 'tavern' && poi.beers && poi.beers.length > 0 && (
+                                    <div style={{ marginTop: '10px', fontSize: '0.85rem', textAlign: 'left', background: '#f8fafc', padding: '5px', borderRadius: '4px' }}>
+                                        <strong>🍺 Ausgeschenkt wird:</strong>
+                                        <ul style={{ margin: '5px 0 0 0', paddingLeft: '15px' }}>
+                                            {poi.beers.slice(0, 3).map(b => (
+                                                <li key={b.beerId}>{b.name}</li>
+                                            ))}
+                                            {poi.beers.length > 3 && <li><i>+ {poi.beers.length - 3} weitere...</i></li>}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        </Popup>
+                    </Marker>
+                ))}
+
+            </BaseMap>
         </div>
     );
 };

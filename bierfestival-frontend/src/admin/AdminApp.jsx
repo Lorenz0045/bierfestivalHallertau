@@ -4,6 +4,7 @@ import AdminRoute from '../components/Navigation/AdminRoute';
 import AdminLayout from './AdminLayout';
 import AnalyticsPage from './AnalyticsPage';
 import MasterDataPage from './MasterDataPage';
+import AdminMapManager from './pages/AdminMapManager';
 
 export default function AdminApp() {
   return (
@@ -14,6 +15,7 @@ export default function AdminApp() {
             <Route path="/" element={<Navigate to="analytics" replace />} />
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="master-data/*" element={<MasterDataPage />} />
+            <Route path="map" element={<AdminMapManager />} />
           </Route>
         </Route>
       </Routes>

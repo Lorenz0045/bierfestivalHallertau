@@ -31,6 +31,12 @@ const AdminLayout = () => {
             >
                 Stammdaten
             </NavLink>
+            <NavLink 
+                to="/admin/map" 
+                className={({ isActive }) => isActive ? `${styles.navLink} ${styles.active}` : styles.navLink}
+            >
+                📍 Karte platzieren
+            </NavLink>
             </nav>
         </div>
         

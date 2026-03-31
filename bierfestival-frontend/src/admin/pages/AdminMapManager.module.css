@@ -1,0 +1,78 @@
+.container {
+    display: flex;
+    height: calc(100vh - 80px); /* Höhe anpassen je nach deinem Header */
+    background: #f1f5f9;
+}
+
+.sidebar {
+    width: 350px;
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    z-index: 10;
+}
+
+.sidebarHeader {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebarHeader h2 { margin: 0; font-size: 1.2rem; color: #1e293b; }
+
+.refreshBtn {
+    background: none; border: none; cursor: pointer; color: #64748b;
+}
+
+.saveArea { padding: 1rem; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+
+.saveBtn {
+    width: 100%; padding: 0.75rem; background: #2d6a4f; color: white;
+    border: none; border-radius: 4px; font-weight: bold; cursor: pointer;
+}
+.saveBtn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+.filterGroup { padding: 1rem; border-bottom: 1px solid #e2e8f0; }
+.select { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; }
+
+.unplacedList { flex: 1; overflow-y: auto; padding: 1rem; }
+.listTitle { font-size: 1rem; margin-top: 0; color: #475569; }
+.list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+
+.listItem {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 4px; background: white;
+}
+.activeItem { border-color: #3b82f6; background: #eff6ff; }
+
+.itemMeta { display: block; font-size: 0.75rem; color: #94a3b8; }
+.placeBtn { background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+.activeItem .placeBtn { background: #3b82f6; color: white; }
+
+.mapArea { flex: 1; position: relative; }
+.map { height: 100%; width: 100%; }
+
+.mapPlacementMode .map { cursor: crosshair !important; }
+
+.placementOverlay {
+    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    background: rgba(27, 67, 50, 0.9); color: white; padding: 10px 20px;
+    border-radius: 8px; z-index: 1000; display: flex; align-items: center; gap: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 1rem;
+}
+
+.cancelPlaceBtn {
+    background: white; color: #1b4332; border: none; padding: 4px 10px;
+    border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .container { flex-direction: column; }
+    .sidebar { width: 100%; height: 40vh; border-right: none; border-bottom: 2px solid #e2e8f0; }
+    .mapArea { height: 60vh; }
+    .placementOverlay { width: 90%; text-align: center; flex-direction: column; top: 10px; }
+}
