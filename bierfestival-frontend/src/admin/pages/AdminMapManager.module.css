@@ -53,25 +53,16 @@
 .placeBtn { background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
 .activeItem .placeBtn { background: #3b82f6; color: white; }
 
-.container {
-    display: flex;
-    height: calc(100vh - 80px); 
-    background: #f1f5f9;
-}
 
 .mapArea { 
     flex: 1; 
-    /* WICHTIG: Das ist der Anker für die absolute Positionierung der Map */
     position: relative; 
-    /* Kein height: 100% mehr nötig, flex: 1 regelt die Breite/Höhe */
+    height: calc(100vh - 80px); 
 }
 
 .map { 
-    position: absolute !important;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    height: 100% !important; 
+    width: 100%; 
     background-color: #e5e5e5 !important; 
     z-index: 1;
 }
@@ -91,7 +82,7 @@
     color: white; 
     padding: 10px 20px;
     border-radius: 8px; 
-    z-index: 9999; 
+    z-index: 1000; 
     display: flex; 
     align-items: center; 
     gap: 15px;
