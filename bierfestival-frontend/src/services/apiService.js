@@ -43,4 +43,42 @@ const apiRequest = async (url, method = 'GET', body = null, token) => {
   }
 };
 
+export const apiUploadFile = async (endpoint, file, subfolder, token) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (subfolder) {
+    formData.append('subfolder', subfolder);
+  }
+
+  const headers = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: headers, 
+      body: formData,
+    });
+
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        errorData = { message: response.statusText || `HTTP error ${response.status}` };
+      }
+      const errorMessage = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
+      const error = new Error(errorMessage);
+      error.status = response.status;
+      throw error;
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("API upload error in apiService:", error.message);
+    throw error;
+  }
+};
+
 export default apiRequest;

@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
+import { apiUploadFile } from '../../services/apiService';
+import { useUser } from '../contexts/UserContext';
 import styles from './GenericFormModal.module.css';
 
 const GenericFormModal = ({ isOpen, onClose, onSubmit, title, fields, initialData }) => {
+    const { keycloakInstance } = useUser();
     const [formData, setFormData] = useState({});
+    const [uploadingField, setUploadingField] = useState(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -25,6 +29,24 @@ const GenericFormModal = ({ isOpen, onClose, onSubmit, title, fields, initialDat
         setFormData(prev => ({ ...prev, [field.name]: value }));
     };
 
+    const handleFileUpload = async (e, field) => {
+        const file = e.target.files[0];
+        if (!file || !keycloakInstance?.token) return;
+
+        setUploadingField(field.name);
+        try {
+            // Sendet die Datei an den neuen Endpunkt
+            const response = await apiUploadFile('/api/admin/uploads/image', file, 'poi-images', keycloakInstance.token);
+            // Speichert den zurückgegebenen Pfad (z.B. /uploads/poi-images/xyz.jpg) im Formular
+            setFormData(prev => ({ ...prev, [field.name]: response.filePath }));
+        } catch (error) {
+            console.error("Upload Fehler:", error);
+            alert("Fehler beim Hochladen des Bildes.");
+        } finally {
+            setUploadingField(null);
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit(formData);
@@ -35,7 +57,7 @@ const GenericFormModal = ({ isOpen, onClose, onSubmit, title, fields, initialDat
             <div className={styles.modal}>
                 <div className={styles.header}>
                     <h2>{title}</h2>
-                    <button onClick={onClose} className={styles.closeBtn}>&times;</button>
+                    <button type="button" onClick={onClose} className={styles.closeBtn}>&times;</button>
                 </div>
                 <form onSubmit={handleSubmit} className={styles.form}>
                     {fields.map(field => (
@@ -65,6 +87,24 @@ const GenericFormModal = ({ isOpen, onClose, onSubmit, title, fields, initialDat
                                         </option>
                                     ))}
                                 </select>
+                            ) : field.type === 'image' ? (
+                                <div className={styles.imageUploadWrapper}>
+                                    {formData[field.name] && (
+                                        <div className={styles.imagePreview}>
+                                            <img src={formData[field.name]} alt="Preview" style={{ maxWidth: '100%', maxHeight: '150px', borderRadius: '4px', marginBottom: '0.5rem' }} />
+                                            <button type="button" onClick={() => setFormData(prev => ({...prev, [field.name]: ''}))} style={{ display: 'block', color: 'red', border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}>Bild entfernen</button>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        id={field.name}
+                                        accept="image/*"
+                                        onChange={(e) => handleFileUpload(e, field)}
+                                        disabled={uploadingField === field.name}
+                                        className={styles.input}
+                                    />
+                                    {uploadingField === field.name && <small>Lädt hoch...</small>}
+                                </div>
                             ) : (
                                 <input
                                     type={field.type || 'text'}
