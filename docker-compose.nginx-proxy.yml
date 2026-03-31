@@ -10,8 +10,8 @@ services:
     volumes:
       - /opt/nginx-proxy-manager/data:/data
       - /opt/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
-      # für Auslieferung von hochgeladenen Bildern von ayurly
-      # - ayurly-data-service_ayurly_uploads_data:/var/www/ayurly/uploads  # Der Pfad /var/www/ayurly/uploads ist der Pfad *innerhalb* des Nginx-Proxy-Manager-Containers -> entspricht alias forwarding in nginx config
+      # für Auslieferung von hochgeladenen Bildern 
+      - /home/lorenz/bierfestival_uploads:/var/www/bierfestival/uploads  # Der Pfad /var/www/bierfestival/uploads ist der Pfad *innerhalb* des Nginx-Proxy-Manager-Containers -> entspricht alias forwarding in nginx config
     networks:
       - nginx-proxy-manager
 networks:
@@ -21,5 +21,5 @@ networks:
 volumes:
   npm_data: {} # Leeres Mapping bedeutet: Docker erstellt dieses Volume mit Standardeinstellungen
   npm_letsencrypt: {} # Ebenso
-  # ayurly-data-service_ayurly_uploads_data: # Korrekte Deklaration des externen Volumes
-    # external: true
+  bierfestival-data-service_bierfestival_uploads_data: # Korrekte Deklaration des externen Volumes
+     external: true
