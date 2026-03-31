@@ -19,7 +19,8 @@ const EventManager = () => {
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Event Name' },
         { key: 'dayName', label: 'Tag' },
-        { key: 'startTime', label: 'Startzeit', render: (val) => new Date(val).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) },
+        { key: 'startTime', label: 'Startzeit', render: (val) => new Date(val).toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit' }) },
+        { key: 'endTime', label: 'Endzeit', render: (val) => new Date(val).toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit' }) },
         { key: 'stage', label: 'Bühne', render: (_, row) => row.stage?.name || '-' }
     ];
 

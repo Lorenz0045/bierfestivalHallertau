@@ -23,6 +23,7 @@ const BeerManager = () => {
         { key: 'brewery', label: 'Brauerei', render: (_, row) => row.brewery?.name || '-' },
         { key: 'beerType', label: 'Sorte', render: (_, row) => row.beerType?.name || '-' },
         { key: 'alcoholPercentage', label: 'Alkohol', render: (val) => val ? `${val} %` : '-' },
+        { key: 'originalGravity', label: 'Stammwürze', render: (val) => val ? `${val} %` : '-' },
         { key: 'isNonAlcoholic', label: 'Alkoholfrei', render: (val) => val ? 'Ja' : 'Nein' }
     ];
 

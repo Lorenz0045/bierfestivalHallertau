@@ -26,4 +26,7 @@ public class Brewery extends PanacheEntityBase {
     public Boolean isHallertau = false;
 
     public String website;
+
+    @Column(name = "img_url")
+    public String imgUrl;
 }

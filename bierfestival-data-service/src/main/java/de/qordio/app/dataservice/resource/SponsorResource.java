@@ -10,10 +10,12 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import de.qordio.app.dataservice.entity.masterdata.Sponsor;
+import de.qordio.app.dataservice.service.FileService;
 import io.quarkus.panache.common.Sort;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -34,12 +36,16 @@ import jakarta.ws.rs.core.Response;
 @Tag(name = "Sponsors")
 public class SponsorResource {
 
+    @Inject
+    FileService fileService;
+
     public static class SponsorDto {
         public Long id;
         public String name;
         public String city;
         public String website;
         public String description;
+        public String imgUrl;
 
         public static SponsorDto fromEntity(Sponsor entity) {
             if (entity == null) return null;
@@ -49,6 +55,7 @@ public class SponsorResource {
             dto.city = entity.city;
             dto.website = entity.website;
             dto.description = entity.description;
+            dto.imgUrl = entity.imgUrl;
             return dto;
         }
 
@@ -58,6 +65,7 @@ public class SponsorResource {
             entity.city = this.city;
             entity.website = this.website;
             entity.description = this.description;
+            entity.imgUrl = this.imgUrl;
             return entity;
         }
     }
@@ -92,10 +100,17 @@ public class SponsorResource {
         if (existingOpt.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
         
         Sponsor existing = existingOpt.get();
+        String oldImageUrl = existing.imgUrl;
+
         existing.name = dto.name;
         existing.city = dto.city;
         existing.website = dto.website;
         existing.description = dto.description;
+        existing.imgUrl = dto.imgUrl;
+
+        if (oldImageUrl != null && !oldImageUrl.equals(existing.imgUrl)) {
+            fileService.deleteFile(oldImageUrl);
+        }
 
         return Response.ok(SponsorDto.fromEntity(existing)).build();
     }
@@ -107,6 +122,17 @@ public class SponsorResource {
     @Operation(summary = "Delete Sponsor")
     @SecurityRequirement(name = "jwtAuth")
     public Response delete(@PathParam("id") Long id) {
-        return Sponsor.deleteById(id) ? Response.noContent().build() : Response.status(Response.Status.NOT_FOUND).build();
+        Optional<Sponsor> opt = Sponsor.findByIdOptional(id);
+        if (opt.isPresent()) {
+            Sponsor entity = opt.get();
+            String imageUrl = entity.imgUrl;
+            entity.delete();
+
+            if (imageUrl != null) {
+                fileService.deleteFile(imageUrl);
+            }
+            return Response.noContent().build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 }

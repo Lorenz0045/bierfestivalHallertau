@@ -1,11 +1,15 @@
 package de.qordio.app.dataservice.entity.masterdata;
 
+import de.qordio.app.dataservice.entity.lookups.GastronomyType;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -20,8 +24,14 @@ public class Gastronomy extends PanacheEntityBase {
     public String name;
 
     public String city;
-    public String category;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "gastronomy_type_id")
+    public GastronomyType gastronomyType;
     public String website;
+
+    @Column(name = "img_url")
+    public String imgUrl;
 
     public Double lat;
     public Double lon;

@@ -6,6 +6,13 @@ import { useUser } from '../contexts/UserContext';
 
 const API_BASE_URL = '/api/sponsors';
 
+
+const renderExternalLink = (url) => {
+    if (!url) return '-';
+    const absoluteUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
+    return <a href={absoluteUrl} target="_blank" rel="noopener noreferrer">Website</a>;
+};
+
 const SponsorManager = () => {
     const { keycloakInstance } = useUser();
     const [sponsors, setSponsors] = useState([]);
@@ -17,14 +24,16 @@ const SponsorManager = () => {
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'city', label: 'Ort' },
-        { key: 'website', label: 'Website', sortable: false, render: (val) => val ? <a href={val} target="_blank" rel="noreferrer">Link</a> : '-' }
+        { key: 'website', label: 'Website', render: (val) => renderExternalLink(val) },
+        { key: 'imgUrl', label: 'Logo', sortable: false, render: (val) => val ? <img src={val} alt="Sponsor" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
     ];
 
     const formFields = [
         { name: 'name', label: 'Sponsor Name', type: 'text', required: true },
         { name: 'city', label: 'Ort', type: 'text' },
         { name: 'website', label: 'Website', type: 'text' },
-        { name: 'description', label: 'Beschreibung', type: 'text' }
+        { name: 'description', label: 'Beschreibung', type: 'text' },
+        { name: 'imgUrl', label: 'Sponsor-Logo', type: 'image' }
     ];
 
     const loadSponsors = useCallback(async () => {

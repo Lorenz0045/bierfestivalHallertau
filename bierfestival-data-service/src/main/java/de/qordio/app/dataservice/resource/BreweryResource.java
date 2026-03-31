@@ -6,17 +6,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import de.qordio.app.dataservice.entity.masterdata.Brewery;
+import de.qordio.app.dataservice.service.FileService;
 import io.quarkus.panache.common.Sort;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -34,8 +33,11 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "Breweries", description = "Operations related to breweries")
+@Tag(name = "Breweries")
 public class BreweryResource {
+
+    @Inject
+    FileService fileService;
 
     public static class BreweryDto {
         public Long id;
@@ -44,6 +46,7 @@ public class BreweryResource {
         public String region;
         public Boolean isHallertau;
         public String website;
+        public String imgUrl;
 
         public static BreweryDto fromEntity(Brewery entity) {
             if (entity == null) return null;
@@ -54,6 +57,7 @@ public class BreweryResource {
             dto.region = entity.region;
             dto.isHallertau = entity.isHallertau;
             dto.website = entity.website;
+            dto.imgUrl = entity.imgUrl;
             return dto;
         }
 
@@ -64,68 +68,54 @@ public class BreweryResource {
             entity.region = this.region;
             entity.isHallertau = this.isHallertau != null ? this.isHallertau : false;
             entity.website = this.website;
+            entity.imgUrl = this.imgUrl;
             return entity;
         }
     }
 
     @GET
     @PermitAll
-    @Operation(summary = "Get all breweries")
-    @APIResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BreweryDto.class)))
-    public List<BreweryDto> getAllBreweries() {
-        List<Brewery> breweries = Brewery.listAll(Sort.by("name"));
-        return breweries.stream()
-                .map(BreweryDto::fromEntity)
+    public List<BreweryDto> getAll() {
+        return Brewery.listAll(Sort.by("name")).stream()
+                .map(entity -> BreweryDto.fromEntity((Brewery) entity))
                 .collect(Collectors.toList());
-    }
-
-    @GET
-    @Path("/{id}")
-    @PermitAll
-    @Operation(summary = "Get a brewery by ID")
-    @APIResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BreweryDto.class)))
-    @APIResponse(responseCode = "404", description = "Brewery not found")
-    public Response getBreweryById(@PathParam("id") Long id) {
-        Optional<Brewery> breweryOpt = Brewery.findByIdOptional(id);
-        return breweryOpt
-                .map(brewery -> Response.ok(BreweryDto.fromEntity(brewery)).build())
-                .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @POST
     @RolesAllowed("admin")
     @Transactional
-    @Operation(summary = "Create a new brewery", description = "Requires 'admin' role.")
-    @APIResponse(responseCode = "201", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BreweryDto.class)))
+    @Operation(summary = "Create Brewery")
     @SecurityRequirement(name = "jwtAuth")
-    public Response createBrewery(@Valid BreweryDto dto) {
-        Brewery brewery = dto.toEntity();
-        brewery.persist();
-        return Response.created(URI.create("/api/breweries/" + brewery.id))
-                .entity(BreweryDto.fromEntity(brewery))
-                .build();
+    public Response create(@Valid BreweryDto dto) {
+        Brewery entity = dto.toEntity();
+        entity.persist();
+        return Response.created(URI.create("/api/breweries/" + entity.id)).entity(BreweryDto.fromEntity(entity)).build();
     }
 
     @PUT
     @Path("/{id}")
     @RolesAllowed("admin")
     @Transactional
-    @Operation(summary = "Update an existing brewery", description = "Requires 'admin' role.")
-    @APIResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BreweryDto.class)))
-    @APIResponse(responseCode = "404", description = "Brewery not found")
+    @Operation(summary = "Update Brewery")
     @SecurityRequirement(name = "jwtAuth")
-    public Response updateBrewery(@PathParam("id") Long id, @Valid BreweryDto dto) {
+    public Response update(@PathParam("id") Long id, @Valid BreweryDto dto) {
         Optional<Brewery> existingOpt = Brewery.findByIdOptional(id);
-        if (existingOpt.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).entity("Brewery not found").build();
-        }
-
+        if (existingOpt.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
+        
         Brewery existing = existingOpt.get();
+        String oldImageUrl = existing.imgUrl;
+
         existing.name = dto.name;
         existing.city = dto.city;
         existing.region = dto.region;
         existing.isHallertau = dto.isHallertau != null ? dto.isHallertau : false;
         existing.website = dto.website;
+        existing.imgUrl = dto.imgUrl;
+
+        // Altes Bild physisch löschen, falls es geändert oder entfernt wurde
+        if (oldImageUrl != null && !oldImageUrl.equals(existing.imgUrl)) {
+            fileService.deleteFile(oldImageUrl);
+        }
 
         return Response.ok(BreweryDto.fromEntity(existing)).build();
     }
@@ -134,13 +124,18 @@ public class BreweryResource {
     @Path("/{id}")
     @RolesAllowed("admin")
     @Transactional
-    @Operation(summary = "Delete a brewery", description = "Requires 'admin' role.")
-    @APIResponse(responseCode = "204", description = "Brewery deleted successfully")
-    @APIResponse(responseCode = "404", description = "Brewery not found")
+    @Operation(summary = "Delete Brewery")
     @SecurityRequirement(name = "jwtAuth")
-    public Response deleteBrewery(@PathParam("id") Long id) {
-        boolean deleted = Brewery.deleteById(id);
-        if (deleted) {
+    public Response delete(@PathParam("id") Long id) {
+        Optional<Brewery> opt = Brewery.findByIdOptional(id);
+        if (opt.isPresent()) {
+            Brewery entity = opt.get();
+            String imageUrl = entity.imgUrl;
+            entity.delete();
+            
+            if (imageUrl != null) {
+                fileService.deleteFile(imageUrl);
+            }
             return Response.noContent().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();

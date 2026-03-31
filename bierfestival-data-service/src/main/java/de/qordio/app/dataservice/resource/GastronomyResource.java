@@ -2,20 +2,17 @@ package de.qordio.app.dataservice.resource;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-
+import de.qordio.app.dataservice.entity.lookups.GastronomyType;
 import de.qordio.app.dataservice.entity.masterdata.Gastronomy;
+import de.qordio.app.dataservice.service.FileService;
 import io.quarkus.panache.common.Sort;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -31,41 +28,44 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "Gastronomy (POIs)")
 public class GastronomyResource {
+
+    @Inject
+    FileService fileService;
 
     public static class GastronomyDto {
         public Long id;
         public String name;
         public String city;
-        public String category;
         public String website;
+        public String imgUrl;
         public Double lat;
         public Double lon;
-
+        public GastronomyType type; // Neues Feld
+        
         public static GastronomyDto fromEntity(Gastronomy entity) {
-            if (entity == null) return null;
             GastronomyDto dto = new GastronomyDto();
             dto.id = entity.id;
             dto.name = entity.name;
             dto.city = entity.city;
-            dto.category = entity.category;
             dto.website = entity.website;
+            dto.imgUrl = entity.imgUrl;
             dto.lat = entity.lat;
             dto.lon = entity.lon;
+            dto.type = entity.gastronomyType;
             return dto;
         }
+    }
 
-        public Gastronomy toEntity() {
-            Gastronomy entity = new Gastronomy();
-            entity.name = this.name;
-            entity.city = this.city;
-            entity.category = this.category;
-            entity.website = this.website;
-            entity.lat = this.lat;
-            entity.lon = this.lon;
-            return entity;
-        }
+    public static class GastronomyUpdateDto {
+        public String name;
+        public String city;
+        public String website;
+        public String imgUrl;
+        public Double lat;
+        public Double lon;
+        public TypeId type;
+        public static class TypeId { public Long id; }
     }
 
     @GET
@@ -79,10 +79,9 @@ public class GastronomyResource {
     @POST
     @RolesAllowed("admin")
     @Transactional
-    @Operation(summary = "Create Gastronomy")
-    @SecurityRequirement(name = "jwtAuth")
-    public Response create(@Valid GastronomyDto dto) {
-        Gastronomy entity = dto.toEntity();
+    public Response create(GastronomyUpdateDto dto) {
+        Gastronomy entity = new Gastronomy();
+        mapDto(dto, entity);
         entity.persist();
         return Response.created(URI.create("/api/gastronomies/" + entity.id)).entity(GastronomyDto.fromEntity(entity)).build();
     }
@@ -91,20 +90,16 @@ public class GastronomyResource {
     @Path("/{id}")
     @RolesAllowed("admin")
     @Transactional
-    @Operation(summary = "Update Gastronomy")
-    @SecurityRequirement(name = "jwtAuth")
-    public Response update(@PathParam("id") Long id, @Valid GastronomyDto dto) {
-        Optional<Gastronomy> existingOpt = Gastronomy.findByIdOptional(id);
-        if (existingOpt.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
+    public Response update(@PathParam("id") Long id, GastronomyUpdateDto dto) {
+        Gastronomy existing = Gastronomy.findById(id);
+        if (existing == null) return Response.status(404).build();
         
-        Gastronomy existing = existingOpt.get();
-        existing.name = dto.name;
-        existing.city = dto.city;
-        existing.category = dto.category;
-        existing.website = dto.website;
-        existing.lat = dto.lat;
-        existing.lon = dto.lon;
-
+        String oldImage = existing.imgUrl;
+        mapDto(dto, existing);
+        
+        if (oldImage != null && !oldImage.equals(existing.imgUrl)) {
+            fileService.deleteFile(oldImage);
+        }
         return Response.ok(GastronomyDto.fromEntity(existing)).build();
     }
 
@@ -112,9 +107,28 @@ public class GastronomyResource {
     @Path("/{id}")
     @RolesAllowed("admin")
     @Transactional
-    @Operation(summary = "Delete Gastronomy")
-    @SecurityRequirement(name = "jwtAuth")
     public Response delete(@PathParam("id") Long id) {
-        return Gastronomy.deleteById(id) ? Response.noContent().build() : Response.status(Response.Status.NOT_FOUND).build();
+        Gastronomy entity = Gastronomy.findById(id);
+        if (entity != null) {
+            String img = entity.imgUrl;
+            entity.delete();
+            if (img != null) fileService.deleteFile(img);
+            return Response.noContent().build();
+        }
+        return Response.status(404).build();
+    }
+
+    private void mapDto(GastronomyUpdateDto dto, Gastronomy entity) {
+        entity.name = dto.name;
+        entity.city = dto.city;
+        entity.website = dto.website;
+        entity.imgUrl = dto.imgUrl;
+        entity.lat = dto.lat;
+        entity.lon = dto.lon;
+        if (dto.type != null && dto.type.id != null) {
+            entity.gastronomyType = GastronomyType.findById(dto.type.id);
+        } else {
+            entity.gastronomyType = null;
+        }
     }
 }

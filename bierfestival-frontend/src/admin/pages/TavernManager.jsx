@@ -16,12 +16,12 @@ const TavernManager = () => {
     const columns = [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name der Schenke' },
-        { key: 'imgUrl', label: 'Bild-URL', render: (val) => val ? <img src={val} alt="Schenke" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
+        { key: 'imgUrl', label: 'Bild', render: (val) => val ? <img src={val} alt="Schenke" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
     ];
 
     const formFields = [
         { name: 'name', label: 'Name der Schenke', type: 'text', required: true },
-        { name: 'imgUrl', label: 'Bild-URL', type: 'text' }
+        { name: 'imgUrl', label: 'Bild', type: 'image' }
     ];
 
     const loadTaverns = useCallback(async () => {

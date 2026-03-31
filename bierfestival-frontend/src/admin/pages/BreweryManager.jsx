@@ -6,6 +6,12 @@ import { useUser } from '../contexts/UserContext';
 
 const API_BASE_URL = '/api/breweries';
 
+const renderExternalLink = (url) => {
+    if (!url) return '-';
+    const absoluteUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
+    return <a href={absoluteUrl} target="_blank" rel="noopener noreferrer">Website</a>;
+};
+
 const BreweryManager = () => {
     const { keycloakInstance } = useUser();
     const [breweries, setBreweries] = useState([]);
@@ -19,7 +25,8 @@ const BreweryManager = () => {
         { key: 'city', label: 'Ort' },
         { key: 'region', label: 'Region' },
         { key: 'isHallertau', label: 'Hallertau', render: (val) => val ? 'Ja' : 'Nein' },
-        { key: 'website', label: 'Website', sortable: false, render: (val) => val ? <a href={val} target="_blank" rel="noreferrer">Link</a> : '-' }
+        { key: 'website', label: 'Website', render: (val) => renderExternalLink(val) },
+        { key: 'imgUrl', label: 'Bild', sortable: false, render: (val) => val ? <img src={val} alt="Brauerei" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
     ];
 
     const formFields = [
@@ -27,7 +34,8 @@ const BreweryManager = () => {
         { name: 'city', label: 'Ort', type: 'text' },
         { name: 'region', label: 'Region', type: 'text' },
         { name: 'website', label: 'Website', type: 'text' },
-        { name: 'isHallertau', label: 'Kommt aus der Hallertau?', type: 'checkbox' }
+        { name: 'isHallertau', label: 'Kommt aus der Hallertau?', type: 'checkbox' },
+        { name: 'imgUrl', label: 'Logo / Bild', type: 'image' }
     ];
 
     const loadBreweries = useCallback(async () => {
