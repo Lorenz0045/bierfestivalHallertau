@@ -38,12 +38,12 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    /* Firefox */
+
 }
 
 .daySelectorWrapper::-webkit-scrollbar {
     display: none;
-    /* Chrome/Safari */
+
 }
 
 .daySelector {
@@ -68,7 +68,6 @@
 
 .dayButton:hover {
     border-color: var(--bf-primary-green);
-    color: var(--bf-primary-green);
 }
 
 .activeDay {
@@ -165,7 +164,6 @@
 
 .stageButton:hover {
     border-color: var(--bf-primary-green);
-    color: var(--bf-primary-green);
 }
 
 .activeStage {
@@ -191,7 +189,6 @@
 
 .stageTag:hover {
     background-color: #e2e8f0;
-    color: var(--bf-primary-green);
 }
 
 .jumpIcon {
