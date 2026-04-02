@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import PublicLayout from './pages/PublicLayout';
 import HomePage from './pages/HomePage';
 import ProgrammPage from './pages/ProgrammPage';
+import SchenkenPage from './pages/SchenkenPage';
 import ScrollToTop from './components/UI/ScrollToTop';
 import CookieBanner from './components/UI/CookieBanner';
 import 'leaflet/dist/leaflet.css';
@@ -25,6 +26,7 @@ function App() {
           <Route element={<PublicLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/programm" element={<ProgrammPage />} />
+            <Route path="/schenken" element={<SchenkenPage />} />
             <Route path="*" element={<div>404 Seite nicht gefunden</div>} />
           </Route>
           
