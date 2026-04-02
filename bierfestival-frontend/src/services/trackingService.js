@@ -18,7 +18,7 @@ export const saveLocalTracking = (trackingData) => {
 // Checkt, ob der Nutzer beim Cookie-Banner das Festival-Tracking erlaubt hat
 const hasTrackingConsent = () => {
     const consents = JSON.parse(localStorage.getItem('bierfestival_consents') || '{}');
-    return consents.festival === true;
+    return consents.festivalSync === true;
 };
 
 // Hilfsfunktion: Fire-and-Forget Request an das Backend
