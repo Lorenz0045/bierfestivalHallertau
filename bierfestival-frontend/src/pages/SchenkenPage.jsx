@@ -54,7 +54,7 @@ const SchenkenPage = () => {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <h1 className={styles.title}>Alle Schenken</h1>
+                <h1 className={styles.title}>Schenken</h1>
             </div>
 
             <div className={styles.tavernList}>
