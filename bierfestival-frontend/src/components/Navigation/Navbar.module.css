@@ -1,125 +1,61 @@
 /* --- VARIABLEN --- */
 :root {
-    --nav-height-desktop: 70px;
     --nav-height-mobile: 60px;
-    --primary-color: #d35400; /* Dein Bier-Orange/Gold */
-    --text-inactive: #8e8e93; /* Klassisches App-Grau */
-    --bg-color: #ffffff;
-    --border-color: #e5e5e5;
 }
 
 /* =========================================
-   DESKTOP STYLING (Nur sichtbar ab 769px)
+   BOTTOM NAV STYLING (Universal)
    ========================================= */
-.desktopNav {
+.bottomNav {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around; /* Verteilt Icons gleichmäßig */
     align-items: center;
-    height: var(--nav-height-desktop);
-    padding: 0 2rem;
-    background-color: var(--bg-color);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--nav-height-mobile);
+    
+    background-color: rgba(255, 255, 255, 0.95); /* Leicht transparent = modern */
+    backdrop-filter: blur(10px); /* Glas-Effekt wie bei iOS */
+    border-top: 1px solid var(--bf-gray-mid);
+    
+    z-index: 2000; /* Muss über der Karte liegen */
+    
+    /* WICHTIG für iPhone X und neuer (Home Balken) */
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(var(--nav-height-mobile) + env(safe-area-inset-bottom));
 }
 
-.desktopGroup {
+.mobileLink {
     display: flex;
-    gap: 30px;
-}
-
-.link {
-    display: flex;
+    flex-direction: column; /* Icon oben, Text unten */
     align-items: center;
-    gap: 8px;
+    justify-content: center;
     text-decoration: none;
-    color: #333;
+    color: var(--bf-gray-dark);
+    width: 100%; /* Klickbereich vergrößern */
+    height: 100%;
+    gap: 4px;
+}
+
+.icon {
+    font-size: 1.4rem; /* Icon Größe */
+    margin-bottom: 2px;
+    transition: transform 0.1s ease;
+}
+
+.label {
+    font-size: 0.65rem; /* Sehr klein, typisch App */
     font-weight: 500;
-    font-size: 1rem;
-    transition: color 0.2s;
 }
 
-.link:hover, .link.active {
-    color: var(--primary-color);
+/* Aktiver Zustand */
+.activeMobile {
+    color: var(--bf-primary-green);
 }
 
-.desktopLogo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* =========================================
-   MOBILE STYLING (Nur sichtbar bis 768px)
-   ========================================= */
-.mobileNav {
-    display: none; /* Standardmäßig aus */
-}
-
-@media (max-width: 768px) {
-    /* Desktop ausblenden */
-    .desktopNav {
-        display: none;
-    }
-
-    /* Mobile einblenden */
-    .mobileNav {
-        display: flex;
-        justify-content: space-around; /* Verteilt Icons gleichmäßig */
-        align-items: center;
-        
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: var(--nav-height-mobile);
-        
-        background-color: rgba(255, 255, 255, 0.95); /* Leicht transparent = modern */
-        backdrop-filter: blur(10px); /* Glas-Effekt wie bei iOS */
-        border-top: 1px solid var(--border-color);
-        
-        z-index: 2000; /* Muss über der Karte liegen */
-        
-        /* WICHTIG für iPhone X und neuer (Home Balken) */
-        padding-bottom: env(safe-area-inset-bottom);
-        height: calc(var(--nav-height-mobile) + env(safe-area-inset-bottom));
-    }
-
-    .mobileLink {
-        display: flex;
-        flex-direction: column; /* Icon oben, Text unten */
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        color: var(--text-inactive);
-        width: 100%; /* Klickbereich vergrößern */
-        height: 100%;
-        gap: 4px;
-    }
-
-    .icon {
-        font-size: 1.4rem; /* Icon Größe */
-        margin-bottom: 2px;
-        transition: transform 0.1s ease;
-    }
-
-    .label {
-        font-size: 0.65rem; /* Sehr klein, typisch App */
-        font-weight: 500;
-    }
-
-    /* Aktiver Zustand */
-    .activeMobile {
-        color: var(--primary-color);
-    }
-
-    /* Kleiner Bounce-Effekt beim Klick (optional) */
-    .activeMobile .icon {
-        transform: scale(1.1);
-    }
+.activeMobile .icon {
+    transform: scale(1.1);
 }

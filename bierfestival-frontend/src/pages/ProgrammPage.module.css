@@ -1,0 +1,148 @@
+.container {
+    padding: 20px 16px 100px 16px; /* Unten padding wegen Bottom Nav */
+    min-height: 100vh;
+    background-color: var(--bf-gray-light);
+}
+
+.header {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.title {
+    font-size: 1.8rem;
+    color: var(--bf-primary-green);
+    margin: 0;
+    font-weight: 800;
+}
+
+.loading, .emptyState {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--bf-gray-dark);
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    color: var(--bf-gray-mid);
+    margin-bottom: 16px;
+}
+
+/* Day Selector (Horizontal Scrollable Tabs) */
+.daySelectorWrapper {
+    margin-bottom: 24px;
+    margin-left: -16px;
+    margin-right: -16px;
+    padding: 0 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+}
+
+.daySelectorWrapper::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.daySelector {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 4px;
+}
+
+.dayButton {
+    background-color: var(--bf-white);
+    border: 2px solid var(--bf-white);
+    color: var(--bf-gray-dark);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.dayButton:hover {
+    border-color: var(--bf-primary-green);
+    color: var(--bf-primary-green);
+}
+
+.activeDay {
+    background-color: var(--bf-primary-green);
+    border-color: var(--bf-primary-green);
+    color: var(--bf-white);
+    box-shadow: 0 4px 8px rgba(39, 103, 73, 0.2);
+}
+
+/* Event List & Cards */
+.eventList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.eventCard {
+    background-color: var(--bf-white);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.eventTimeColumn {
+    min-width: 75px;
+    display: flex;
+    flex-direction: column;
+    border-right: 2px solid var(--bf-gray-light);
+    padding-right: 12px;
+}
+
+.timeMain {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--bf-primary-green);
+}
+
+.timeSub {
+    font-size: 0.75rem;
+    color: var(--bf-gray-dark);
+    margin-top: 4px;
+}
+
+.eventDetailsColumn {
+    flex: 1;
+}
+
+.eventName {
+    margin: 0 0 6px 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--bf-text-dark);
+}
+
+.eventMeta {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.stageTag {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    background-color: #f1f5f9;
+    color: #475569;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.eventDescription {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--bf-gray-dark);
+    line-height: 1.4;
+}

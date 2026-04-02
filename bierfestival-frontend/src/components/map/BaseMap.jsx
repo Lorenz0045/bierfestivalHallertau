@@ -1,6 +1,14 @@
 import React from 'react';
 import { MapContainer, TileLayer, LayersControl, AttributionControl } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+// Approximate bounds for the festival area (Hallertau center +/- 0.02 degrees)
+// This restricts the visible map area and saves Map API tiles/tokens.
+const FESTIVAL_BOUNDS = L.latLngBounds(
+    [48.48555, 11.73896], // South West
+    [48.52555, 11.77896]  // North East
+);
 
 const BaseMap = ({ center = [48.50555, 11.75896], zoom = 17, children, className, style }) => {
     return (
@@ -11,6 +19,9 @@ const BaseMap = ({ center = [48.50555, 11.75896], zoom = 17, children, className
             style={style}
             attributionControl={false} 
             zoomControl={false}
+            maxBounds={FESTIVAL_BOUNDS}
+            maxBoundsViscosity={1.0}
+            minZoom={15}
         >
             <AttributionControl prefix={false} position="bottomleft" />
             

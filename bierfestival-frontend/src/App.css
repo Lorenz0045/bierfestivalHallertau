@@ -1,3 +1,16 @@
+:root {
+    /* Bavarian Theme / Bierfestival Palette */
+    --bf-primary-green: #008A5E;
+    --bf-secondary-green: #2d6a4f;
+    --bf-light-green: #d8f3dc;
+    --bf-white: #ffffff;
+    --bf-gray-light: #f8f9fa;
+    --bf-gray-mid: #e9ecef;
+    --bf-gray-dark: #495057;
+    --bf-text-dark: #212529;
+    --bf-gold: #ffbe0b; /* for beer and stars */
+}
+
 * {
     margin: 0;
     padding: 0;
