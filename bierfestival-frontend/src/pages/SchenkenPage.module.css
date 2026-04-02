@@ -206,3 +206,64 @@
     background-color: #fee2e2;
     color: #991b1b;
 }
+
+.beerInteractions {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.interactionButton {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.interactionButton:hover {
+    color: var(--bf-primary-green);
+    transform: scale(1.1);
+}
+
+.activeBookmark {
+    color: #f59e0b;
+    background-color: #fef3c7;
+}
+
+.activeCheck {
+    color: var(--bf-primary-green);
+    background-color: #dcfce7;
+}
+
+.activeStar {
+    color: #fbbf24;
+    background-color: #fffbeb;
+}
+
+.disabledAction {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.drinkCount {
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+.ratingNumber {
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-left: 4px;
+}
