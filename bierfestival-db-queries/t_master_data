@@ -84,3 +84,58 @@ CREATE TABLE facility (
     lat DOUBLE PRECISION,
     lon DOUBLE PRECISION
 );
+
+
+-- Changes
+ALTER TABLE facility_type DROP COLUMN IF EXISTS icon_name;
+ALTER TABLE facility_type ADD COLUMN img_url VARCHAR(500);
+
+ALTER TABLE facility ADD COLUMN img_url VARCHAR(500);
+
+ALTER TABLE brewery ADD COLUMN img_url VARCHAR(500);
+ALTER TABLE sponsor ADD COLUMN img_url VARCHAR(500);
+ALTER TABLE stage ADD COLUMN img_url VARCHAR(500);
+
+CREATE TABLE gastronomy_type (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+ALTER TABLE gastronomy DROP COLUMN category;
+ALTER TABLE gastronomy ADD COLUMN gastronomy_type_id BIGINT REFERENCES gastronomy_type(id) ON DELETE SET NULL;
+ALTER TABLE gastronomy ADD COLUMN img_url VARCHAR(500);
+
+DROP TABLE IF EXISTS tavern_beer;
+
+CREATE TABLE tavern_beer (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tavern_id BIGINT REFERENCES tavern(id) ON DELETE CASCADE,
+    beer_id BIGINT REFERENCES beer(id) ON DELETE CASCADE,
+    sort_order INT NOT NULL DEFAULT 0
+);
+
+
+
+CREATE TABLE user_beer_interaction (
+    id BIGSERIAL PRIMARY KEY,
+    device_id VARCHAR(255) NOT NULL,
+    beer_id BIGINT NOT NULL,
+    is_on_merkliste BOOLEAN DEFAULT FALSE,
+    merkliste_added_at TIMESTAMP(6) WITH TIME ZONE,
+    rating INTEGER,
+    rated_at TIMESTAMP(6) WITH TIME ZONE,
+    CONSTRAINT fk_beer_interaction FOREIGN KEY (beer_id) REFERENCES beer(id) ON DELETE CASCADE,
+    CONSTRAINT uq_device_beer UNIQUE (device_id, beer_id)
+);
+
+CREATE TABLE user_drink_event (
+    id BIGSERIAL PRIMARY KEY,
+    device_id VARCHAR(255) NOT NULL,
+    beer_id BIGINT NOT NULL,
+    consumed_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
+    CONSTRAINT fk_beer_drink FOREIGN KEY (beer_id) REFERENCES beer(id) ON DELETE CASCADE
+);
+
+
+CREATE INDEX idx_ubi_device_id ON user_beer_interaction(device_id);
+CREATE INDEX idx_ude_device_id ON user_drink_event(device_id);
