@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Marker, Popup, Polygon, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import BaseMap from '../components/map/BaseMap';
@@ -16,7 +17,7 @@ const userIcon = L.divIcon({
 });
 
 // --- Komponente: MapControls  ---
-const MapControls = ({ festivalCoords }) => {
+const MapControls = ({ festivalCoords, jumpCoords }) => {
     const [userPosition, setUserPosition] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
     const map = useMap();
@@ -41,6 +42,14 @@ const MapControls = ({ festivalCoords }) => {
             map.panTo(userPosition, { animate: true, duration: 1.0 });
         }
     }, [userPosition, isFollowing, map]);
+
+    // Handle jump to external POI
+    useEffect(() => {
+        if (jumpCoords) {
+            setIsFollowing(false);
+            map.flyTo([jumpCoords.lat, jumpCoords.lon], 18, { duration: 1.5 });
+        }
+    }, [jumpCoords, map]);
 
     useMapEvents({
         dragstart: () => setIsFollowing(false),
@@ -90,7 +99,10 @@ const MapControls = ({ festivalCoords }) => {
 // --- Haupt-Page ---
 const HomePage = () => {
     const [pois, setPois] = useState([]);
+    const location = useLocation();
     const festivalPosition = [48.50555005218888, 11.75895927999904];
+    
+    const jumpToPoi = location.state?.jumpToPoi;
 
     // 1. Lade alle platzierten POIs aus dem Cache (schnell für normale User)
     useEffect(() => {
@@ -131,7 +143,7 @@ const HomePage = () => {
             <BaseMap center={festivalPosition} zoom={17} className={styles.mapContainer}>
                 
                 {/* 3. Deine Custom Controls (GPS etc.) als Kind-Element übergeben */}
-                <MapControls festivalCoords={festivalPosition} />
+                <MapControls festivalCoords={festivalPosition} jumpCoords={jumpToPoi} />
                 
 
                 {/* 4. Alle POIs dynamisch rendern */}

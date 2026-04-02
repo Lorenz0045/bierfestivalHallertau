@@ -1,5 +1,5 @@
 .container {
-    padding: 20px 16px 100px 16px; /* Unten padding wegen Bottom Nav */
+    padding: 20px 16px 100px 16px;
     min-height: 100vh;
     background-color: var(--bf-gray-light);
 }
@@ -16,7 +16,8 @@
     font-weight: 800;
 }
 
-.loading, .emptyState {
+.loading,
+.emptyState {
     text-align: center;
     padding: 50px 20px;
     color: var(--bf-gray-dark);
@@ -28,7 +29,6 @@
     margin-bottom: 16px;
 }
 
-/* Day Selector (Horizontal Scrollable Tabs) */
 .daySelectorWrapper {
     margin-bottom: 24px;
     margin-left: -16px;
@@ -36,11 +36,13 @@
     padding: 0 16px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
+    /* Firefox */
 }
 
 .daySelectorWrapper::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none;
+    /* Chrome/Safari */
 }
 
 .daySelector {
@@ -60,7 +62,7 @@
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .dayButton:hover {
@@ -75,7 +77,6 @@
     box-shadow: 0 4px 8px rgba(39, 103, 73, 0.2);
 }
 
-/* Event List & Cards */
 .eventList {
     display: flex;
     flex-direction: column;
@@ -88,7 +89,7 @@
     padding: 16px;
     display: flex;
     gap: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .eventTimeColumn {
@@ -128,6 +129,50 @@
     margin-bottom: 8px;
 }
 
+.stageSelectorWrapper {
+    margin-bottom: 24px;
+    margin-left: -16px;
+    margin-right: -16px;
+    padding: 0 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.stageSelectorWrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.stageSelector {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 4px;
+}
+
+.stageButton {
+    background-color: transparent;
+    border: 1px solid var(--bf-gray-mid);
+    color: var(--bf-gray-dark);
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.stageButton:hover {
+    border-color: var(--bf-primary-green);
+    color: var(--bf-primary-green);
+}
+
+.activeStage {
+    background-color: var(--bf-primary-green);
+    border-color: var(--bf-primary-green);
+    color: var(--bf-white);
+}
+
 .stageTag {
     display: flex;
     align-items: center;
@@ -135,9 +180,22 @@
     font-size: 0.8rem;
     background-color: #f1f5f9;
     color: #475569;
-    padding: 4px 8px;
+    padding: 6px 10px;
     border-radius: 6px;
     font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.stageTag:hover {
+    background-color: #e2e8f0;
+    color: var(--bf-primary-green);
+}
+
+.jumpIcon {
+    font-size: 0.7rem;
+    margin-left: 4px;
 }
 
 .eventDescription {

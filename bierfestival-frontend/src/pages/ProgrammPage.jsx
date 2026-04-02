@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchCachedData } from '../services/cacheService';
-import { FaClock, FaMapMarkerAlt, FaGuitar } from 'react-icons/fa';
+import { FaClock, FaMapMarkerAlt, FaGuitar, FaLocationArrow } from 'react-icons/fa';
 import styles from './ProgrammPage.module.css';
 
 const ProgrammPage = () => {
     const [events, setEvents] = useState([]);
     const [selectedDay, setSelectedDay] = useState('');
+    const [selectedStage, setSelectedStage] = useState('Alle');
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadProgram = async () => {
@@ -29,7 +32,6 @@ const ProgrammPage = () => {
         const groups = {};
         
         events.forEach(event => {
-            // Entweder den vom Admin vergebenen Namen, oder fallback auf das Datum
             let dayKey = event.dayName;
             if (!dayKey) {
                 if (event.startTime) {
@@ -46,7 +48,7 @@ const ProgrammPage = () => {
             groups[dayKey].push(event);
         });
 
-        // Alle Events innerhalb eines Tages chronologisch sortieren
+        // Chronologische Sortierung
         Object.keys(groups).forEach(key => {
             groups[key].sort((a, b) => {
                 if (!a.startTime || !b.startTime) return 0;
@@ -55,7 +57,6 @@ const ProgrammPage = () => {
         });
 
         const sortedDays = Object.keys(groups).sort((a, b) => {
-            // Minimalistischer Ansatz: Sortiere nach der Startzeit des allerersten Events des jeweiligen Tages
             const timeA = groups[a][0]?.startTime ? new Date(groups[a][0].startTime).getTime() : 0;
             const timeB = groups[b][0]?.startTime ? new Date(groups[b][0].startTime).getTime() : 0;
             return timeA - timeB;
@@ -64,8 +65,16 @@ const ProgrammPage = () => {
         return { groupedEvents: groups, topDays: sortedDays };
     }, [events]);
 
+    // Bühnen extrahieren
+    const stages = useMemo(() => {
+        const stageSet = new Set();
+        events.forEach(e => {
+            if (e.stage && e.stage.name) stageSet.add(e.stage.name);
+        });
+        return ['Alle', ...Array.from(stageSet).sort()];
+    }, [events]);
+
     useEffect(() => {
-        // Initiale Auswahl auf den ersten gefundenen Tag setzen
         if (topDays.length > 0 && !selectedDay) {
             setSelectedDay(topDays[0]);
         }
@@ -75,6 +84,14 @@ const ProgrammPage = () => {
         if (!isoString) return '';
         const d = new Date(isoString);
         return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+    };
+
+    const handleJumpToMap = (stage) => {
+        if (stage && stage.lat && stage.lon) {
+            navigate('/', { state: { jumpToPoi: { lat: stage.lat, lon: stage.lon } } });
+        } else {
+            navigate('/');
+        }
     };
 
     if (loading) {
@@ -92,6 +109,10 @@ const ProgrammPage = () => {
             </div>
         );
     }
+
+    const displayedEvents = groupedEvents[selectedDay]?.filter(
+        e => selectedStage === 'Alle' || (e.stage && e.stage.name === selectedStage)
+    ) || [];
 
     return (
         <div className={styles.container}>
@@ -114,31 +135,57 @@ const ProgrammPage = () => {
                 </div>
             </div>
 
-            {/* Event-Liste für den ausgewählten Tag */}
+            {/* Bühne-Filter */}
+            {stages.length > 1 && (
+                <div className={styles.stageSelectorWrapper}>
+                    <div className={styles.stageSelector}>
+                        {stages.map(stage => (
+                            <button
+                                key={stage}
+                                className={`${styles.stageButton} ${selectedStage === stage ? styles.activeStage : ''}`}
+                                onClick={() => setSelectedStage(stage)}
+                            >
+                                {stage}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Event-Liste */}
             <div className={styles.eventList}>
-                {groupedEvents[selectedDay]?.map((event, index) => (
-                    <div key={event.id || index} className={styles.eventCard}>
-                        <div className={styles.eventTimeColumn}>
-                            <span className={styles.timeMain}>{formatTime(event.startTime)}</span>
-                            {event.endTime && (
-                                <span className={styles.timeSub}>bis {formatTime(event.endTime)}</span>
-                            )}
-                        </div>
-                        <div className={styles.eventDetailsColumn}>
-                            <h3 className={styles.eventName}>{event.name}</h3>
-                            <div className={styles.eventMeta}>
-                                {event.stage && (
-                                    <span className={styles.stageTag}>
-                                        <FaMapMarkerAlt /> {event.stage.name || 'Bühne'}
-                                    </span>
+                {displayedEvents.length === 0 ? (
+                    <div className={styles.emptyState}>Keine Events für diese Bühne an diesem Tag.</div>
+                ) : (
+                    displayedEvents.map((event, index) => (
+                        <div key={event.id || index} className={styles.eventCard}>
+                            <div className={styles.eventTimeColumn}>
+                                <span className={styles.timeMain}>{formatTime(event.startTime)}</span>
+                                {event.endTime && (
+                                    <span className={styles.timeSub}>bis {formatTime(event.endTime)}</span>
                                 )}
                             </div>
-                            {event.description && (
-                                <p className={styles.eventDescription}>{event.description}</p>
-                            )}
+                            <div className={styles.eventDetailsColumn}>
+                                <h3 className={styles.eventName}>{event.name}</h3>
+                                <div className={styles.eventMeta}>
+                                    {event.stage && (
+                                        <button 
+                                            className={styles.stageTag} 
+                                            onClick={() => handleJumpToMap(event.stage)}
+                                            title="Auf Karte anzeigen"
+                                        >
+                                            <FaMapMarkerAlt /> {event.stage.name || 'Bühne'}
+                                            <FaLocationArrow className={styles.jumpIcon} />
+                                        </button>
+                                    )}
+                                </div>
+                                {event.description && (
+                                    <p className={styles.eventDescription}>{event.description}</p>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );
