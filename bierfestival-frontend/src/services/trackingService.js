@@ -26,15 +26,18 @@ const syncToBackend = async (url, method, body) => {
     if (!hasTrackingConsent()) return; // Nichts an den Server schicken, wenn abgelehnt!
 
     try {
-        await fetch(url, {
+        const options = {
             method,
             headers: {
                 'Content-Type': 'application/json',
                 'X-Device-Id': getDeviceId()
-            },
-            body: JSON.stringify(body)
-        });
-    } catch (e) {
+            }
+        };
+        if (body) {
+            options.body = JSON.stringify(body);
+        }
+        await fetch(url, options);
+    } catch(e) {
         console.warn("Tracking sync missing or failed. Data is safe locally.", e);
     }
 };
@@ -71,6 +74,27 @@ export const logDrink = (beerId) => {
     syncToBackend(`/api/tracking/${beerId}/getrunken`, 'POST', {
         consumedAt: now
     });
+};
+
+export const removeDrink = (beerId) => {
+    const tracking = getLocalTracking();
+    if (!tracking[beerId] || !tracking[beerId].drinkTimestamps || tracking[beerId].drinkTimestamps.length === 0) {
+        return;
+    }
+    
+    // Remove the most recent one (last element)
+    tracking[beerId].drinkTimestamps.pop();
+    
+    // Check if we need to clear rating too locally
+    if (tracking[beerId].drinkTimestamps.length === 0) {
+         tracking[beerId].rating = null;
+         tracking[beerId].ratedAt = null;
+    }
+    
+    saveLocalTracking(tracking);
+    
+    // Wir können bei DELETE keinen Payload mitsenden standardmäßig in fetch as body, aber Backend braucht das eh nicht
+    syncToBackend(`/api/tracking/${beerId}/getrunken`, 'DELETE', null);
 };
 
 export const rateBeer = (beerId, rating) => {

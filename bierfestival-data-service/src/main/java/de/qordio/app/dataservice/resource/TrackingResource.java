@@ -140,6 +140,41 @@ public class TrackingResource {
         return Response.ok(InteractionDto.fromEntity(interaction, beerEvents)).build();
     }
 
+    @DELETE
+    @Path("/{beerId}/getrunken")
+    @PermitAll
+    @Transactional
+    @Operation(summary = "Remove Drank Beer", description = "Removes the most recent drink event for this beer.")
+    public Response removeGetrunken(
+            @HeaderParam("X-Device-Id") String deviceId, 
+            @PathParam("beerId") Long beerId) {
+        if (deviceId == null || deviceId.isBlank()) {
+            return Response.status(Status.BAD_REQUEST).entity("Missing X-Device-Id header").build();
+        }
+        
+        // Find most recent drink event
+        List<UserDrinkEvent> events = UserDrinkEvent.list("deviceId = ?1 and beer.id = ?2 order by consumedAt desc", deviceId, beerId);
+        if (events != null && !events.isEmpty()) {
+            UserDrinkEvent latestEvent = events.get(0);
+            latestEvent.delete();
+        }
+
+        UserBeerInteraction interaction = getOrCreateInteraction(deviceId, beerId);
+        if (interaction == null) {
+            return Response.status(Status.NOT_FOUND).entity("Beer not found").build();
+        }
+
+        // Check if no drinks left, clear rating
+        List<UserDrinkEvent> remainingEvents = UserDrinkEvent.list("deviceId = ?1 and beer.id = ?2", deviceId, beerId);
+        if (remainingEvents.isEmpty() && interaction.rating != null) {
+            interaction.rating = null;
+            interaction.ratedAt = null;
+            interaction.persist();
+        }
+
+        return Response.ok(InteractionDto.fromEntity(interaction, remainingEvents)).build();
+    }
+
     @PUT
     @Path("/{beerId}/rating")
     @PermitAll

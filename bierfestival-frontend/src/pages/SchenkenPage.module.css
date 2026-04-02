@@ -207,63 +207,111 @@
     color: #991b1b;
 }
 
-.beerInteractions {
+.beerInfoArea {
+    flex: 1;
     display: flex;
-    gap: 12px;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #e2e8f0;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.interactionButton {
-    background: none;
+.beerTopRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.beerMainActions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    min-width: 80px;
+}
+
+.merkenButton {
+    background: transparent;
     border: none;
     font-size: 1.1rem;
-    color: #94a3b8;
+    font-weight: 800;
+    font-family: 'Inter', sans-serif;
+    color: var(--bf-gray-dark);
     cursor: pointer;
-    padding: 6px;
-    border-radius: 50%;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+}
+
+.merkenButton:hover {
+    color: var(--bf-primary-green);
+}
+
+.gemerkt {
+    color: var(--bf-primary-green);
+}
+
+.drinkCounter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: transparent;
+}
+
+.counterBtn {
+    background: none;
+    border: none;
+    color: var(--bf-primary-green);
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
-    background-color: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.interactionButton:hover {
+.counterBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.counterValue {
+    font-size: 1.2rem;
+    font-weight: 800;
     color: var(--bf-primary-green);
-    transform: scale(1.1);
+    line-height: 1;
 }
 
-.activeBookmark {
-    color: #f59e0b;
-    background-color: #fef3c7;
-}
-
-.activeCheck {
-    color: var(--bf-primary-green);
-    background-color: #dcfce7;
-}
-
-.activeStar {
-    color: #fbbf24;
-    background-color: #fffbeb;
+.beerRatingArea {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
 }
 
 .disabledAction {
     opacity: 0.5;
-    cursor: not-allowed;
+    pointer-events: none;
 }
 
-.drinkCount {
-    font-size: 0.75rem;
-    font-weight: bold;
-    margin-left: 4px;
+.ratingMug {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s;
 }
 
-.ratingNumber {
-    font-size: 0.75rem;
-    font-weight: bold;
-    margin-left: 4px;
+.ratingMug:not(:disabled):hover {
+    transform: scale(1.2);
+}
+
+.filledMug {
+    color: #eab308;
+}
+
+.emptyMug {
+    color: #cbd5e1;
 }

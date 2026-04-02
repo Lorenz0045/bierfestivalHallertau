@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getLocalTracking, toggleMerkliste, logDrink, rateBeer } from '../services/trackingService';
+import { getLocalTracking, toggleMerkliste, logDrink, removeDrink, rateBeer } from '../services/trackingService';
 
 const useTracking = () => {
     const [trackingData, setTrackingData] = useState(getLocalTracking());
@@ -31,6 +31,7 @@ const useTracking = () => {
         getBeerState,
         toggleMerkliste,
         logDrink,
+        removeDrink,
         rateBeer
     };
 };

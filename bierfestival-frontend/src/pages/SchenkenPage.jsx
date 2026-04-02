@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchCachedData } from '../services/cacheService';
-import { FaMapMarkerAlt, FaLocationArrow, FaBeer, FaAngleRight, FaBookmark, FaCheck, FaStar } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaLocationArrow, FaBeer, FaAngleRight, FaBookmark, FaCheck, FaStar, FaMinus, FaPlus } from 'react-icons/fa';
 import BottomSheet from '../components/UI/BottomSheet';
 import useTracking from '../hooks/useTracking';
 import styles from './SchenkenPage.module.css';
@@ -104,57 +104,78 @@ const SchenkenPage = () => {
                     <p className={styles.noBeersText}>Hier sind aktuell keine Biere hinterlegt.</p>
                 ) : (
                     <ul className={styles.beerList}>
-                        {selectedTavern.beers.sort((a, b) => a.sortOrder - b.sortOrder).map(beer => {
+                        {selectedTavern.beers.sort((a,b) => a.sortOrder - b.sortOrder).map(beer => {
                             const state = getBeerState(beer.beerId);
-                            const hasDrunk = state.drinkTimestamps && state.drinkTimestamps.length > 0;
-
+                            const drinkCount = state.drinkTimestamps ? state.drinkTimestamps.length : 0;
+                            const hasDrunk = drinkCount > 0;
+                            const currentRating = state.rating || 0;
+                            
                             return (
-                                <li key={beer.beerId} className={styles.beerItem}>
-                                    <div className={styles.beerIconWrapper}>
-                                        <FaBeer className={styles.beerIcon} />
-                                    </div>
-                                    <div className={styles.beerDetails}>
-                                        <h4 className={styles.beerName}>{beer.name}</h4>
-                                        <div className={styles.beerMeta}>
-                                            {beer.breweryName && <span className={styles.breweryInfo}>{beer.breweryName}</span>}
-                                            {beer.typeName && <span className={styles.typeBadge}>{beer.typeName}</span>}
-                                            {beer.alcoholPercentage != null && (
-                                                <span className={styles.alcoholBadge}>{beer.alcoholPercentage}% Vol.</span>
-                                            )}
+                            <li key={beer.beerId} className={styles.beerItem}>
+                                <div className={styles.beerIconWrapper}>
+                                    <FaBeer className={styles.beerIcon} />
+                                </div>
+                                <div className={styles.beerInfoArea}>
+                                    <div className={styles.beerTopRow}>
+                                        <div className={styles.beerDetails}>
+                                            <h4 className={styles.beerName}>{beer.name}</h4>
+                                            <div className={styles.beerMeta}>
+                                                {beer.breweryName && <span className={styles.breweryInfo}>{beer.breweryName}</span>}
+                                                {beer.typeName && <span className={styles.typeBadge}>{beer.typeName}</span>}
+                                                {beer.alcoholPercentage != null && (
+                                                    <span className={styles.alcoholBadge}>{beer.alcoholPercentage}% Vol.</span>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className={styles.beerInteractions}>
-                                            <button
-                                                className={`${styles.interactionButton} ${state.isOnMerkliste ? styles.activeBookmark : ''}`}
-                                                title="Auf die Merkliste"
+                                        <div className={styles.beerMainActions}>
+                                            <button 
+                                                className={`${styles.merkenButton} ${state.isOnMerkliste ? styles.gemerkt : ''}`} 
                                                 onClick={() => toggleMerkliste(beer.beerId)}
                                             >
-                                                <FaBookmark />
+                                                {state.isOnMerkliste ? <><FaCheck /> Gemerkt</> : 'Merken'}
                                             </button>
-
-                                            <button
-                                                className={`${styles.interactionButton} ${hasDrunk ? styles.activeCheck : ''}`}
-                                                title="Als Getrunken markieren"
-                                                onClick={() => logDrink(beer.beerId)}
-                                            >
-                                                <FaCheck /> {hasDrunk && <span className={styles.drinkCount}>{state.drinkTimestamps.length}x</span>}
-                                            </button>
-
-                                            <button
-                                                className={`${styles.interactionButton} ${state.rating ? styles.activeStar : ''} ${!hasDrunk ? styles.disabledAction : ''}`}
-                                                title={hasDrunk ? "Stern vergeben (1-5)" : "Bewerten (nur wenn probiert)"}
-                                                onClick={() => {
-                                                    if (!hasDrunk) {
-                                                        alert("Du musst das Bier probiert haben, bevor du es bewerten kannst.");
-                                                        return;
-                                                    }
-                                                    rateBeer(beer.beerId, state.rating ? null : 5);
-                                                }}
-                                            >
-                                                <FaStar /> {state.rating && <span className={styles.ratingNumber}>{state.rating}</span>}
-                                            </button>
+                                            
+                                            <div className={styles.drinkCounter}>
+                                                 <button 
+                                                     className={styles.counterBtn} 
+                                                     onClick={() => removeDrink(beer.beerId)} 
+                                                     disabled={!hasDrunk}
+                                                 >
+                                                    <FaMinus />
+                                                 </button>
+                                                 <span className={styles.counterValue}>{drinkCount}</span>
+                                                 <button 
+                                                     className={styles.counterBtn} 
+                                                     onClick={() => logDrink(beer.beerId)}
+                                                 >
+                                                    <FaPlus />
+                                                 </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </li>
+                                    
+                                    {/* Beer Mugs Rating Area */}
+                                    <div className={`${styles.beerRatingArea} ${!hasDrunk ? styles.disabledAction : ''}`}>
+                                        {[1, 2, 3, 4, 5].map(level => (
+                                             <button 
+                                                 key={level} 
+                                                 className={`${styles.ratingMug} ${currentRating >= level ? styles.filledMug : styles.emptyMug}`}
+                                                 onClick={() => {
+                                                     if (!hasDrunk) {
+                                                         alert("Du musst das Bier probiert haben, bevor du es bewerten kannst.");
+                                                         return;
+                                                     }
+                                                     // Toggle rating: If user clicks the exact rating they already have, clear it
+                                                     rateBeer(beer.beerId, currentRating === level ? null : level);
+                                                 }}
+                                                 disabled={!hasDrunk}
+                                             >
+                                                <FaBeer />
+                                             </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </li>
                             );
                         })}
                     </ul>
