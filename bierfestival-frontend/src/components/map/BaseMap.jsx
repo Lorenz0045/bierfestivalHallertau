@@ -6,8 +6,8 @@ import 'leaflet/dist/leaflet.css';
 // Approximate bounds for the festival area (Hallertau center +/- 0.02 degrees)
 // This restricts the visible map area and saves Map API tiles/tokens.
 const FESTIVAL_BOUNDS = L.latLngBounds(
-    [48.48555, 11.73896], // South West
-    [48.52555, 11.77896]  // North East
+    [48.49950, 11.74742], // South West 48.49950184977375, 11.747427129572412
+    [48.51183, 11.76635]  // North East 48.51183197823702, 11.766351596755545
 );
 
 const BaseMap = ({ center = [48.50555, 11.75896], zoom = 17, children, className, style }) => {
@@ -21,7 +21,7 @@ const BaseMap = ({ center = [48.50555, 11.75896], zoom = 17, children, className
             zoomControl={false}
             maxBounds={FESTIVAL_BOUNDS}
             maxBoundsViscosity={1.0}
-            minZoom={15}
+            minZoom={16}
         >
             <AttributionControl prefix={false} position="bottomleft" />
             
