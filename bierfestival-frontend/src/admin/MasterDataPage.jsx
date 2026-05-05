@@ -8,6 +8,7 @@ import StageManager from './pages/StageManager';
 import TavernManager from './pages/TavernManager';
 import EventManager from './pages/EventManager';
 import FacilityManager from './pages/FacilityManager';
+import CraftMarketManager from './pages/CraftMarketManager';
 import styles from './MasterDataPage.module.css';
 
 const MasterDataPage = () => {
@@ -24,6 +25,7 @@ const MasterDataPage = () => {
           <NavLink to="/admin/master-data/stages" className={({isActive}) => isActive ? styles.active : ''}>Bühnen</NavLink>
           <NavLink to="/admin/master-data/events" className={({isActive}) => isActive ? styles.active : ''}>Programm</NavLink>
           <NavLink to="/admin/master-data/facilities" className={({isActive}) => isActive ? styles.active : ''}>Einrichtungen</NavLink>
+          <NavLink to="/admin/master-data/craft-markets" className={({isActive}) => isActive ? styles.active : ''}>Handwerkermarkt</NavLink>
           <NavLink to="/admin/master-data/lookups" className={({isActive}) => isActive ? styles.active : ''}>Lookups</NavLink>
         </nav>
       </header>
@@ -39,6 +41,7 @@ const MasterDataPage = () => {
           <Route path="stages" element={<StageManager />} />
           <Route path="events" element={<EventManager />} />
           <Route path="facilities" element={<FacilityManager />} />
+          <Route path="craft-markets" element={<CraftMarketManager />} />
           <Route path="lookups" element={<LookupManager />} />
         </Routes>
       </div>

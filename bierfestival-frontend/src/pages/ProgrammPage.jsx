@@ -35,8 +35,8 @@ const ProgrammPage = () => {
             let dayKey = event.dayName;
             if (!dayKey) {
                 if (event.startTime) {
-                    const d = new Date(event.startTime);
-                    dayKey = d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' });
+                    // Datum direkt aus dem ISO-String lesen (z.B. "2026-06-12")
+                    dayKey = event.startTime.substring(0, 10);
                 } else {
                     dayKey = 'Sonstige';
                 }
@@ -82,8 +82,8 @@ const ProgrammPage = () => {
 
     const formatTime = (isoString) => {
         if (!isoString) return '';
-        const d = new Date(isoString);
-        return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+        // LocalDateTime kommt als z.B. "2026-06-12T14:30:00" – kein Timezone-Shift!
+        return isoString.substring(11, 16) + ' Uhr';
     };
 
     const handleJumpToMap = (stage) => {

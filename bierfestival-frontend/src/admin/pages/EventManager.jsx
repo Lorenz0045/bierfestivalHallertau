@@ -19,8 +19,8 @@ const EventManager = () => {
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'dayName', label: 'Tag' },
-        { key: 'startTime', label: 'Startzeit', render: (val) => new Date(val).toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit' }) },
-        { key: 'endTime', label: 'Endzeit', render: (val) => new Date(val).toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit' }) },
+        { key: 'startTime', label: 'Startzeit', render: (val) => val ? val.substring(11, 16) : '-' },
+        { key: 'endTime', label: 'Endzeit', render: (val) => val ? val.substring(11, 16) : '-' },
         { key: 'stage', label: 'Bühne', render: (_, row) => row.stage?.name || '-' }
     ];
 
@@ -63,8 +63,10 @@ const EventManager = () => {
         const itemForEdit = {
             ...item,
             stageId: item.stage?.id,
-            startTime: item.startTime ? new Date(item.startTime).toISOString().slice(0, 16) : '',
-            endTime: item.endTime ? new Date(item.endTime).toISOString().slice(0, 16) : ''
+            // LocalDateTime kommt als ISO-String ohne Timezone (z.B. "2026-06-12T14:30:00")
+            // -> direkt als Substring verwenden statt via new Date(), um Timezone-Shifts zu vermeiden
+            startTime: item.startTime ? item.startTime.substring(0, 16) : '',
+            endTime: item.endTime ? item.endTime.substring(0, 16) : ''
         };
         setEditingItem(itemForEdit);
         setIsModalOpen(true);

@@ -4,7 +4,7 @@ import GenericFormModal from '../components/GenericFormModal';
 import apiRequest from '../../services/apiService';
 import { useUser } from '../contexts/UserContext';
 
-const API_BASE_URL = '/api/breweries';
+const API_CRAFT_MARKETS = '/api/craft-markets';
 
 const renderExternalLink = (url) => {
     if (!url) return '-';
@@ -12,9 +12,9 @@ const renderExternalLink = (url) => {
     return <a href={absoluteUrl} target="_blank" rel="noopener noreferrer">Website</a>;
 };
 
-const BreweryManager = () => {
+const CraftMarketManager = () => {
     const { keycloakInstance } = useUser();
-    const [breweries, setBreweries] = useState([]);
+    const [craftMarkets, setCraftMarkets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
@@ -23,27 +23,29 @@ const BreweryManager = () => {
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'city', label: 'Ort' },
-        { key: 'region', label: 'Landkreis' },
-        { key: 'isHallertau', label: 'Hallertau', render: (val) => val ? 'Ja' : 'Nein' },
         { key: 'website', label: 'Website', render: (val) => renderExternalLink(val) },
-        { key: 'imgUrl', label: 'Logo', sortable: false, render: (val) => val ? <img src={val} alt="Brauerei" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
+        { 
+            key: 'imgUrl', 
+            label: 'Icon', 
+            sortable: false, 
+            render: (val) => val ? <img src={val} alt="Markt" style={{ height: '30px', borderRadius: '4px' }} /> : '-' 
+        }
     ];
 
     const formFields = [
         { name: 'name', label: 'Name', type: 'text', required: true },
+        { name: 'description', label: 'Beschreibung', type: 'textarea', rows: 5, maxLength: 2000 },
         { name: 'city', label: 'Ort', type: 'text' },
-        { name: 'region', label: 'Landkreis', type: 'text' },
         { name: 'website', label: 'Website', type: 'text' },
-        { name: 'isHallertau', label: 'Kommt aus der Hallertau?', type: 'checkbox' },
-        { name: 'imgUrl', label: 'Logo', type: 'image' }
+        { name: 'imgUrl', label: 'Icon', type: 'image' }
     ];
 
-    const loadBreweries = useCallback(async () => {
+    const loadData = useCallback(async () => {
         if (!keycloakInstance?.token) return;
         setLoading(true);
         try {
-            const data = await apiRequest(API_BASE_URL, 'GET', null, keycloakInstance.token);
-            setBreweries(data || []);
+            const data = await apiRequest(API_CRAFT_MARKETS, 'GET', null, keycloakInstance.token);
+            setCraftMarkets(data || []);
         } catch (error) {
             console.error(error);
         } finally {
@@ -52,43 +54,46 @@ const BreweryManager = () => {
     }, [keycloakInstance]);
 
     useEffect(() => {
-        loadBreweries();
-    }, [loadBreweries]);
+        loadData();
+    }, [loadData]);
 
     const handleCreateNew = () => {
         setEditingItem(null);
         setIsModalOpen(true);
     };
 
-    const handleEdit = (brewery) => {
-        setEditingItem(brewery);
+    const handleEdit = (item) => {
+        setEditingItem(item);
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (brewery) => {
+    const handleDelete = async (item) => {
         if (!keycloakInstance?.token) return;
-        if(window.confirm(`Brauerei "${brewery.name}" wirklich löschen?`)) {
+        if(window.confirm(`Handwerkermarkt "${item.name}" wirklich löschen?`)) {
             try {
-                await apiRequest(`${API_BASE_URL}/${brewery.id}`, 'DELETE', null, keycloakInstance.token);
-                loadBreweries();
+                await apiRequest(`${API_CRAFT_MARKETS}/${item.id}`, 'DELETE', null, keycloakInstance.token);
+                loadData();
             } catch (error) {
                 console.error(error);
+                alert("Fehler beim Löschen.");
             }
         }
     };
 
     const handleFormSubmit = async (formData) => {
         if (!keycloakInstance?.token) return;
+
         try {
             if (editingItem && editingItem.id) {
-                await apiRequest(`${API_BASE_URL}/${editingItem.id}`, 'PUT', formData, keycloakInstance.token);
+                await apiRequest(`${API_CRAFT_MARKETS}/${editingItem.id}`, 'PUT', formData, keycloakInstance.token);
             } else {
-                await apiRequest(API_BASE_URL, 'POST', formData, keycloakInstance.token);
+                await apiRequest(API_CRAFT_MARKETS, 'POST', formData, keycloakInstance.token);
             }
             setIsModalOpen(false);
-            loadBreweries();
+            loadData();
         } catch (error) {
             console.error(error);
+            alert("Fehler beim Speichern.");
         }
     };
 
@@ -97,15 +102,22 @@ const BreweryManager = () => {
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ color: '#1b4332', margin: 0 }}>Brauereien verwalten</h2>
+                <h2 style={{ color: '#1b4332', margin: 0 }}>Handwerkermarkt verwalten</h2>
                 <button onClick={handleCreateNew} style={{ background: '#2d6a4f', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                    + Neue Brauerei
+                    + Neuer Handwerkermarkt
                 </button>
             </div>
-            <DataTable columns={columns} data={breweries} onEdit={handleEdit} onDelete={handleDelete} />
-            <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Brauerei bearbeiten' : 'Neue Brauerei anlegen'} fields={formFields} initialData={editingItem} />
+            <DataTable columns={columns} data={craftMarkets} onEdit={handleEdit} onDelete={handleDelete} />
+            <GenericFormModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                onSubmit={handleFormSubmit} 
+                title={editingItem ? 'Handwerkermarkt bearbeiten' : 'Neuen Handwerkermarkt anlegen'} 
+                fields={formFields} 
+                initialData={editingItem} 
+            />
         </div>
     );
 };
 
-export default BreweryManager;
+export default CraftMarketManager;

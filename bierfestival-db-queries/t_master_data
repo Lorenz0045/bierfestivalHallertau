@@ -139,3 +139,19 @@ CREATE TABLE user_drink_event (
 
 CREATE INDEX idx_ubi_device_id ON user_beer_interaction(device_id);
 CREATE INDEX idx_ude_device_id ON user_drink_event(device_id);
+
+
+-- Migration: beer.description auf TEXT umstellen für mehrzeilige Beschreibungen
+ALTER TABLE beer ALTER COLUMN description TYPE TEXT;
+
+-- Handwerkermarkt (Craft Market)
+CREATE TABLE craft_market (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    website VARCHAR(255),
+    city VARCHAR(255),
+    img_url VARCHAR(500),
+    lat DOUBLE PRECISION,
+    lon DOUBLE PRECISION
+);

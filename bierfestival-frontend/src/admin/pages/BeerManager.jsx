@@ -23,7 +23,7 @@ const BeerManager = () => {
         { key: 'brewery', label: 'Brauerei', render: (_, row) => row.brewery?.name || '-' },
         { key: 'beerType', label: 'Sorte', render: (_, row) => row.beerType?.name || '-' },
         { key: 'alcoholPercentage', label: 'Alkohol', render: (val) => val ? `${val} %` : '-' },
-        { key: 'originalGravity', label: 'Stammwürze', render: (val) => val ? `${val} %` : '-' },
+        { key: 'originalGravity', label: 'Stammwürze', render: (val) => val ? `${val} °P` : '-' },
         { key: 'isNonAlcoholic', label: 'Alkoholfrei', render: (val) => val ? 'Ja' : 'Nein' }
     ];
 
@@ -32,9 +32,9 @@ const BeerManager = () => {
         { name: 'breweryId', label: 'Brauerei', type: 'select', options: breweries.map(b => ({ id: b.id, name: b.name })), required: true },
         { name: 'beerTypeId', label: 'Biersorte', type: 'select', options: beerTypes.map(t => ({ id: t.id, name: t.name })) },
         { name: 'alcoholPercentage', label: 'Alkoholgehalt (%)', type: 'number', step: '0.1' },
-        { name: 'originalGravity', label: 'Stammwürze', type: 'number', step: '0.1' },
+        { name: 'originalGravity', label: 'Stammwürze (°P)', type: 'number', step: '0.1' },
         { name: 'isNonAlcoholic', label: 'Alkoholfrei', type: 'checkbox' },
-        { name: 'description', label: 'Beschreibung', type: 'text' }
+        { name: 'description', label: 'Beschreibung', type: 'textarea', rows: 5, maxLength: 2000 }
     ];
 
     const loadData = useCallback(async () => {

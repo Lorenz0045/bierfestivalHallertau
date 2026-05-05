@@ -42,6 +42,7 @@ public class Beer extends PanacheEntityBase {
     @Column(name = "is_non_alcoholic")
     public Boolean isNonAlcoholic = false;
 
+    @Column(columnDefinition = "TEXT")
     public String description;
 
     @Column(name = "rating_count")

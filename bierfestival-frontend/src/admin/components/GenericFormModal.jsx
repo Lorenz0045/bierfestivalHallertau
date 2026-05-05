@@ -105,6 +105,17 @@ const GenericFormModal = ({ isOpen, onClose, onSubmit, title, fields, initialDat
                                     />
                                     {uploadingField === field.name && <small>Lädt hoch...</small>}
                                 </div>
+                            ) : field.type === 'textarea' ? (
+                                <textarea
+                                    id={field.name}
+                                    value={formData[field.name] || ''}
+                                    onChange={(e) => handleChange(e, field)}
+                                    required={field.required}
+                                    rows={field.rows || 4}
+                                    maxLength={field.maxLength || 2000}
+                                    className={styles.input}
+                                    style={{ resize: 'vertical', minHeight: '80px' }}
+                                />
                             ) : (
                                 <input
                                     type={field.type || 'text'}
