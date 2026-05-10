@@ -1,41 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchCachedData } from '../services/cacheService';
-import { FaMapMarkerAlt, FaLocationArrow, FaBeer, FaAngleRight, FaBookmark, FaCheck, FaStar, FaMinus, FaPlus } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaLocationArrow, FaBeer, FaAngleRight } from 'react-icons/fa';
 import BottomSheet from '../components/UI/BottomSheet';
+import BeerCard from '../components/UI/BeerCard';
 import useTracking from '../hooks/useTracking';
 import styles from './SchenkenPage.module.css';
 
 const SchenkenPage = () => {
     const [taverns, setTaverns] = useState([]);
+    const [breweries, setBreweries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedTavern, setSelectedTavern] = useState(null);
+    const [breweryDetail, setBreweryDetail] = useState(null);
     const navigate = useNavigate();
 
-    const { getBeerState, toggleMerkliste, logDrink, rateBeer, removeDrink } = useTracking();
+    const { getBeerState, toggleMerkliste, logDrink, removeDrink, rateBeer } = useTracking();
 
     useEffect(() => {
-        const loadTaverns = async () => {
+        const loadData = async () => {
             try {
-                const data = await fetchCachedData('/api/taverns');
-                if (data) {
-                    setTaverns(data.sort((a, b) => a.name.localeCompare(b.name)));
-                }
+                const [tavernsData, brewData] = await Promise.all([
+                    fetchCachedData('/api/taverns'),
+                    fetchCachedData('/api/breweries'),
+                ]);
+                if (tavernsData) setTaverns(tavernsData.sort((a, b) => a.name.localeCompare(b.name)));
+                if (brewData) setBreweries(brewData);
             } catch (error) {
                 console.error("Fehler beim Laden der Schenken", error);
             } finally {
                 setLoading(false);
             }
         };
-        loadTaverns();
+        loadData();
     }, []);
 
     const handleJumpToMap = (tavern) => {
-        if (tavern && tavern.lat && tavern.lon) {
+        if (tavern?.lat && tavern?.lon) {
             navigate('/', { state: { jumpToPoi: { lat: tavern.lat, lon: tavern.lon } } });
         } else {
             navigate('/');
         }
+    };
+
+    const handleBreweryClick = (breweryId) => {
+        const brewery = breweries.find(b => b.id === breweryId);
+        if (brewery) setBreweryDetail(brewery);
     };
 
     if (loading) {
@@ -58,6 +68,7 @@ const SchenkenPage = () => {
         <div className={styles.container}>
             <div className={styles.header}>
                 <h1 className={styles.title}>Schenken</h1>
+                <p className={styles.subtitle}>{taverns.length} Schenken am Bierfestival</p>
             </div>
 
             <div className={styles.tavernList}>
@@ -76,14 +87,14 @@ const SchenkenPage = () => {
                                     <FaBeer />
                                     <span>
                                         {tavern.beers?.length
-                                            ? `${tavern.beers.length} Biere auf der Karte`
+                                            ? `${tavern.beers.length} Biere`
                                             : 'Keine Biere gelistet'}
                                     </span>
                                     {tavern.beers?.length > 0 && <FaAngleRight className={styles.arrowIcon} />}
                                 </button>
 
                                 <button
-                                    className={styles.mapButton}
+                                    className={styles.mapBtn}
                                     onClick={() => handleJumpToMap(tavern)}
                                 >
                                     <FaMapMarkerAlt /> Karte
@@ -95,90 +106,61 @@ const SchenkenPage = () => {
                 ))}
             </div>
 
+            {/* Bier-Overlay für Schenke */}
             <BottomSheet
-                isOpen={!!selectedTavern}
+                isOpen={!!selectedTavern && !breweryDetail}
                 onClose={() => setSelectedTavern(null)}
-                title={selectedTavern ? `Ausschank: ${selectedTavern.name}` : ''}
+                title={selectedTavern ? `${selectedTavern.name}` : ''}
             >
                 {!selectedTavern?.beers || selectedTavern.beers.length === 0 ? (
                     <p className={styles.noBeersText}>Hier sind aktuell keine Biere hinterlegt.</p>
                 ) : (
-                    <ul className={styles.beerList}>
-                        {selectedTavern.beers.sort((a, b) => a.sortOrder - b.sortOrder).map(beer => {
-                            const state = getBeerState(beer.beerId);
-                            const drinkCount = state.drinkTimestamps ? state.drinkTimestamps.length : 0;
-                            const hasDrunk = drinkCount > 0;
-                            const currentRating = state.rating || 0;
+                    <div className={styles.beerCardList}>
+                        {selectedTavern.beers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(beer => (
+                            <BeerCard
+                                key={beer.beerId}
+                                beer={{
+                                    beerId: beer.beerId,
+                                    name: beer.name,
+                                    breweryName: beer.breweryName,
+                                    breweryId: beer.breweryId,
+                                    typeName: beer.typeName,
+                                    alcoholPercentage: beer.alcoholPercentage,
+                                    isNonAlcoholic: beer.isNonAlcoholic,
+                                }}
+                                trackingState={getBeerState(beer.beerId)}
+                                onToggleMerkliste={toggleMerkliste}
+                                onLogDrink={logDrink}
+                                onRemoveDrink={removeDrink}
+                                onRate={rateBeer}
+                                onBreweryClick={handleBreweryClick}
+                                compact
+                            />
+                        ))}
+                    </div>
+                )}
+            </BottomSheet>
 
-                            return (
-                                <li key={beer.beerId} className={styles.beerItem}>
-                                    <div className={styles.beerIconWrapper}>
-                                        <FaBeer className={styles.beerIcon} />
-                                    </div>
-                                    <div className={styles.beerInfoArea}>
-                                        <div className={styles.beerTopRow}>
-                                            <div className={styles.beerDetails}>
-                                                <h4 className={styles.beerName}>{beer.name}</h4>
-                                                <div className={styles.beerMeta}>
-                                                    {beer.breweryName && <span className={styles.breweryInfo}>{beer.breweryName}</span>}
-                                                    {beer.typeName && <span className={styles.typeBadge}>{beer.typeName}</span>}
-                                                    {(beer.alcoholPercentage != null || beer.isNonAlcoholic) && (
-                                                        <span className={styles.alcoholBadge}>{beer.isNonAlcoholic ? '< 0,5% Vol.' : `${beer.alcoholPercentage}% Vol.`}</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className={styles.beerMainActions}>
-                                                <button
-                                                    className={`${styles.merkenButton} ${state.isOnMerkliste ? styles.gemerkt : ''}`}
-                                                    onClick={() => toggleMerkliste(beer.beerId)}
-                                                >
-                                                    {state.isOnMerkliste ? <><FaCheck /> Gemerkt</> : 'Merken'}
-                                                </button>
-
-                                                <div className={styles.drinkCounter}>
-                                                    <button
-                                                        className={styles.counterBtn}
-                                                        onClick={() => removeDrink(beer.beerId)}
-                                                        disabled={!hasDrunk}
-                                                    >
-                                                        <FaMinus />
-                                                    </button>
-                                                    <span className={styles.counterValue}>{drinkCount}</span>
-                                                    <button
-                                                        className={styles.counterBtn}
-                                                        onClick={() => logDrink(beer.beerId)}
-                                                    >
-                                                        <FaPlus />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Beer Mugs Rating Area */}
-                                        <div className={`${styles.beerRatingArea} ${!hasDrunk ? styles.disabledAction : ''}`}>
-                                            {[1, 2, 3, 4, 5].map(level => (
-                                                <button
-                                                    key={level}
-                                                    className={`${styles.ratingMug} ${currentRating >= level ? styles.filledMug : styles.emptyMug}`}
-                                                    onClick={() => {
-                                                        if (!hasDrunk) {
-                                                            alert("Du musst das Bier probiert haben, bevor du es bewerten kannst.");
-                                                            return;
-                                                        }
-                                                        // Toggle rating: If user clicks the exact rating they already have, clear it
-                                                        rateBeer(beer.beerId, currentRating === level ? null : level);
-                                                    }}
-                                                    disabled={!hasDrunk}
-                                                >
-                                                    <FaBeer />
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </li>
-                            );
-                        })}
-                    </ul>
+            {/* Brauerei Detail Drill-down */}
+            <BottomSheet
+                isOpen={!!breweryDetail}
+                onClose={() => setBreweryDetail(null)}
+                onBack={() => setBreweryDetail(null)}
+                showBack={true}
+                title={breweryDetail?.name || ''}
+            >
+                {breweryDetail && (
+                    <div className={styles.breweryDetail}>
+                        {breweryDetail.imgUrl && <img src={breweryDetail.imgUrl} alt={breweryDetail.name} className={styles.breweryImg} />}
+                        {breweryDetail.description && <p className={styles.breweryDesc}>{breweryDetail.description}</p>}
+                        {breweryDetail.city && <p className={styles.breweryMeta}>📍 {breweryDetail.city.name || breweryDetail.city}</p>}
+                        {breweryDetail.district && <p className={styles.breweryMeta}>🗺️ Landkreis {breweryDetail.district.name || breweryDetail.district}</p>}
+                        {breweryDetail.website && (
+                            <a href={breweryDetail.website} target="_blank" rel="noopener noreferrer" className={styles.breweryWebsite}>
+                                🌐 Website besuchen
+                            </a>
+                        )}
+                    </div>
                 )}
             </BottomSheet>
         </div>

@@ -1,0 +1,10 @@
+/* =========================================
+   LEGAL PAGES – Impressum, Datenschutz, etc.
+   ========================================= */
+.page { padding: 16px 16px 40px; width: 100%; max-width: 600px; margin: 0 auto; }
+.title { font-size: 1.3rem; font-weight: 700; color: var(--bf-dark-green); margin: 0 0 16px; }
+.content { background: var(--bf-white); border-radius: var(--bf-radius-md); padding: 20px; box-shadow: var(--bf-shadow-sm); }
+.content h2 { font-size: 1rem; color: var(--bf-dark-green); margin: 20px 0 8px; }
+.content h2:first-child { margin-top: 0; }
+.content h3 { font-size: 0.9rem; color: var(--bf-mid-green); margin: 14px 0 6px; }
+.content p { font-size: 0.88rem; line-height: 1.6; color: var(--bf-text-dark); margin-bottom: 10px; }

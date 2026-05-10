@@ -1,8 +1,8 @@
 .container {
-    padding: 20px 16px 100px 16px;
-    min-height: 100vh;
+    padding: 0 12px 20px;
     width: 100%;
-    background-color: var(--bf-gray-light);
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .header {
@@ -11,10 +11,10 @@
 }
 
 .title {
-    font-size: 1.8rem;
-    color: var(--bf-primary-green);
+    font-size: 1.3rem;
+    color: var(--bf-dark-green);
     margin: 0;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .loading,
@@ -177,8 +177,8 @@
     align-items: center;
     gap: 4px;
     font-size: 0.8rem;
-    background-color: #f1f5f9;
-    color: #475569;
+    background-color: var(--bf-light-green);
+    color: var(--bf-mid-green);
     padding: 6px 10px;
     border-radius: 6px;
     font-weight: 600;
@@ -188,7 +188,7 @@
 }
 
 .stageTag:hover {
-    background-color: #e2e8f0;
+    background-color: var(--bf-gray-light);
 }
 
 .jumpIcon {

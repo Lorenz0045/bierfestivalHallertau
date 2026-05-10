@@ -1,61 +1,97 @@
-/* --- VARIABLEN --- */
-:root {
-    --nav-height-mobile: 60px;
-}
-
 /* =========================================
-   BOTTOM NAV STYLING (Universal)
+   BOTTOM NAVBAR – Festival Design
    ========================================= */
 .bottomNav {
     display: flex;
-    justify-content: space-around; /* Verteilt Icons gleichmäßig */
-    align-items: center;
-    
+    justify-content: space-around;
+    align-items: flex-end;
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: var(--nav-height-mobile);
-    
-    background-color: rgba(255, 255, 255, 0.95); /* Leicht transparent = modern */
-    backdrop-filter: blur(10px); /* Glas-Effekt wie bei iOS */
+    height: var(--bf-navbar-height);
+    background: var(--bf-white);
     border-top: 1px solid var(--bf-gray-mid);
-    
-    z-index: 2000; /* Muss über der Karte liegen */
-    
-    /* WICHTIG für iPhone X und neuer (Home Balken) */
+    z-index: 2000;
     padding-bottom: env(safe-area-inset-bottom);
-    height: calc(var(--nav-height-mobile) + env(safe-area-inset-bottom));
+    height: calc(var(--bf-navbar-height) + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
 }
 
-.mobileLink {
+.navLink {
     display: flex;
-    flex-direction: column; /* Icon oben, Text unten */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     text-decoration: none;
     color: var(--bf-gray-dark);
-    width: 100%; /* Klickbereich vergrößern */
+    width: 20%;
     height: 100%;
-    gap: 4px;
+    gap: 2px;
+    transition: color 0.2s ease;
+    padding-top: 8px;
 }
 
 .icon {
-    font-size: 1.4rem; /* Icon Größe */
-    margin-bottom: 2px;
-    transition: transform 0.1s ease;
+    font-size: 1.3rem;
+    transition: transform 0.15s ease;
 }
 
 .label {
-    font-size: 0.65rem; /* Sehr klein, typisch App */
+    font-size: 0.6rem;
     font-weight: 500;
+    letter-spacing: 0.2px;
 }
 
-/* Aktiver Zustand */
-.activeMobile {
+/* Aktiver Tab */
+.activeLink {
     color: var(--bf-primary-green);
 }
 
-.activeMobile .icon {
+.activeLink .icon {
     transform: scale(1.1);
+}
+
+/* === PROMINENTER LAGEPLAN CENTER BUTTON === */
+.centerLink {
+    position: relative;
+    padding-top: 0;
+}
+
+.centerButton {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--bf-primary-green) 0%, var(--bf-mid-green) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -22px;
+    box-shadow: 0 4px 14px rgba(84, 185, 71, 0.35);
+    transition: all 0.2s ease;
+    border: 3px solid var(--bf-white);
+}
+
+.centerIcon {
+    font-size: 1.5rem;
+    color: var(--bf-white);
+}
+
+.centerLink .label {
+    color: var(--bf-gray-dark);
+    margin-top: 2px;
+}
+
+.activeCenterLink .centerButton {
+    background: linear-gradient(135deg, var(--bf-gold) 0%, var(--bf-gold-dark) 100%);
+    box-shadow: 0 4px 14px rgba(238, 219, 60, 0.4);
+}
+
+.activeCenterLink .centerIcon {
+    color: var(--bf-dark-green);
+}
+
+.activeCenterLink .label {
+    color: var(--bf-primary-green);
+    font-weight: 700;
 }

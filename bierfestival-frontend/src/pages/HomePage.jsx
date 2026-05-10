@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Marker, Popup, Polygon, useMap, useMapEvents } from 'react-leaflet';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import BaseMap from '../components/map/BaseMap';
 import { fetchCachedData } from '../services/cacheService';
 import { createPoiIcon } from '../components/map/IconFactory';
-import { FaLocationArrow, FaBeer } from 'react-icons/fa'; 
+import BottomSheet from '../components/UI/BottomSheet';
+import BeerCard from '../components/UI/BeerCard';
+import SponsorBanner from '../components/UI/SponsorBanner';
+import useTracking from '../hooks/useTracking';
+import { FaLocationArrow, FaBeer, FaInfoCircle, FaTimes, FaGlobe, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
 import styles from './HomePage.module.css';
 
-// --- Icon Definition (Blauer Punkt für User) ---
+// --- User Location Icon ---
 const userIcon = L.divIcon({
     className: styles.userLocationDot,
     iconSize: [20, 20],
@@ -16,7 +20,7 @@ const userIcon = L.divIcon({
     popupAnchor: [0, -10]
 });
 
-// --- Komponente: MapControls  ---
+// --- Map Controls ---
 const MapControls = ({ festivalCoords, jumpCoords }) => {
     const [userPosition, setUserPosition] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
@@ -43,7 +47,6 @@ const MapControls = ({ festivalCoords, jumpCoords }) => {
         }
     }, [userPosition, isFollowing, map]);
 
-    // Handle jump to external POI
     useEffect(() => {
         if (jumpCoords) {
             setIsFollowing(false);
@@ -56,15 +59,11 @@ const MapControls = ({ festivalCoords, jumpCoords }) => {
     });
 
     const handleLocateClick = () => {
-        if (isFollowing) {
-            setIsFollowing(false);
-            return;
-        }
+        if (isFollowing) { setIsFollowing(false); return; }
         if (userPosition) {
             setIsFollowing(true);
             map.flyTo(userPosition, 18, { duration: 1.5 });
         } else {
-            alert("Suche Standort...");
             map.locate({ setView: true, maxZoom: 18 });
         }
     };
@@ -82,12 +81,13 @@ const MapControls = ({ festivalCoords, jumpCoords }) => {
                 </Marker>
             )}
             <div className={styles.controlsContainer}>
-                <button className={styles.mapButton} onClick={handleFestivalClick}>
+                <button className={styles.mapButton} onClick={handleFestivalClick} title="Festival-Zentrum">
                     <FaBeer />
                 </button>
                 <button 
                     className={`${styles.mapButton} ${isFollowing ? styles.activeButton : ''}`} 
                     onClick={handleLocateClick}
+                    title="Mein Standort"
                 >
                     <FaLocationArrow />
                 </button>
@@ -99,29 +99,31 @@ const MapControls = ({ festivalCoords, jumpCoords }) => {
 // --- Haupt-Page ---
 const HomePage = () => {
     const [pois, setPois] = useState([]);
+    const [selectedPoi, setSelectedPoi] = useState(null);
+    const [showInfoPanel, setShowInfoPanel] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
     const festivalPosition = [48.50555005218888, 11.75895927999904];
-    
     const jumpToPoi = location.state?.jumpToPoi;
 
-    // 1. Lade alle platzierten POIs aus dem Cache (schnell für normale User)
+    const { getBeerState, toggleMerkliste, logDrink, removeDrink, rateBeer } = useTracking();
+
+    // Lade alle POIs
     useEffect(() => {
         const loadMapData = async () => {
             const endpoints = [
                 { type: 'tavern', url: '/api/taverns' },
                 { type: 'stage', url: '/api/stages' },
                 { type: 'gastronomy', url: '/api/gastronomies' },
-                { type: 'facility', url: '/api/facilities' }
+                { type: 'facility', url: '/api/facilities' },
+                { type: 'craftmarket', url: '/api/craft-markets' },
             ];
 
             let allPlacedPois = [];
-            
             for (const ep of endpoints) {
                 try {
-                    // Nutzt den zentralen Cache, feuert das Backend also nur 1x am Tag ab!
                     const data = await fetchCachedData(ep.url);
                     if (data) {
-                        // Filtere nur die heraus, die auch Koordinaten haben
                         const placed = data
                             .filter(item => item.lat && item.lon)
                             .map(item => ({ ...item, type: ep.type }));
@@ -133,60 +135,141 @@ const HomePage = () => {
             }
             setPois(allPlacedPois);
         };
-
         loadMapData();
     }, []);
 
+    // Events für Bühnen laden
+    const [events, setEvents] = useState([]);
+    useEffect(() => {
+        fetchCachedData('/api/events').then(d => d && setEvents(d)).catch(() => {});
+    }, []);
+
+    const stageEvents = useMemo(() => {
+        if (!selectedPoi || selectedPoi.type !== 'stage') return [];
+        return events
+            .filter(e => e.stage?.id === selectedPoi.id)
+            .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+    }, [selectedPoi, events]);
+
+    const formatTime = (iso) => iso ? iso.substring(11, 16) + ' Uhr' : '';
+
+    const handleMarkerClick = (poi) => {
+        setSelectedPoi(poi);
+    };
+
+    const getPoiTypeLabel = (type) => {
+        const labels = { tavern: 'Schenke', stage: 'Bühne', gastronomy: 'Gastronomie', facility: 'Einrichtung', craftmarket: 'Handwerkerstand' };
+        return labels[type] || type;
+    };
+
     return (
         <div className={styles.mapWrapper}>
-            
-            <BaseMap center={festivalPosition} zoom={17} className={styles.mapContainer}>
-                
-                {/* 3. Deine Custom Controls (GPS etc.) als Kind-Element übergeben */}
-                <MapControls festivalCoords={festivalPosition} jumpCoords={jumpToPoi} />
-                
+            {/* (i) Info Button */}
+            <button className={styles.infoButton} onClick={() => setShowInfoPanel(!showInfoPanel)} title="Informationen">
+                {showInfoPanel ? <FaTimes /> : <FaInfoCircle />}
+            </button>
 
-                {/* 4. Alle POIs dynamisch rendern */}
+            {showInfoPanel && (
+                <div className={styles.infoPanel}>
+                    <h4>Informationen</h4>
+                    <Link to="/impressum" className={styles.infoLink} onClick={() => setShowInfoPanel(false)}>Impressum</Link>
+                    <Link to="/datenschutz" className={styles.infoLink} onClick={() => setShowInfoPanel(false)}>Datenschutzerklärung</Link>
+                    <Link to="/nutzungsbedingungen" className={styles.infoLink} onClick={() => setShowInfoPanel(false)}>Nutzungsbedingungen</Link>
+                </div>
+            )}
+
+            <BaseMap center={festivalPosition} zoom={17} className={styles.mapContainer}>
+                <MapControls festivalCoords={festivalPosition} jumpCoords={jumpToPoi} />
+
                 {pois.map(poi => (
-                    <Marker 
-                        key={`${poi.type}-${poi.id}`} 
+                    <Marker
+                        key={`${poi.type}-${poi.id}`}
                         position={[poi.lat, poi.lon]}
                         icon={createPoiIcon(poi)}
-                    >
-                        <Popup>
-                            <div style={{ textAlign: 'center', minWidth: '150px' }}>
-                                {/* Falls ein Bild existiert, zeigen wir es im Popup klein an */}
-                                {poi.imgUrl && (
-                                    <img 
-                                        src={poi.imgUrl} 
-                                        alt={poi.name} 
-                                        style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }} 
-                                    />
-                                )}
-                                <strong style={{ display: 'block', fontSize: '1.1rem', color: '#1b4332' }}>{poi.name}</strong>
-                                
-                                {/* Kategorie-spezifische Zusätze */}
-                                {poi.type === 'gastronomy' && poi.type && <span style={{ color: '#64748b' }}>{poi.type.name}</span>}
-                                {poi.type === 'facility' && poi.facilityType && <span style={{ color: '#64748b' }}>{poi.facilityType.name}</span>}
-                                
-                                {/* Quickinfo: Biere bei Schenken */}
-                                {poi.type === 'tavern' && poi.beers && poi.beers.length > 0 && (
-                                    <div style={{ marginTop: '10px', fontSize: '0.85rem', textAlign: 'left', background: '#f8fafc', padding: '5px', borderRadius: '4px' }}>
-                                        <strong>🍺 Ausgeschenkt wird:</strong>
-                                        <ul style={{ margin: '5px 0 0 0', paddingLeft: '15px' }}>
-                                            {poi.beers.slice(0, 3).map(b => (
-                                                <li key={b.beerId}>{b.name}</li>
-                                            ))}
-                                            {poi.beers.length > 3 && <li><i>+ {poi.beers.length - 3} weitere...</i></li>}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        </Popup>
-                    </Marker>
+                        eventHandlers={{ click: () => handleMarkerClick(poi) }}
+                    />
                 ))}
-
             </BaseMap>
+
+            {/* Sponsor Banner */}
+            <div className={styles.sponsorOverlay}>
+                <SponsorBanner />
+            </div>
+
+            {/* POI Detail BottomSheet */}
+            <BottomSheet
+                isOpen={!!selectedPoi}
+                onClose={() => setSelectedPoi(null)}
+                title={selectedPoi?.name || ''}
+            >
+                {selectedPoi && (
+                    <div className={styles.poiDetail}>
+                        {selectedPoi.imgUrl && (
+                            <img src={selectedPoi.imgUrl} alt={selectedPoi.name} className={styles.poiImg} />
+                        )}
+                        <span className={styles.poiType}>{getPoiTypeLabel(selectedPoi.type)}</span>
+
+                        {selectedPoi.description && (
+                            <p className={styles.poiDesc}>{selectedPoi.description}</p>
+                        )}
+
+                        {selectedPoi.website && (
+                            <a href={selectedPoi.website} target="_blank" rel="noopener noreferrer" className={styles.poiWebsite}>
+                                <FaGlobe /> Website besuchen
+                            </a>
+                        )}
+
+                        {/* Gastronomie-Typ */}
+                        {selectedPoi.type === 'gastronomy' && selectedPoi.gastronomyType && (
+                            <p className={styles.poiMeta}>🍴 {selectedPoi.gastronomyType.name}</p>
+                        )}
+
+                        {/* Einrichtung-Typ */}
+                        {selectedPoi.type === 'facility' && selectedPoi.facilityType && (
+                            <p className={styles.poiMeta}>ℹ️ {selectedPoi.facilityType.name}</p>
+                        )}
+
+                        {/* Bühne: Programm */}
+                        {selectedPoi.type === 'stage' && stageEvents.length > 0 && (
+                            <div className={styles.stageProgram}>
+                                <h4><FaCalendarAlt /> Programm</h4>
+                                {stageEvents.map(ev => (
+                                    <div key={ev.id} className={styles.eventItem}>
+                                        <span className={styles.eventTime}>{formatTime(ev.startTime)}{ev.endTime ? ` – ${formatTime(ev.endTime)}` : ''}</span>
+                                        <span className={styles.eventName}>{ev.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Schenke: Biere */}
+                        {selectedPoi.type === 'tavern' && selectedPoi.beers?.length > 0 && (
+                            <div className={styles.tavernBeers}>
+                                <h4><FaBeer /> Ausgeschenkte Biere ({selectedPoi.beers.length})</h4>
+                                {selectedPoi.beers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(beer => (
+                                    <BeerCard
+                                        key={beer.beerId}
+                                        beer={{
+                                            beerId: beer.beerId,
+                                            name: beer.name,
+                                            breweryName: beer.breweryName,
+                                            typeName: beer.typeName,
+                                            alcoholPercentage: beer.alcoholPercentage,
+                                            isNonAlcoholic: beer.isNonAlcoholic,
+                                        }}
+                                        trackingState={getBeerState(beer.beerId)}
+                                        onToggleMerkliste={toggleMerkliste}
+                                        onLogDrink={logDrink}
+                                        onRemoveDrink={removeDrink}
+                                        onRate={rateBeer}
+                                        compact
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </BottomSheet>
         </div>
     );
 };

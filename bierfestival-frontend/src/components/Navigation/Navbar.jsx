@@ -2,38 +2,40 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import { 
-    FaSearch,       // Suche
-    FaRoute,        // Anreise
-    FaMapMarkedAlt, // Lageplan (Zentrum)
-    FaCalendarAlt,  // Programm
-    FaBeer          // Schenken
+    FaSearch,
+    FaBus,
+    FaMapMarkedAlt,
+    FaCalendarAlt,
+    FaBeer
 } from 'react-icons/fa';
 
 const Navbar = () => {
     return (
         <nav className={styles.bottomNav}>
-            <NavLink to="/suche" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
+            <NavLink to="/suche" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.activeLink : ''}`}>
                 <FaSearch className={styles.icon} />
                 <span className={styles.label}>Suche</span>
             </NavLink>
             
-            <NavLink to="/anreise" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
-                <FaRoute className={styles.icon} />
+            <NavLink to="/anreise" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.activeLink : ''}`}>
+                <FaBus className={styles.icon} />
                 <span className={styles.label}>Anreise</span>
             </NavLink>
 
-            {/* Der Haupt-Button (Mitte) */}
-            <NavLink to="/" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
-                <FaMapMarkedAlt className={styles.icon} />
+            {/* Prominenter Lageplan-Button in der Mitte */}
+            <NavLink to="/" end className={({ isActive }) => `${styles.navLink} ${styles.centerLink} ${isActive ? styles.activeCenterLink : ''}`}>
+                <div className={styles.centerButton}>
+                    <FaMapMarkedAlt className={styles.centerIcon} />
+                </div>
                 <span className={styles.label}>Lageplan</span>
             </NavLink>
 
-            <NavLink to="/programm" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
+            <NavLink to="/programm" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.activeLink : ''}`}>
                 <FaCalendarAlt className={styles.icon} />
                 <span className={styles.label}>Programm</span>
             </NavLink>
 
-            <NavLink to="/schenken" className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.activeMobile : ''}`}>
+            <NavLink to="/schenken" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.activeLink : ''}`}>
                 <FaBeer className={styles.icon} />
                 <span className={styles.label}>Schenken</span>
             </NavLink>

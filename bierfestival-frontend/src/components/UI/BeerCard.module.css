@@ -1,0 +1,267 @@
+/* =========================================
+   BEER CARD – Zentrale Bier-Kachel
+   ========================================= */
+.card {
+    background: var(--bf-white);
+    border-radius: var(--bf-radius-md);
+    box-shadow: var(--bf-shadow-sm);
+    border: 1px solid var(--bf-gray-light);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover, .card.expanded {
+    box-shadow: var(--bf-shadow-md);
+    border-color: var(--bf-gray-mid);
+}
+
+.compact {
+    border-radius: var(--bf-radius-sm);
+}
+
+/* Header (klickbar für expand) */
+.header {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 12px 8px;
+    cursor: pointer;
+}
+
+.info {
+    flex: 1;
+    min-width: 0;
+}
+
+.name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--bf-dark-green);
+    margin: 0 0 4px;
+    line-height: 1.2;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.breweryLink {
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    color: var(--bf-primary-green);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.2s;
+}
+
+.breweryLink:hover:not(:disabled) {
+    text-decoration-color: var(--bf-primary-green);
+}
+
+.breweryLink:disabled {
+    cursor: default;
+    color: var(--bf-text-muted);
+}
+
+.typeBadge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--bf-radius-full);
+    background: var(--bf-light-green);
+    color: var(--bf-mid-green);
+}
+
+.alcBadge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--bf-radius-full);
+    background: var(--bf-gold-light);
+    color: var(--bf-gold-dark);
+}
+
+.alcFree {
+    background: #E3F2FD;
+    color: var(--bf-accent-blue);
+}
+
+.expandIcon {
+    color: var(--bf-gray-dark);
+    font-size: 0.8rem;
+    padding-top: 4px;
+    flex-shrink: 0;
+}
+
+/* Actions Row */
+.actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 12px 10px;
+    gap: 4px;
+}
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: none;
+    border-radius: var(--bf-radius-full);
+    padding: 5px 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.merkenBtn {
+    background: var(--bf-gray-light);
+    color: var(--bf-gray-dark);
+}
+
+.merkenBtn:hover {
+    background: var(--bf-light-green);
+    color: var(--bf-primary-green);
+}
+
+.gemerkt {
+    background: var(--bf-primary-green);
+    color: var(--bf-white);
+}
+
+.gemerkt:hover {
+    background: var(--bf-mid-green);
+}
+
+/* Drink Counter */
+.drinkCounter {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--bf-gray-light);
+    border-radius: var(--bf-radius-full);
+    padding: 2px;
+}
+
+.counterBtn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bf-white);
+    color: var(--bf-dark-green);
+    font-size: 0.65rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.counterBtn:hover:not(:disabled) {
+    background: var(--bf-primary-green);
+    color: var(--bf-white);
+}
+
+.counterBtn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.counterVal {
+    min-width: 22px;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--bf-gray-dark);
+}
+
+.hasCount {
+    color: var(--bf-dark-green);
+}
+
+/* Rating Mugs */
+.ratingRow {
+    display: flex;
+    gap: 2px;
+}
+
+.ratingDisabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.ratingMug {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 2px;
+    transition: transform 0.1s;
+    display: flex;
+}
+
+.ratingMug:hover:not(:disabled) {
+    transform: scale(1.2);
+}
+
+.filled {
+    color: var(--bf-gold);
+}
+
+.empty {
+    color: var(--bf-gray-mid);
+}
+
+/* Expanded Details */
+.details {
+    padding: 0 12px 14px;
+    border-top: 1px solid var(--bf-gray-light);
+    animation: expandIn 0.2s ease-out;
+}
+
+.description {
+    font-size: 0.82rem;
+    color: var(--bf-text-muted);
+    line-height: 1.5;
+    margin: 12px 0;
+    white-space: pre-line;
+}
+
+.detailGrid {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.detailItem {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.detailLabel {
+    font-size: 0.65rem;
+    color: var(--bf-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detailValue {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bf-dark-green);
+}
+
+@keyframes expandIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}

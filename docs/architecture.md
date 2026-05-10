@@ -66,6 +66,9 @@
 | `Event` | `event` | Programmpunkte mit Start/Ende (`LocalDateTime`), Tagesname, Bühne |
 | `Facility` | `facility` | Einrichtungen (WC, Büro, Bushaltestelle) mit FacilityType |
 | `Sponsor` | `sponsor` | Sponsoren mit Logo, Website, Referenz zu City |
+| `BusLine` | `bus_line` | Buslinie mit Nummer, Name, Routenbeschreibung, Preis |
+| `BusStop` | `bus_stop` | Bushaltestelle mit optionaler Referenz zu Facility (für Karten-Jump) |
+| `BusDeparture` | `bus_departure` | Einzelne Abfahrt: Linie, Haltestelle, Richtung (HINFAHRT/RUECKFAHRT), Zeitstempel |
 
 ### Lookup-Tabellen
 
@@ -101,9 +104,9 @@ src/
 ├── components/
 │   ├── map/                # Leaflet-Komponenten (BaseMap, IconFactory)
 │   ├── Navigation/         # Navbar (Bottom), TopBar
-│   └── UI/                 # Wiederverwendbare UI-Elemente (BottomSheet, CookieBanner, ScrollToTop)
+|   └── UI/                 # Wiederverwendbare UI-Elemente (BottomSheet, BeerCard, SponsorBanner, CookieBanner)
 ├── hooks/                  # Custom Hooks (useTracking)
-├── pages/                  # Öffentliche Seiten (HomePage, ProgrammPage, SchenkenPage)
+├── pages/                  # Öffentliche Seiten (HomePage, SuchePage, AnreisePage, ProgrammPage, SchenkenPage, MeinBesuchPage, Legal-Pages)
 └── services/               # API/Cache/Tracking/Device Services
 ```
 
@@ -118,7 +121,7 @@ src/
 
 2. **Conditional Fields (`disabledWhen`)**: Formularfelder können über `disabledWhen: { field: 'isNonAlcoholic', value: true }` bedingt ausgegraut werden. Der Wert bleibt erhalten, wird aber nicht mehr editierbar.
 
-3. **BottomSheet**: Ausgelagerte, wiederverwendbare Modal-Komponente (`components/UI/BottomSheet.jsx`) für alle Overlay-Darstellungen.
+3. **BottomSheet**: Wiederverwendbare Modal-Komponente mit optionalem Zurück-Pfeil (für Drilldown-Navigation Beer→Brewery) und Grab-Handle.
 
 4. **cacheService**: Statische API-Daten werden beim ersten Abruf im `localStorage` gecacht und bei nachfolgenden Aufrufen sofort geliefert (kein Netzwerk-Roundtrip).
 
@@ -278,3 +281,53 @@ fetchCachedData('/api/taverns') → localStorage['cache_/api/taverns']
 Die App ist so konzipiert, dass sie für zukünftige Festivals **ohne Code-Änderungen** wiederverwendet werden kann. Alle Festival-spezifischen Daten (Programm, Schenken, Biere, Bühnen, ...) werden über das Admin-Backend gepflegt.
 
 **Aktuell**: Bierfestival Hallertau, 12.–14. Juni 2026 (Freitag bis Sonntag)
+
+---
+
+## Design-System (Redesign 2026)
+
+### Farbpalette (basierend auf Logo)
+
+| Variable | Wert | Verwendung |
+|----------|------|------------|
+| `--bf-primary-green` | `#54B947` | Primärfarbe, aktive Tabs, CTAs |
+| `--bf-dark-green` | `#1B5E20` | Header-Gradient, Überschriften |
+| `--bf-gold` | `#EEDB3C` | Rating-Krüge, Akzente |
+| `--bf-accent-blue` | `#6478A8` | Alkoholfrei-Badge |
+| `--bf-bg` | `#FAFAF5` | Warmer Off-White Hintergrund |
+
+### Navigation
+
+- **TopBar**: Dunkelgrün-Gradient, Logo links, Mein Besuch rechts (Gold bei aktiv).
+- **Navbar**: 5 Tabs. Lageplan-Button ist erhöht in grünem Kreis.
+- **Lazy Loading**: Nur Admin lazy. Öffentliche Seiten sofort verfügbar.
+
+### BeerCard-Komponente
+
+Zentrale Kachel (`components/UI/BeerCard.jsx`), wiederverwendet überall:
+- **Merken**: Bookmark-Toggle
+- **Getrunken**: Plus/Minus-Counter
+- **Bewertung**: 5 Bierkrüge (FaBeer), Gold wenn gefüllt. Erst nach Trinken aktiv.
+- **Brauerei-Klick**: Öffnet Brauerei-Detail (BottomSheet mit Zurück-Pfeil).
+- **Expand**: Beschreibung, Stammwürze, Details.
+
+### SponsorBanner
+
+Auto-Scroll alle 5s um 2 Logos, 4 sichtbar, pausiert bei Touch (8s Cooldown). Klick öffnet Detail-BottomSheet.
+
+### Bus-API
+
+| Endpoint | Methode | Beschreibung |
+|----------|---------|-------------|
+| `/api/bus/lines` | GET | Alle Buslinien |
+| `/api/bus/stops` | GET | Alle Haltestellen mit Facility-Referenz |
+| `/api/bus/schedule` | GET | Vollständiger Fahrplan gruppiert nach Linie |
+
+**Nachtfahrt-Regel**: 00:00–04:00 Uhr → Vortag.
+**Rückfahrt**: Nur Abfahrtszeit.
+
+### Mein Besuch – Aggregation
+
+- Tagesfilter mit Nachtfahrt-Regel
+- Gemerkte/Bewertete/Getrunkene Biere
+- Initial 5 Einträge, Mehr/Weniger-Button

@@ -1,0 +1,118 @@
+/* =========================================
+   ANREISE PAGE – Busfahrplan
+   ========================================= */
+.page { padding: 0 12px 20px; width: 100%; max-width: 600px; margin: 0 auto; }
+.loading { text-align: center; padding: 60px 20px; color: var(--bf-text-muted); }
+
+.header { text-align: center; padding: 16px 0 8px; }
+.headerIcon { font-size: 2rem; color: var(--bf-primary-green); margin-bottom: 4px; }
+.title { font-size: 1.3rem; font-weight: 700; color: var(--bf-dark-green); margin: 0; }
+.subtitle { font-size: 0.8rem; color: var(--bf-text-muted); margin-top: 4px; }
+
+/* Day Tabs */
+.dayTabs { display: flex; gap: 8px; margin: 12px 0; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+.dayTabs::-webkit-scrollbar { display: none; }
+.dayTab {
+    flex: 0 0 auto; padding: 8px 16px; border: 1px solid var(--bf-gray-mid);
+    border-radius: var(--bf-radius-full); background: var(--bf-white); color: var(--bf-text-dark);
+    font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.dayActive { background: var(--bf-primary-green); color: var(--bf-white); border-color: var(--bf-primary-green); }
+
+/* Search Section */
+.searchSection {
+    background: var(--bf-white); border-radius: var(--bf-radius-md); padding: 14px;
+    box-shadow: var(--bf-shadow-sm); margin-bottom: 16px;
+}
+.searchTitle { font-size: 0.95rem; color: var(--bf-dark-green); margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+.searchFields { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 10px; }
+.searchField { flex: 1; }
+.searchField label { font-size: 0.7rem; color: var(--bf-text-muted); display: block; margin-bottom: 4px; }
+.searchInput {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--bf-gray-mid); border-radius: var(--bf-radius-sm);
+    font-size: 0.82rem; font-family: inherit;
+}
+.searchInput:focus { outline: none; border-color: var(--bf-primary-green); }
+.swapBtn {
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--bf-gray-mid);
+    background: var(--bf-white); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--bf-primary-green); font-size: 0.8rem; flex-shrink: 0; margin-bottom: 2px;
+}
+.searchBtn {
+    width: 100%; padding: 10px; background: var(--bf-primary-green); color: var(--bf-white);
+    border: none; border-radius: var(--bf-radius-sm); font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: background 0.2s;
+}
+.searchBtn:hover { background: var(--bf-dark-green); }
+
+/* Search Results */
+.searchResults { margin-bottom: 16px; }
+.searchResults h4 { font-size: 0.9rem; color: var(--bf-dark-green); margin-bottom: 10px; }
+.resultCard {
+    background: var(--bf-white); border-radius: var(--bf-radius-md); padding: 12px;
+    box-shadow: var(--bf-shadow-sm); margin-bottom: 8px;
+}
+.resultLine { font-weight: 700; color: var(--bf-dark-green); font-size: 0.9rem; }
+.resultPrice { font-size: 0.8rem; color: var(--bf-gold-dark); font-weight: 600; }
+.resultTimes { margin-top: 8px; }
+.resultTime {
+    font-size: 0.8rem; color: var(--bf-text-dark); padding: 4px 0;
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.dirBadge {
+    font-size: 0.65rem; padding: 2px 8px; border-radius: var(--bf-radius-full);
+    background: var(--bf-light-green); color: var(--bf-mid-green); font-weight: 600;
+}
+
+/* Line Section */
+.sectionTitle { font-size: 1.05rem; color: var(--bf-dark-green); margin: 0 0 10px; }
+.lineCard {
+    background: var(--bf-white); border-radius: var(--bf-radius-md);
+    box-shadow: var(--bf-shadow-sm); margin-bottom: 10px; overflow: hidden;
+    border: 1px solid var(--bf-gray-light);
+}
+.lineHeader {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    padding: 14px; border: none; background: none; cursor: pointer; text-align: left; gap: 10px;
+}
+.lineInfo { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.lineNumber {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--bf-primary-green);
+    color: var(--bf-white); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
+}
+.lineInfo strong { font-size: 0.9rem; color: var(--bf-dark-green); display: block; }
+.lineRoute { font-size: 0.75rem; color: var(--bf-text-muted); display: block; }
+.lineRight { display: flex; align-items: center; gap: 8px; flex-shrink: 0; color: var(--bf-gray-dark); }
+.price {
+    font-size: 0.8rem; font-weight: 700; color: var(--bf-gold-dark);
+    background: var(--bf-gold-light); padding: 3px 10px; border-radius: var(--bf-radius-full);
+}
+
+/* Line Body (expanded) */
+.lineBody { padding: 0 14px 14px; animation: expandIn 0.2s ease-out; }
+.directionBlock { margin-bottom: 16px; }
+.dirTitle { font-size: 0.85rem; color: var(--bf-dark-green); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--bf-gray-light); }
+.noDeps { font-size: 0.85rem; color: var(--bf-text-muted); text-align: center; padding: 12px; }
+
+.scheduleTable { display: flex; flex-direction: column; gap: 6px; }
+.stopRow { display: flex; flex-direction: column; gap: 4px; padding: 6px 0; border-bottom: 1px solid var(--bf-gray-light); }
+.stopRow:last-child { border-bottom: none; }
+.stopName {
+    font-size: 0.8rem; font-weight: 600; color: var(--bf-text-dark);
+    display: flex; align-items: center; gap: 6px;
+}
+.stopMapBtn {
+    width: 24px; height: 24px; border-radius: 50%; border: none;
+    background: var(--bf-light-green); color: var(--bf-primary-green); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 0.7rem;
+}
+.stopMapBtn:hover { background: var(--bf-primary-green); color: var(--bf-white); }
+.stopTimes { display: flex; flex-wrap: wrap; gap: 4px; }
+.timeChip {
+    font-size: 0.75rem; padding: 3px 10px; background: var(--bf-bg);
+    border-radius: var(--bf-radius-full); color: var(--bf-text-dark); font-weight: 500;
+    border: 1px solid var(--bf-gray-light);
+}
+
+@keyframes expandIn { from { opacity: 0; } to { opacity: 1; } }

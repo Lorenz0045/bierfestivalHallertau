@@ -1,14 +1,51 @@
 :root {
-    /* Bavarian Theme / Bierfestival Palette */
-    --bf-primary-green: #008A5E;
-    --bf-secondary-green: #2d6a4f;
-    --bf-light-green: #d8f3dc;
+    /* ==========================================
+       BIERFESTIVAL HALLERTAU – DESIGN TOKENS
+       Basierend auf Logo-Farben
+       ========================================== */
+
+    /* Primärfarben (Logo) */
+    --bf-primary-green: #54B947;
+    --bf-dark-green: #1B5E20;
+    --bf-gold: #EEDB3C;
+    --bf-accent-blue: #6478A8;
+
+    /* Abgeleitete Grüntöne */
+    --bf-light-green: #E8F5E9;
+    --bf-mid-green: #388E3C;
+    --bf-secondary-green: #2E7D32;
+
+    /* Abgeleitete Goldtöne */
+    --bf-gold-dark: #C9B82C;
+    --bf-gold-light: #FFF9C4;
+
+    /* Neutrals */
     --bf-white: #ffffff;
-    --bf-gray-light: #f8f9fa;
-    --bf-gray-mid: #e9ecef;
-    --bf-gray-dark: #495057;
-    --bf-text-dark: #212529;
-    --bf-gold: #ffbe0b; /* for beer and stars */
+    --bf-bg: #FAFAF5;
+    --bf-gray-light: #f1f5f0;
+    --bf-gray-mid: #d4d9d0;
+    --bf-gray-dark: #5a6355;
+    --bf-text-dark: #1a2e1a;
+    --bf-text-muted: #6b7b6b;
+
+    /* Semantisch */
+    --bf-danger: #D32F2F;
+    --bf-success: #54B947;
+
+    /* Schatten */
+    --bf-shadow-sm: 0 1px 3px rgba(27, 94, 32, 0.08);
+    --bf-shadow-md: 0 4px 12px rgba(27, 94, 32, 0.1);
+    --bf-shadow-lg: 0 8px 24px rgba(27, 94, 32, 0.12);
+
+    /* Radien */
+    --bf-radius-sm: 8px;
+    --bf-radius-md: 12px;
+    --bf-radius-lg: 20px;
+    --bf-radius-full: 9999px;
+
+    /* Layout */
+    --bf-topbar-height: 56px;
+    --bf-navbar-height: 64px;
 }
 
 * {
@@ -16,94 +53,98 @@
     padding: 0;
     box-sizing: border-box;
     font-family: "Ubuntu", sans-serif;
+    -webkit-tap-highlight-color: transparent;
 }
 
 a {
     text-decoration: none;
-    color: #222222;
+    color: var(--bf-text-dark);
     font-size: 13pt;
 }
 
 body {
-    background-color: #f1f1f1;
+    background-color: var(--bf-bg);
+    color: var(--bf-text-dark);
+    -webkit-font-smoothing: antialiased;
 }
 
 main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--bf-topbar-height) - var(--bf-navbar-height));
+    padding-bottom: calc(var(--bf-navbar-height) + env(safe-area-inset-bottom));
+    width: 100%;
 }
 
 /* ubuntu-300 - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Ubuntu';
   font-style: normal;
   font-weight: 300;
-  src: url('../fonts/ubuntu-v20-latin-300.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-       url('../fonts/ubuntu-v20-latin-300.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+  src: url('../fonts/ubuntu-v20-latin-300.woff2') format('woff2'),
+       url('../fonts/ubuntu-v20-latin-300.ttf') format('truetype');
 }
 /* ubuntu-300italic - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Ubuntu';
   font-style: italic;
   font-weight: 300;
-  src: url('../fonts/ubuntu-v20-latin-300italic.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-       url('../fonts/ubuntu-v20-latin-300italic.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+  src: url('../fonts/ubuntu-v20-latin-300italic.woff2') format('woff2'),
+       url('../fonts/ubuntu-v20-latin-300italic.ttf') format('truetype');
 }
 /* ubuntu-regular - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Ubuntu';
   font-style: normal;
   font-weight: 400;
-  src: url('../fonts/ubuntu-v20-latin-regular.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-       url('../fonts/ubuntu-v20-latin-regular.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+  src: url('../fonts/ubuntu-v20-latin-regular.woff2') format('woff2'),
+       url('../fonts/ubuntu-v20-latin-regular.ttf') format('truetype');
 }
 /* ubuntu-italic - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Ubuntu';
   font-style: italic;
   font-weight: 400;
-  src: url('../fonts/ubuntu-v20-latin-italic.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-       url('../fonts/ubuntu-v20-latin-italic.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+  src: url('../fonts/ubuntu-v20-latin-italic.woff2') format('woff2'),
+       url('../fonts/ubuntu-v20-latin-italic.ttf') format('truetype');
 }
 /* ubuntu-500 - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Ubuntu';
   font-style: normal;
   font-weight: 500;
-  src: url('../fonts/ubuntu-v20-latin-500.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-       url('../fonts/ubuntu-v20-latin-500.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+  src: url('../fonts/ubuntu-v20-latin-500.woff2') format('woff2'),
+       url('../fonts/ubuntu-v20-latin-500.ttf') format('truetype');
 }
 /* ubuntu-500italic - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Ubuntu';
   font-style: italic;
   font-weight: 500;
-  src: url('../fonts/ubuntu-v20-latin-500italic.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-       url('../fonts/ubuntu-v20-latin-500italic.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+  src: url('../fonts/ubuntu-v20-latin-500italic.woff2') format('woff2'),
+       url('../fonts/ubuntu-v20-latin-500italic.ttf') format('truetype');
 }
 /* ubuntu-700 - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Ubuntu';
   font-style: normal;
   font-weight: 700;
-  src: url('../fonts/ubuntu-v20-latin-700.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-       url('../fonts/ubuntu-v20-latin-700.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+  src: url('../fonts/ubuntu-v20-latin-700.woff2') format('woff2'),
+       url('../fonts/ubuntu-v20-latin-700.ttf') format('truetype');
 }
 /* ubuntu-700italic - latin */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Ubuntu';
   font-style: italic;
   font-weight: 700;
-  src: url('../fonts/ubuntu-v20-latin-700italic.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-       url('../fonts/ubuntu-v20-latin-700italic.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+  src: url('../fonts/ubuntu-v20-latin-700italic.woff2') format('woff2'),
+       url('../fonts/ubuntu-v20-latin-700italic.ttf') format('truetype');
 }

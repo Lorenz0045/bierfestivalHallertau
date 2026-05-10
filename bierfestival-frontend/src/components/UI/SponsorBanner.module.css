@@ -1,0 +1,112 @@
+/* =========================================
+   SPONSOR BANNER – Auto-Scroll Logo-Leiste
+   ========================================= */
+.banner {
+    background: var(--bf-white);
+    border-top: 1px solid var(--bf-gray-light);
+    padding: 8px 0;
+}
+
+.scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 12px;
+    scrollbar-width: none;
+}
+
+.scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.logoBtn {
+    flex: 0 0 auto;
+    width: 80px;
+    height: 48px;
+    border: 1px solid var(--bf-gray-light);
+    border-radius: var(--bf-radius-sm);
+    background: var(--bf-white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    scroll-snap-align: start;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.logoBtn:hover {
+    border-color: var(--bf-primary-green);
+    box-shadow: var(--bf-shadow-sm);
+}
+
+.logoImg {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.logoFallback {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--bf-dark-green);
+    text-transform: uppercase;
+}
+
+/* Detail BottomSheet Content */
+.detail {
+    padding: 8px 0;
+}
+
+.detailImg {
+    width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+    border-radius: var(--bf-radius-sm);
+    margin-bottom: 16px;
+    background: var(--bf-gray-light);
+    padding: 12px;
+}
+
+.detailDesc {
+    font-size: 0.9rem;
+    color: var(--bf-text-dark);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    white-space: pre-line;
+}
+
+.detailMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.metaItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--bf-text-muted);
+}
+
+.websiteLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bf-primary-green);
+    color: var(--bf-white) !important;
+    border-radius: var(--bf-radius-full);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.websiteLink:hover {
+    background: var(--bf-dark-green);
+}

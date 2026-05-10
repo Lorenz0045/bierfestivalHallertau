@@ -1,317 +1,61 @@
-.container {
-    padding: 20px 16px 120px 16px;
-    min-height: 100vh;
-    width: 100%;
-    background-color: var(--bf-gray-light);
-}
+/* =========================================
+   SCHENKEN PAGE – Festival Design
+   ========================================= */
+.container { padding: 0 12px 20px; width: 100%; max-width: 600px; margin: 0 auto; }
+.loading { text-align: center; padding: 60px 20px; color: var(--bf-text-muted); }
+.emptyState { text-align: center; padding: 60px 20px; color: var(--bf-text-muted); }
+.emptyIcon { font-size: 3rem; color: var(--bf-gray-mid); margin-bottom: 12px; }
 
-.header {
-    margin-bottom: 24px;
-    text-align: center;
-}
+.header { text-align: center; padding: 16px 0 4px; }
+.title { font-size: 1.3rem; font-weight: 700; color: var(--bf-dark-green); margin: 0; }
+.subtitle { font-size: 0.8rem; color: var(--bf-text-muted); margin-top: 4px; }
 
-.title {
-    font-size: 1.8rem;
-    color: var(--bf-primary-green);
-    margin: 0;
-    font-weight: 800;
-}
-
-.loading,
-.emptyState {
-    text-align: center;
-    padding: 50px 20px;
-    color: var(--bf-gray-dark);
-}
-
-.emptyIcon {
-    font-size: 3rem;
-    color: var(--bf-gray-mid);
-    margin-bottom: 16px;
-}
-
-.tavernList {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
+.tavernList { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
 
 .tavernCard {
-    background-color: var(--bf-white);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-    display: flex;
-    flex-direction: column;
+    background: var(--bf-white); border-radius: var(--bf-radius-md); overflow: hidden;
+    box-shadow: var(--bf-shadow-sm); border: 1px solid var(--bf-gray-light);
+    transition: box-shadow 0.2s;
 }
+.tavernCard:hover { box-shadow: var(--bf-shadow-md); }
 
-.tavernImage {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-}
+.tavernImage { width: 100%; height: 120px; object-fit: cover; }
 
-.tavernContent {
-    padding: 16px;
-}
+.tavernContent { padding: 12px; }
+.tavernName { font-size: 1rem; font-weight: 700; color: var(--bf-dark-green); margin: 0 0 10px; }
 
-.tavernName {
-    margin: 0 0 16px 0;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--bf-text-dark);
-}
-
-.actionButtons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+.actionButtons { display: flex; gap: 8px; }
 
 .beersButton {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #f1f5f9;
-    color: var(--bf-text-dark);
-    padding: 12px 16px;
-    border-radius: 8px;
-    border: none;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    width: 100%;
+    flex: 1; display: flex; align-items: center; gap: 6px; padding: 9px 14px;
+    background: var(--bf-light-green); border: 1px solid var(--bf-primary-green);
+    border-radius: var(--bf-radius-sm); color: var(--bf-dark-green);
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
+.beersButton:hover { background: var(--bf-primary-green); color: var(--bf-white); }
+.arrowIcon { margin-left: auto; font-size: 0.9rem; }
 
-.beersButton span {
-    flex: 1;
-    text-align: left;
-    margin-left: 10px;
+.mapBtn {
+    display: flex; align-items: center; gap: 6px; padding: 9px 14px;
+    background: var(--bf-gray-light); border: 1px solid var(--bf-gray-mid);
+    border-radius: var(--bf-radius-sm); color: var(--bf-text-dark);
+    font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
 }
+.mapBtn:hover { background: var(--bf-gray-mid); }
+.jumpIcon { font-size: 0.7rem; }
 
-.beersButton:hover {
-    background-color: #e2e8f0;
+/* Beer Card List in BottomSheet */
+.beerCardList { display: flex; flex-direction: column; gap: 8px; padding: 4px 0; }
+.noBeersText { font-size: 0.85rem; color: var(--bf-text-muted); text-align: center; padding: 20px 0; }
+
+/* Brewery Detail */
+.breweryDetail { padding: 8px 0; }
+.breweryImg { width: 100%; max-height: 150px; object-fit: contain; border-radius: var(--bf-radius-sm); margin-bottom: 14px; background: var(--bf-gray-light); padding: 12px; }
+.breweryDesc { font-size: 0.88rem; line-height: 1.6; color: var(--bf-text-dark); margin-bottom: 14px; white-space: pre-line; }
+.breweryMeta { font-size: 0.85rem; color: var(--bf-text-muted); margin-bottom: 6px; }
+.breweryWebsite {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+    background: var(--bf-primary-green); color: var(--bf-white) !important;
+    border-radius: var(--bf-radius-full); font-size: 0.85rem; font-weight: 600; margin-top: 8px;
 }
-
-.arrowIcon {
-    color: var(--bf-gray-dark);
-}
-
-.mapButton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background-color: transparent;
-    color: var(--bf-primary-green);
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid var(--bf-primary-green);
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 100%;
-}
-
-.mapButton:hover {
-    background-color: var(--bf-primary-green);
-    color: var(--bf-white);
-}
-
-.jumpIcon {
-    font-size: 0.75rem;
-}
-
-
-
-.noBeersText {
-    color: var(--bf-gray-dark);
-    text-align: center;
-    margin-top: 20px;
-}
-
-.beerList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.beerItem {
-    display: flex;
-    gap: 16px;
-    padding: 12px;
-    background-color: #f8fafc;
-    border-radius: 12px;
-    align-items: center;
-}
-
-.beerIconWrapper {
-    background-color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #eab308;
-    /* Bavarian Gold */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.beerIcon {
-    font-size: 1.2rem;
-}
-
-.beerDetails {
-    flex: 1;
-}
-
-.beerName {
-    margin: 0 0 6px 0;
-    font-size: 1.1rem;
-    color: var(--bf-text-dark);
-}
-
-.beerMeta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    font-size: 0.75rem;
-}
-
-.breweryInfo,
-.typeBadge,
-.alcoholBadge {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-weight: 600;
-}
-
-.breweryInfo {
-    background-color: var(--bf-gray-light);
-    color: var(--bf-gray-dark);
-}
-
-.typeBadge {
-    background-color: var(--bf-primary-green);
-    color: white;
-}
-
-.alcoholBadge {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-.beerInfoArea {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.beerTopRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.beerMainActions {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 12px;
-    min-width: 80px;
-}
-
-.merkenButton {
-    background: transparent;
-    border: none;
-    font-size: 1.1rem;
-    font-weight: 800;
-    font-family: 'Inter', sans-serif;
-    color: var(--bf-gray-dark);
-    cursor: pointer;
-    transition: color 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 0;
-}
-
-.merkenButton:hover {
-    color: var(--bf-primary-green);
-}
-
-.gemerkt {
-    color: var(--bf-primary-green);
-}
-
-.drinkCounter {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: transparent;
-}
-
-.counterBtn {
-    background: none;
-    border: none;
-    color: var(--bf-primary-green);
-    font-size: 1.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.counterBtn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.counterValue {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--bf-primary-green);
-    line-height: 1;
-}
-
-.beerRatingArea {
-    display: flex;
-    gap: 4px;
-    margin-top: 4px;
-}
-
-.disabledAction {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-.ratingMug {
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    cursor: pointer;
-    padding: 0;
-    transition: transform 0.2s;
-}
-
-.ratingMug:not(:disabled):hover {
-    transform: scale(1.2);
-}
-
-.filledMug {
-    color: #eab308;
-}
-
-.emptyMug {
-    color: #cbd5e1;
-}
+.breweryWebsite:hover { background: var(--bf-dark-green); }

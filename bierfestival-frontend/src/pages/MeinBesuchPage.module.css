@@ -1,0 +1,73 @@
+/* =========================================
+   MEIN BESUCH PAGE
+   ========================================= */
+.page { padding: 0 12px 20px; width: 100%; max-width: 600px; margin: 0 auto; }
+.loading { text-align: center; padding: 60px 20px; color: var(--bf-text-muted); }
+
+.header { text-align: center; padding: 16px 0 4px; }
+.title { font-size: 1.3rem; font-weight: 700; color: var(--bf-dark-green); margin: 0; }
+.subtitle { font-size: 0.8rem; color: var(--bf-text-muted); margin-top: 4px; }
+
+/* Day Filter */
+.dayFilter {
+    display: flex; gap: 6px; margin: 12px 0; overflow-x: auto;
+    scrollbar-width: none; padding-bottom: 4px;
+}
+.dayFilter::-webkit-scrollbar { display: none; }
+.dayBtn {
+    flex: 0 0 auto; padding: 7px 14px; border: 1px solid var(--bf-gray-mid);
+    border-radius: var(--bf-radius-full); background: var(--bf-white); color: var(--bf-text-dark);
+    font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.dayActive { background: var(--bf-primary-green); color: var(--bf-white); border-color: var(--bf-primary-green); }
+
+/* Sections */
+.section {
+    background: var(--bf-white); border-radius: var(--bf-radius-md); padding: 14px;
+    box-shadow: var(--bf-shadow-sm); margin-bottom: 14px;
+}
+.sectionTitle {
+    font-size: 1rem; font-weight: 700; color: var(--bf-dark-green); margin: 0 0 10px;
+    display: flex; align-items: center; gap: 6px;
+}
+.sectionIcon { color: var(--bf-gold); font-size: 1rem; }
+.count { font-weight: 400; font-size: 0.8rem; color: var(--bf-text-muted); }
+
+.empty { font-size: 0.85rem; color: var(--bf-text-muted); text-align: center; padding: 16px 0; }
+
+/* Filter Toggles */
+.filterToggles { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.toggleLabel {
+    display: flex; align-items: center; gap: 6px; font-size: 0.78rem;
+    color: var(--bf-text-dark); cursor: pointer;
+}
+.toggleLabel input[type="checkbox"] { accent-color: var(--bf-primary-green); width: 16px; height: 16px; }
+
+/* Beer List */
+.beerList { display: flex; flex-direction: column; gap: 8px; }
+
+/* Toggle More */
+.toggleMore {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; padding: 10px; margin-top: 10px;
+    border: 1px dashed var(--bf-gray-mid); border-radius: var(--bf-radius-sm);
+    background: none; color: var(--bf-primary-green); font-size: 0.85rem;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.toggleMore:hover { background: var(--bf-light-green); border-color: var(--bf-primary-green); }
+
+/* Sponsor Section */
+.sponsorSection { margin-top: 20px; }
+.sponsorTitle { font-size: 0.9rem; color: var(--bf-text-muted); text-align: center; margin-bottom: 8px; }
+
+/* Brewery Detail */
+.breweryDetail { padding: 8px 0; }
+.breweryImg { width: 100%; max-height: 150px; object-fit: contain; border-radius: var(--bf-radius-sm); margin-bottom: 14px; background: var(--bf-gray-light); padding: 12px; }
+.breweryDesc { font-size: 0.88rem; line-height: 1.6; color: var(--bf-text-dark); margin-bottom: 14px; white-space: pre-line; }
+.breweryMeta { font-size: 0.85rem; color: var(--bf-text-muted); margin-bottom: 6px; }
+.breweryWebsite {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+    background: var(--bf-primary-green); color: var(--bf-white) !important;
+    border-radius: var(--bf-radius-full); font-size: 0.85rem; font-weight: 600; margin-top: 8px;
+}
+.breweryWebsite:hover { background: var(--bf-dark-green); }

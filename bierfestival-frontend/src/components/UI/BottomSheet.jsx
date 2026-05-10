@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaArrowLeft } from 'react-icons/fa';
 import styles from './BottomSheet.module.css';
 
-const BottomSheet = ({ isOpen, onClose, title, children }) => {
+const BottomSheet = ({ isOpen, onClose, title, children, onBack, showBack = false }) => {
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -17,15 +17,23 @@ const BottomSheet = ({ isOpen, onClose, title, children }) => {
     if (!isOpen) return null;
 
     return (
-        <div className={styles.modalOverlay} onClick={onClose} role="dialog" aria-modal="true">
-            <div className={styles.bottomSheet} onClick={e => e.stopPropagation()}>
-                <div className={styles.sheetHeader}>
-                    {title && <h3 className={styles.sheetTitle}>{title}</h3>}
-                    <button className={styles.closeButton} onClick={onClose} aria-label="Schließen">
+        <div className={styles.overlay} onClick={onClose} role="dialog" aria-modal="true">
+            <div className={styles.sheet} onClick={e => e.stopPropagation()}>
+                <div className={styles.grabber} />
+                <div className={styles.header}>
+                    <div className={styles.headerLeft}>
+                        {showBack && onBack && (
+                            <button className={styles.backBtn} onClick={onBack} aria-label="Zurück">
+                                <FaArrowLeft />
+                            </button>
+                        )}
+                        {title && <h3 className={styles.title}>{title}</h3>}
+                    </div>
+                    <button className={styles.closeBtn} onClick={onClose} aria-label="Schließen">
                         <FaTimes />
                     </button>
                 </div>
-                <div className={styles.sheetContent}>
+                <div className={styles.content}>
                     {children}
                 </div>
             </div>

@@ -1,13 +1,13 @@
-.homePageContainer {}
-
+/* =========================================
+   HOME PAGE (LAGEPLAN) – Map Styles
+   ========================================= */
 .mapWrapper {
-    height: calc(100vh - 120px);
+    height: calc(100vh - var(--bf-topbar-height) - var(--bf-navbar-height));
     width: 100%;
     position: relative;
     z-index: 1;
 }
 
-/* WICHTIG: Leaflet braucht explizite Höhe und Hintergrund farbe, damit es die größe einnimmt und die karte drüber rendert... */
 .mapContainer {
     height: 100%;
     width: 100%;
@@ -19,41 +19,30 @@
     font-size: 10px !important;
     padding: 0 4px !important;
     color: #555 !important;
-    text-decoration: none !important;
 }
-
 :global(.leaflet-control-attribution a) {
     color: #333 !important;
 }
 
-
+/* User Location */
 .userLocationDot {
-    width: 20px;
-    height: 20px;
+    width: 20px; height: 20px;
     background-color: #4285F4;
     border: 3px solid white;
     border-radius: 50%;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
     animation: pulse 2s infinite;
 }
-
 @keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7);
-    }
-
-    70% {
-        box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
-    }
-
-    100% {
-        box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
-    }
+    0% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(66, 133, 244, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0); }
 }
 
+/* Map Controls */
 .controlsContainer {
     position: absolute;
-    bottom: 30px;
+    bottom: 80px; /* above sponsor banner */
     right: 15px;
     z-index: 1000;
     display: flex;
@@ -64,8 +53,7 @@
 .mapButton {
     background: white;
     border: none;
-    width: 45px;
-    height: 45px;
+    width: 45px; height: 45px;
     border-radius: 50%;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     cursor: pointer;
@@ -73,7 +61,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #333;
+    color: var(--bf-dark-green);
     transition: all 0.2s ease;
 }
 
@@ -83,36 +71,128 @@
 }
 
 .activeButton {
-    color: #4285F4;
-    background: #e8f0fe;
-    border: 2px solid #4285F4;
+    color: var(--bf-primary-green);
+    background: var(--bf-light-green);
+    border: 2px solid var(--bf-primary-green);
 }
 
-/* Ein Button unten rechts über der Map */
-.locateButton {
+/* (i) Info Button */
+.infoButton {
     position: absolute;
-    bottom: 20px;
-    right: 20px;
-    z-index: 999;
-    background: white;
-    border: none;
-    padding: 10px;
+    top: 12px;
+    left: 12px;
+    z-index: 1000;
+    width: 40px; height: 40px;
     border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    background: var(--bf-white);
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #333;
+    color: var(--bf-dark-green);
+    transition: all 0.2s;
 }
 
-.locateButton:active {
-    background: #f0f0f0;
+.infoButton:hover {
+    background: var(--bf-light-green);
+}
+
+.infoPanel {
+    position: absolute;
+    top: 58px;
+    left: 12px;
+    z-index: 1000;
+    background: var(--bf-white);
+    border-radius: var(--bf-radius-md);
+    padding: 14px 16px;
+    box-shadow: var(--bf-shadow-lg);
+    min-width: 200px;
+    animation: fadeInDown 0.2s ease-out;
+}
+
+.infoPanel h4 {
+    margin: 0 0 10px;
+    font-size: 0.9rem;
+    color: var(--bf-dark-green);
+}
+
+.infoLink {
+    display: block;
+    padding: 8px 0;
+    font-size: 0.85rem !important;
+    color: var(--bf-primary-green) !important;
+    border-bottom: 1px solid var(--bf-gray-light);
+    transition: color 0.2s;
+}
+
+.infoLink:last-child { border-bottom: none; }
+.infoLink:hover { color: var(--bf-dark-green) !important; }
+
+/* Sponsor Overlay */
+.sponsorOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+}
+
+/* POI Detail Styles */
+.poiDetail { padding: 4px 0; }
+.poiImg {
+    width: 100%; max-height: 180px; object-fit: cover;
+    border-radius: var(--bf-radius-sm); margin-bottom: 12px;
+}
+.poiType {
+    display: inline-block; font-size: 0.75rem; font-weight: 600;
+    padding: 3px 10px; border-radius: var(--bf-radius-full);
+    background: var(--bf-light-green); color: var(--bf-mid-green); margin-bottom: 10px;
+}
+.poiDesc {
+    font-size: 0.88rem; line-height: 1.6; color: var(--bf-text-dark);
+    margin-bottom: 12px; white-space: pre-line;
+}
+.poiWebsite {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+    background: var(--bf-primary-green); color: var(--bf-white) !important;
+    border-radius: var(--bf-radius-full); font-size: 0.85rem; font-weight: 600;
+    margin-bottom: 12px; transition: background 0.2s;
+}
+.poiWebsite:hover { background: var(--bf-dark-green); }
+.poiMeta { font-size: 0.85rem; color: var(--bf-text-muted); margin-bottom: 6px; }
+
+/* Stage Events */
+.stageProgram { margin-top: 14px; }
+.stageProgram h4 {
+    font-size: 0.95rem; color: var(--bf-dark-green); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+}
+.eventItem {
+    display: flex; gap: 10px; align-items: baseline;
+    padding: 6px 0; border-bottom: 1px solid var(--bf-gray-light);
+}
+.eventItem:last-child { border-bottom: none; }
+.eventTime { font-size: 0.8rem; font-weight: 600; color: var(--bf-primary-green); white-space: nowrap; min-width: 110px; }
+.eventName { font-size: 0.85rem; color: var(--bf-text-dark); }
+
+/* Tavern Beers */
+.tavernBeers { margin-top: 14px; }
+.tavernBeers h4 {
+    font-size: 0.95rem; color: var(--bf-dark-green); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+}
+.tavernBeers > div { margin-bottom: 8px; }
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 768px) {
     .mapWrapper {
-        height: calc(100vh - 120px - env(safe-area-inset-bottom));
+        height: calc(100vh - var(--bf-topbar-height) - var(--bf-navbar-height) - env(safe-area-inset-bottom));
     }
 }

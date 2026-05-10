@@ -198,3 +198,31 @@ ALTER TABLE brewery DROP COLUMN region;
 ALTER TABLE sponsor DROP COLUMN city;
 ALTER TABLE gastronomy DROP COLUMN city;
 ALTER TABLE craft_market DROP COLUMN city;
+
+
+-- ============================================================
+-- BUSPLAN 
+-- ============================================================
+
+-- 1. Neue Tabellenstrukturen anlegen
+CREATE TABLE bus_line (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    line_number INT UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    route_description TEXT,
+    price_eur DECIMAL(4,2) 
+);
+
+CREATE TABLE bus_stop (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    facility_id BIGINT REFERENCES facility(id) ON DELETE SET NULL -- Referenz für den Lageplan
+);
+
+CREATE TABLE bus_departure (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    bus_line_id BIGINT REFERENCES bus_line(id) ON DELETE CASCADE,
+    bus_stop_id BIGINT REFERENCES bus_stop(id) ON DELETE CASCADE,
+    direction VARCHAR(50) NOT NULL, -- 'HINFAHRT' oder 'RUECKFAHRT'
+    departure_time TIMESTAMP(6) WITH TIME ZONE NOT NULL
+);
