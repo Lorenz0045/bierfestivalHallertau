@@ -11,6 +11,7 @@ import SponsorBanner from '../components/UI/SponsorBanner';
 import useTracking from '../hooks/useTracking';
 import { FaLocationArrow, FaBeer, FaInfoCircle, FaTimes, FaGlobe, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
 import styles from './HomePage.module.css';
+import EventItem from '../components/UI/EventItem';
 
 // --- User Location Icon ---
 const userIcon = L.divIcon({
@@ -84,8 +85,8 @@ const MapControls = ({ festivalCoords, jumpCoords }) => {
                 <button className={styles.mapButton} onClick={handleFestivalClick} title="Festival-Zentrum">
                     <FaBeer />
                 </button>
-                <button 
-                    className={`${styles.mapButton} ${isFollowing ? styles.activeButton : ''}`} 
+                <button
+                    className={`${styles.mapButton} ${isFollowing ? styles.activeButton : ''}`}
                     onClick={handleLocateClick}
                     title="Mein Standort"
                 >
@@ -105,6 +106,7 @@ const HomePage = () => {
     const navigate = useNavigate();
     const festivalPosition = [48.50555005218888, 11.75895927999904];
     const jumpToPoi = location.state?.jumpToPoi;
+
 
     const { getBeerState, toggleMerkliste, logDrink, removeDrink, rateBeer } = useTracking();
 
@@ -140,8 +142,15 @@ const HomePage = () => {
 
     // Events für Bühnen laden
     const [events, setEvents] = useState([]);
+    const [allBeers, setAllBeers] = useState([]);
     useEffect(() => {
-        fetchCachedData('/api/events').then(d => d && setEvents(d)).catch(() => {});
+        Promise.all([
+            fetchCachedData('/api/events'),
+            fetchCachedData('/api/beers')
+        ]).then(([evData, beerData]) => {
+            if (evData) setEvents(evData);
+            if (beerData) setAllBeers(beerData);
+        }).catch(() => { });
     }, []);
 
     const stageEvents = useMemo(() => {
@@ -232,12 +241,9 @@ const HomePage = () => {
                         {/* Bühne: Programm */}
                         {selectedPoi.type === 'stage' && stageEvents.length > 0 && (
                             <div className={styles.stageProgram}>
-                                <h4><FaCalendarAlt /> Programm</h4>
+                                <h4><FaCalendarAlt /> Programm auf dieser Bühne</h4>
                                 {stageEvents.map(ev => (
-                                    <div key={ev.id} className={styles.eventItem}>
-                                        <span className={styles.eventTime}>{formatTime(ev.startTime)}{ev.endTime ? ` – ${formatTime(ev.endTime)}` : ''}</span>
-                                        <span className={styles.eventName}>{ev.name}</span>
-                                    </div>
+                                    <EventItem key={ev.id} event={ev} />
                                 ))}
                             </div>
                         )}
@@ -246,25 +252,39 @@ const HomePage = () => {
                         {selectedPoi.type === 'tavern' && selectedPoi.beers?.length > 0 && (
                             <div className={styles.tavernBeers}>
                                 <h4><FaBeer /> Ausgeschenkte Biere ({selectedPoi.beers.length})</h4>
-                                {selectedPoi.beers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(beer => (
-                                    <BeerCard
-                                        key={beer.beerId}
-                                        beer={{
-                                            beerId: beer.beerId,
-                                            name: beer.name,
-                                            breweryName: beer.breweryName,
-                                            typeName: beer.typeName,
-                                            alcoholPercentage: beer.alcoholPercentage,
-                                            isNonAlcoholic: beer.isNonAlcoholic,
-                                        }}
-                                        trackingState={getBeerState(beer.beerId)}
-                                        onToggleMerkliste={toggleMerkliste}
-                                        onLogDrink={logDrink}
-                                        onRemoveDrink={removeDrink}
-                                        onRate={rateBeer}
-                                        compact
-                                    />
-                                ))}
+                                {selectedPoi.beers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(beer => {
+                                    const fullBeer = allBeers.find(b => b.id === beer.beerId);
+                                    return (
+                                        <BeerCard
+                                            key={beer.beerId}
+                                            beer={fullBeer ? {
+                                                beerId: fullBeer.id,
+                                                name: fullBeer.name,
+                                                breweryName: fullBeer.brewery?.name,
+                                                breweryId: fullBeer.brewery?.id,
+                                                typeName: fullBeer.beerType?.name,
+                                                alcoholPercentage: fullBeer.alcoholPercentage,
+                                                isNonAlcoholic: fullBeer.isNonAlcoholic,
+                                                description: fullBeer.description,
+                                                originalGravity: fullBeer.originalGravity,
+                                            } : {
+                                                beerId: beer.beerId,
+                                                name: beer.name,
+                                                breweryName: beer.breweryName,
+                                                typeName: beer.typeName,
+                                                alcoholPercentage: beer.alcoholPercentage,
+                                                isNonAlcoholic: beer.isNonAlcoholic,
+                                            }}
+                                            trackingState={getBeerState(beer.beerId)}
+                                            onToggleMerkliste={toggleMerkliste}
+                                            onLogDrink={logDrink}
+                                            onRemoveDrink={removeDrink}
+                                            onRate={rateBeer}
+                                            // Falls du Drilldown willst, kannst du hier onBreweryClick implementieren
+                                            compact={false} /* False, damit Description wie in Suche angezeigt wird */
+                                        />
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

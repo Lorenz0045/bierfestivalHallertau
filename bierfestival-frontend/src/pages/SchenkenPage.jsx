@@ -14,18 +14,21 @@ const SchenkenPage = () => {
     const [selectedTavern, setSelectedTavern] = useState(null);
     const [breweryDetail, setBreweryDetail] = useState(null);
     const navigate = useNavigate();
+    const [allBeers, setAllBeers] = useState([]);
 
     const { getBeerState, toggleMerkliste, logDrink, removeDrink, rateBeer } = useTracking();
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [tavernsData, brewData] = await Promise.all([
+                const [tavernsData, brewData, beersData] = await Promise.all([
                     fetchCachedData('/api/taverns'),
                     fetchCachedData('/api/breweries'),
+                    fetchCachedData('/api/beers')
                 ]);
                 if (tavernsData) setTaverns(tavernsData.sort((a, b) => a.name.localeCompare(b.name)));
                 if (brewData) setBreweries(brewData);
+                if (beersData) setAllBeers(beersData);
             } catch (error) {
                 console.error("Fehler beim Laden der Schenken", error);
             } finally {
@@ -116,27 +119,36 @@ const SchenkenPage = () => {
                     <p className={styles.noBeersText}>Hier sind aktuell keine Biere hinterlegt.</p>
                 ) : (
                     <div className={styles.beerCardList}>
-                        {selectedTavern.beers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(beer => (
-                            <BeerCard
-                                key={beer.beerId}
-                                beer={{
-                                    beerId: beer.beerId,
-                                    name: beer.name,
-                                    breweryName: beer.breweryName,
-                                    breweryId: beer.breweryId,
-                                    typeName: beer.typeName,
-                                    alcoholPercentage: beer.alcoholPercentage,
-                                    isNonAlcoholic: beer.isNonAlcoholic,
-                                }}
-                                trackingState={getBeerState(beer.beerId)}
-                                onToggleMerkliste={toggleMerkliste}
-                                onLogDrink={logDrink}
-                                onRemoveDrink={removeDrink}
-                                onRate={rateBeer}
-                                onBreweryClick={handleBreweryClick}
-                                compact
-                            />
-                        ))}
+                        {selectedTavern.beers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(beer => {
+                            const fullBeer = allBeers.find(b => b.id === beer.beerId);
+                            return (
+                                <BeerCard
+                                    key={beer.beerId}
+                                    beer={fullBeer ? {
+                                        beerId: fullBeer.id,
+                                        name: fullBeer.name,
+                                        breweryName: fullBeer.brewery?.name,
+                                        breweryId: fullBeer.brewery?.id,
+                                        typeName: fullBeer.beerType?.name,
+                                        alcoholPercentage: fullBeer.alcoholPercentage,
+                                        isNonAlcoholic: fullBeer.isNonAlcoholic,
+                                        description: fullBeer.description,
+                                        originalGravity: fullBeer.originalGravity,
+                                        hopInfo: fullBeer.hopInfo,
+                                        maltInfo: fullBeer.maltInfo,
+                                    } : {
+                                        beerId: beer.beerId, name: beer.name, breweryName: beer.breweryName, breweryId: beer.breweryId, typeName: beer.typeName, alcoholPercentage: beer.alcoholPercentage, isNonAlcoholic: beer.isNonAlcoholic
+                                    }}
+                                    trackingState={getBeerState(beer.beerId)}
+                                    onToggleMerkliste={toggleMerkliste}
+                                    onLogDrink={logDrink}
+                                    onRemoveDrink={removeDrink}
+                                    onRate={rateBeer}
+                                    onBreweryClick={handleBreweryClick}
+                                    compact={false}
+                                />
+                            );
+                        })}
                     </div>
                 )}
             </BottomSheet>

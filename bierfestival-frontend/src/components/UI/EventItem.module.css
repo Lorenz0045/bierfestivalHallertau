@@ -1,0 +1,76 @@
+.eventCard {
+    display: flex;
+    gap: 15px;
+    background: var(--bf-white);
+    border: 1px solid var(--bf-gray-light);
+    border-radius: var(--bf-radius-md);
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: var(--bf-shadow-sm);
+}
+
+.eventTimeColumn {
+    display: flex;
+    flex-direction: column;
+    min-width: 80px;
+    border-right: 2px solid var(--bf-primary-green);
+    padding-right: 10px;
+}
+
+.timeMain {
+    font-weight: 700;
+    color: var(--bf-dark-green);
+    font-size: 0.95rem;
+}
+
+.timeSub {
+    font-size: 0.75rem;
+    color: var(--bf-text-muted);
+    margin-top: 4px;
+}
+
+.eventDetailsColumn {
+    flex: 1;
+}
+
+.eventName {
+    margin: 0 0 6px 0;
+    font-size: 1rem;
+    color: var(--bf-dark-green);
+    font-weight: 700;
+}
+
+.eventDescription {
+    font-size: 0.85rem;
+    color: var(--bf-text-dark);
+    line-height: 1.4;
+    margin: 6px 0 0 0;
+    white-space: pre-line;
+}
+
+.eventMeta {
+    margin-top: 4px;
+}
+
+.stageTag {
+    background: var(--bf-light-green);
+    border: none;
+    color: var(--bf-mid-green);
+    padding: 4px 10px;
+    border-radius: var(--bf-radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.stageTag:hover {
+    background: #d4f0ce;
+}
+
+.jumpIcon {
+    font-size: 0.65rem;
+}

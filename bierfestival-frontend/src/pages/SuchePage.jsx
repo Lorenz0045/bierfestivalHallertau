@@ -4,8 +4,10 @@ import { fetchCachedData } from '../services/cacheService';
 import useTracking from '../hooks/useTracking';
 import BeerCard from '../components/UI/BeerCard';
 import BottomSheet from '../components/UI/BottomSheet';
-import { FaBeer, FaMapMarkerAlt, FaSearch, FaGlobe, FaLocationArrow, FaMapMarkedAlt } from 'react-icons/fa';
+import EventItem from '../components/UI/EventItem';
+import { FaBeer, FaMapMarkerAlt, FaSearch, FaGlobe, FaLocationArrow, FaMapMarkedAlt, FaCalendarAlt } from 'react-icons/fa';
 import styles from './SuchePage.module.css';
+
 
 const SuchePage = () => {
     const [mode, setMode] = useState('bier'); // 'bier' | 'orte'
@@ -21,6 +23,7 @@ const SuchePage = () => {
     const [craftMarkets, setCraftMarkets] = useState([]);
     const [facilities, setFacilities] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [events, setEvents] = useState([]);
 
     // Filters - Bier
     const [searchText, setSearchText] = useState('');
@@ -55,6 +58,7 @@ const SuchePage = () => {
                     fetchCachedData('/api/sponsors'),
                     fetchCachedData('/api/craft-markets'),
                     fetchCachedData('/api/facilities'),
+                    fetchCachedData('/api/events'),
                 ]);
                 setBeers(beersData || []);
                 setBreweries(breweriesData || []);
@@ -65,6 +69,7 @@ const SuchePage = () => {
                 setSponsors(sponsorsData || []);
                 setCraftMarkets(craftData || []);
                 setFacilities(facilData || []);
+                setEvents(eventsData || []);
             } catch (err) {
                 console.error('Suche: Fehler beim Laden', err);
             } finally {
@@ -188,7 +193,7 @@ const SuchePage = () => {
                         <div className={styles.filterRow}>
                             <select value={selectedBrewery} onChange={e => setSelectedBrewery(e.target.value)} className={styles.filterSelect}>
                                 <option value="">Alle Brauereien</option>
-                                {breweries.sort((a,b) => a.name.localeCompare(b.name)).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                {breweries.sort((a, b) => a.name.localeCompare(b.name)).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                             </select>
                             <label className={styles.checkLabel}>
                                 <input type="checkbox" checked={hallertauOnly} onChange={e => setHallertauOnly(e.target.checked)} />
@@ -298,18 +303,57 @@ const SuchePage = () => {
                         {selectedOrt.ortType === 'Schenke' && selectedOrt.beers?.length > 0 && (
                             <div className={styles.ortBeers}>
                                 <h4>Ausgeschenkte Biere</h4>
-                                {selectedOrt.beers.map(b => (
+                                {selectedOrt.beers.map(b => {
+                                    const fullBeer = beers.find(ab => ab.id === b.beerId);
+                                    return (
+                                        <BeerCard
+                                            key={b.beerId}
+                                            beer={fullBeer ? mapBeerForCard(fullBeer) : { beerId: b.beerId, name: b.name, breweryName: b.breweryName, typeName: b.typeName, alcoholPercentage: b.alcoholPercentage, isNonAlcoholic: b.isNonAlcoholic }}
+                                            trackingState={getBeerState(b.beerId)}
+                                            onToggleMerkliste={toggleMerkliste}
+                                            onLogDrink={logDrink}
+                                            onRemoveDrink={removeDrink}
+                                            onRate={rateBeer}
+                                            onBreweryClick={handleBreweryClick}
+                                            compact={false}
+                                        />
+                                    )
+                                })}
+                            </div>
+                        )}
+
+                        {selectedOrt.ortType === 'Bühne' && (
+                            <div className={styles.ortEvents}>
+                                <h4 style={{ marginTop: '15px', color: 'var(--bf-dark-green)' }}><FaCalendarAlt /> Programm auf dieser Bühne</h4>
+                                {events.filter(e => e.stage?.id === selectedOrt.id)
+                                    .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+                                    .map(ev => (
+                                        <EventItem key={ev.id} event={ev} />
+                                    ))}
+                                {events.filter(e => e.stage?.id === selectedOrt.id).length === 0 && (
+                                    <p>Derzeit kein Programm gelistet.</p>
+                                )}
+                            </div>
+                        )}
+
+                        {selectedOrt.ortType === 'Brauerei' && (
+                            <div className={styles.ortBeers}>
+                                <h4 style={{ marginTop: '15px', color: 'var(--bf-dark-green)' }}><FaBeer /> Biere dieser Brauerei auf dem Festival</h4>
+                                {beers.filter(b => b.brewery?.id === selectedOrt.id).map(fullBeer => (
                                     <BeerCard
-                                        key={b.beerId}
-                                        beer={{ beerId: b.beerId, name: b.name, breweryName: b.breweryName, typeName: b.typeName, alcoholPercentage: b.alcoholPercentage, isNonAlcoholic: b.isNonAlcoholic }}
-                                        trackingState={getBeerState(b.beerId)}
+                                        key={fullBeer.id}
+                                        beer={mapBeerForCard(fullBeer)}
+                                        trackingState={getBeerState(fullBeer.id)}
                                         onToggleMerkliste={toggleMerkliste}
                                         onLogDrink={logDrink}
                                         onRemoveDrink={removeDrink}
                                         onRate={rateBeer}
-                                        compact
+                                        compact={false}
                                     />
                                 ))}
+                                {beers.filter(b => b.brewery?.id === selectedOrt.id).length === 0 && (
+                                    <p>Derzeit keine Biere gelistet.</p>
+                                )}
                             </div>
                         )}
                     </div>
@@ -335,6 +379,26 @@ const SuchePage = () => {
                             <a href={breweryDetail.website} target="_blank" rel="noopener noreferrer" className={styles.ortWebsite}>
                                 <FaGlobe /> Website besuchen
                             </a>
+                        )}
+                        {selectedOrt.ortType === 'Brauerei' && (
+                            <div className={styles.ortBeers}>
+                                <h4 style={{ marginTop: '15px', color: 'var(--bf-dark-green)' }}><FaBeer /> Biere dieser Brauerei auf dem Festival</h4>
+                                {beers.filter(b => b.brewery?.id === selectedOrt.id).map(fullBeer => (
+                                    <BeerCard
+                                        key={fullBeer.id}
+                                        beer={mapBeerForCard(fullBeer)}
+                                        trackingState={getBeerState(fullBeer.id)}
+                                        onToggleMerkliste={toggleMerkliste}
+                                        onLogDrink={logDrink}
+                                        onRemoveDrink={removeDrink}
+                                        onRate={rateBeer}
+                                        compact={false}
+                                    />
+                                ))}
+                                {beers.filter(b => b.brewery?.id === selectedOrt.id).length === 0 && (
+                                    <p>Derzeit keine Biere gelistet.</p>
+                                )}
+                            </div>
                         )}
                     </div>
                 )}

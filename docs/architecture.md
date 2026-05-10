@@ -127,6 +127,10 @@ src/
 
 5. **Timestamps (LocalDateTime)**: Event-Zeiten werden im Backend als `LocalDateTime` (ohne Timezone) gespeichert und als ISO-String ohne `Z`-Suffix an das Frontend geliefert. Das Frontend darf diese **niemals** durch `new Date()` jagen, sondern muss sie als rohen String per `substring()` verarbeiten, um Timezone-Shifts zu vermeiden.
 
+6. **Wiederverwendbare Kacheln (`EventItem` & `BeerCard`)**: Um Redundanzen zu vermeiden, werden für die Darstellung von Programmpunkten und Bieren einheitliche Komponenten verwendet. Diese werden in den Overlays (Lageplan, Schenken, Suche) sowie auf den Hauptseiten (`ProgrammPage`) gleichermaßen genutzt.
+
+7. **Client-Side Data Enrichment (Offline-First)**: Da z.B. in der `Tavern` Entity nur eine flache Liste von Bieren ausgeliefert wird, lädt das Frontend an betroffenen Stellen (Schenken/Lageplan) parallel den `/api/beers` Endpoint via `cacheService` und reichert die Bier-Kacheln clientseitig mit den vollständigen Metadaten (wie Description, originalGravity) an, ohne zusätzliche Backend-Last zu erzeugen.
+
 ---
 
 ## Backend-Architektur

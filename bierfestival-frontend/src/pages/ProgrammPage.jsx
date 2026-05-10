@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchCachedData } from '../services/cacheService';
-import { FaClock, FaMapMarkerAlt, FaGuitar, FaLocationArrow } from 'react-icons/fa';
+import { FaGuitar } from 'react-icons/fa';
+import EventItem from '../components/UI/EventItem'; // Neue Komponente importieren
 import styles from './ProgrammPage.module.css';
 
 const ProgrammPage = () => {
@@ -14,6 +15,7 @@ const ProgrammPage = () => {
     useEffect(() => {
         const loadProgram = async () => {
             try {
+                // Nutzt weiterhin den aggressiven cacheService
                 const data = await fetchCachedData('/api/events');
                 if (data && data.length > 0) {
                     setEvents(data);
@@ -30,7 +32,7 @@ const ProgrammPage = () => {
     // Events nach Tagen gruppieren
     const { groupedEvents, topDays } = useMemo(() => {
         const groups = {};
-        
+
         events.forEach(event => {
             let dayKey = event.dayName;
             if (!dayKey) {
@@ -80,12 +82,6 @@ const ProgrammPage = () => {
         }
     }, [topDays, selectedDay]);
 
-    const formatTime = (isoString) => {
-        if (!isoString) return '';
-        // LocalDateTime kommt als z.B. "2026-06-12T14:30:00" – kein Timezone-Shift!
-        return isoString.substring(11, 16) + ' Uhr';
-    };
-
     const handleJumpToMap = (stage) => {
         if (stage && stage.lat && stage.lon) {
             navigate('/', { state: { jumpToPoi: { lat: stage.lat, lon: stage.lon } } });
@@ -124,7 +120,7 @@ const ProgrammPage = () => {
             <div className={styles.daySelectorWrapper}>
                 <div className={styles.daySelector}>
                     {topDays.map(day => (
-                        <button 
+                        <button
                             key={day}
                             className={`${styles.dayButton} ${selectedDay === day ? styles.activeDay : ''}`}
                             onClick={() => setSelectedDay(day)}
@@ -158,32 +154,12 @@ const ProgrammPage = () => {
                     <div className={styles.emptyState}>Keine Events für diese Bühne an diesem Tag.</div>
                 ) : (
                     displayedEvents.map((event, index) => (
-                        <div key={event.id || index} className={styles.eventCard}>
-                            <div className={styles.eventTimeColumn}>
-                                <span className={styles.timeMain}>{formatTime(event.startTime)}</span>
-                                {event.endTime && (
-                                    <span className={styles.timeSub}>bis {formatTime(event.endTime)}</span>
-                                )}
-                            </div>
-                            <div className={styles.eventDetailsColumn}>
-                                <h3 className={styles.eventName}>{event.name}</h3>
-                                <div className={styles.eventMeta}>
-                                    {event.stage && (
-                                        <button 
-                                            className={styles.stageTag} 
-                                            onClick={() => handleJumpToMap(event.stage)}
-                                            title="Auf Karte anzeigen"
-                                        >
-                                            <FaMapMarkerAlt /> {event.stage.name || 'Bühne'}
-                                            <FaLocationArrow className={styles.jumpIcon} />
-                                        </button>
-                                    )}
-                                </div>
-                                {event.description && (
-                                    <p className={styles.eventDescription}>{event.description}</p>
-                                )}
-                            </div>
-                        </div>
+                        <EventItem
+                            key={event.id || index}
+                            event={event}
+                            onJumpToMap={handleJumpToMap}
+                            showStage={true}
+                        />
                     ))
                 )}
             </div>

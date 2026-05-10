@@ -30,6 +30,8 @@
     margin-bottom: 16px;
 }
 
+/* --- Navigation / Filter --- */
+
 .daySelectorWrapper {
     margin-bottom: 24px;
     margin-left: -16px;
@@ -38,12 +40,10 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-
 }
 
 .daySelectorWrapper::-webkit-scrollbar {
     display: none;
-
 }
 
 .daySelector {
@@ -75,58 +75,6 @@
     border-color: var(--bf-primary-green);
     color: var(--bf-white);
     box-shadow: 0 4px 8px rgba(39, 103, 73, 0.2);
-}
-
-.eventList {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.eventCard {
-    background-color: var(--bf-white);
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    gap: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.eventTimeColumn {
-    min-width: 75px;
-    display: flex;
-    flex-direction: column;
-    border-right: 2px solid var(--bf-gray-light);
-    padding-right: 12px;
-}
-
-.timeMain {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--bf-primary-green);
-}
-
-.timeSub {
-    font-size: 0.75rem;
-    color: var(--bf-gray-dark);
-    margin-top: 4px;
-}
-
-.eventDetailsColumn {
-    flex: 1;
-}
-
-.eventName {
-    margin: 0 0 6px 0;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--bf-text-dark);
-}
-
-.eventMeta {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 8px;
 }
 
 .stageSelectorWrapper {
@@ -172,33 +120,10 @@
     color: var(--bf-white);
 }
 
-.stageTag {
+/* --- Content Wrapper --- */
+
+.eventList {
     display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.8rem;
-    background-color: var(--bf-light-green);
-    color: var(--bf-mid-green);
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.stageTag:hover {
-    background-color: var(--bf-gray-light);
-}
-
-.jumpIcon {
-    font-size: 0.7rem;
-    margin-left: 4px;
-}
-
-.eventDescription {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--bf-gray-dark);
-    line-height: 1.4;
+    flex-direction: column;
+    gap: 16px;
 }
