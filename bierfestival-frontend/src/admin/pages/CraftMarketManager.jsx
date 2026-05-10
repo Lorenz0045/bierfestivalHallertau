@@ -5,6 +5,7 @@ import apiRequest from '../../services/apiService';
 import { useUser } from '../contexts/UserContext';
 
 const API_CRAFT_MARKETS = '/api/craft-markets';
+const API_CITIES = '/api/cities';
 
 const renderExternalLink = (url) => {
     if (!url) return '-';
@@ -15,6 +16,7 @@ const renderExternalLink = (url) => {
 const CraftMarketManager = () => {
     const { keycloakInstance } = useUser();
     const [craftMarkets, setCraftMarkets] = useState([]);
+    const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
@@ -22,20 +24,20 @@ const CraftMarketManager = () => {
     const columns = [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
-        { key: 'city', label: 'Ort' },
+        { key: 'city', label: 'Ort', render: (_, row) => row.city?.name || '-' },
         { key: 'website', label: 'Website', render: (val) => renderExternalLink(val) },
-        { 
-            key: 'imgUrl', 
-            label: 'Icon', 
-            sortable: false, 
-            render: (val) => val ? <img src={val} alt="Markt" style={{ height: '30px', borderRadius: '4px' }} /> : '-' 
+        {
+            key: 'imgUrl',
+            label: 'Icon',
+            sortable: false,
+            render: (val) => val ? <img src={val} alt="Markt" style={{ height: '30px', borderRadius: '4px' }} /> : '-'
         }
     ];
 
     const formFields = [
         { name: 'name', label: 'Name', type: 'text', required: true },
         { name: 'description', label: 'Beschreibung', type: 'textarea', rows: 5, maxLength: 2000 },
-        { name: 'city', label: 'Ort', type: 'text' },
+        { name: 'cityId', label: 'Ort', type: 'select', options: cities.map(c => ({ id: c.id, name: c.name })), lookupEndpoint: '/api/cities' },
         { name: 'website', label: 'Website', type: 'text' },
         { name: 'imgUrl', label: 'Icon', type: 'image' }
     ];
@@ -44,8 +46,12 @@ const CraftMarketManager = () => {
         if (!keycloakInstance?.token) return;
         setLoading(true);
         try {
-            const data = await apiRequest(API_CRAFT_MARKETS, 'GET', null, keycloakInstance.token);
-            setCraftMarkets(data || []);
+            const [marketData, cityData] = await Promise.all([
+                apiRequest(API_CRAFT_MARKETS, 'GET', null, keycloakInstance.token),
+                apiRequest(API_CITIES, 'GET', null, keycloakInstance.token)
+            ]);
+            setCraftMarkets(marketData || []);
+            setCities(cityData || []);
         } catch (error) {
             console.error(error);
         } finally {
@@ -63,7 +69,11 @@ const CraftMarketManager = () => {
     };
 
     const handleEdit = (item) => {
-        setEditingItem(item);
+        const itemForEdit = {
+            ...item,
+            cityId: item.city?.id || ''
+        };
+        setEditingItem(itemForEdit);
         setIsModalOpen(true);
     };
 
@@ -82,18 +92,28 @@ const CraftMarketManager = () => {
 
     const handleFormSubmit = async (formData) => {
         if (!keycloakInstance?.token) return;
+        const payload = {
+            ...formData,
+            city: formData.cityId ? { id: parseInt(formData.cityId) } : null
+        };
 
         try {
             if (editingItem && editingItem.id) {
-                await apiRequest(`${API_CRAFT_MARKETS}/${editingItem.id}`, 'PUT', formData, keycloakInstance.token);
+                await apiRequest(`${API_CRAFT_MARKETS}/${editingItem.id}`, 'PUT', payload, keycloakInstance.token);
             } else {
-                await apiRequest(API_CRAFT_MARKETS, 'POST', formData, keycloakInstance.token);
+                await apiRequest(API_CRAFT_MARKETS, 'POST', payload, keycloakInstance.token);
             }
             setIsModalOpen(false);
             loadData();
         } catch (error) {
             console.error(error);
             alert("Fehler beim Speichern.");
+        }
+    };
+
+    const handleLookupCreated = (fieldName, newEntry) => {
+        if (fieldName === 'cityId') {
+            setCities(prev => [...prev, newEntry].sort((a, b) => a.name.localeCompare(b.name)));
         }
     };
 
@@ -108,13 +128,14 @@ const CraftMarketManager = () => {
                 </button>
             </div>
             <DataTable columns={columns} data={craftMarkets} onEdit={handleEdit} onDelete={handleDelete} />
-            <GenericFormModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-                onSubmit={handleFormSubmit} 
-                title={editingItem ? 'Handwerkermarkt bearbeiten' : 'Neuen Handwerkermarkt anlegen'} 
-                fields={formFields} 
-                initialData={editingItem} 
+            <GenericFormModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleFormSubmit}
+                title={editingItem ? 'Handwerkermarkt bearbeiten' : 'Neuen Handwerkermarkt anlegen'}
+                fields={formFields}
+                initialData={editingItem}
+                onLookupCreated={handleLookupCreated}
             />
         </div>
     );

@@ -122,8 +122,8 @@ const SchenkenPage = () => {
                                                 <div className={styles.beerMeta}>
                                                     {beer.breweryName && <span className={styles.breweryInfo}>{beer.breweryName}</span>}
                                                     {beer.typeName && <span className={styles.typeBadge}>{beer.typeName}</span>}
-                                                    {beer.alcoholPercentage != null && (
-                                                        <span className={styles.alcoholBadge}>{beer.alcoholPercentage}% Vol.</span>
+                                                    {(beer.alcoholPercentage != null || beer.isNonAlcoholic) && (
+                                                        <span className={styles.alcoholBadge}>{beer.isNonAlcoholic ? '< 0,5% Vol.' : `${beer.alcoholPercentage}% Vol.`}</span>
                                                     )}
                                                 </div>
                                             </div>

@@ -155,3 +155,46 @@ CREATE TABLE craft_market (
     lat DOUBLE PRECISION,
     lon DOUBLE PRECISION
 );
+
+-- ============================================================
+-- MIGRATION: Ort & Landkreis als Lookup-Tabellen
+-- ============================================================
+
+-- 1. Lookup-Tabellen erstellen
+CREATE TABLE city (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE district (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+-- 2. Bestehende Werte in Lookup-Tabellen überführen (DISTINCT)
+INSERT INTO city (name) SELECT DISTINCT city FROM brewery WHERE city IS NOT NULL AND city != '' ON CONFLICT DO NOTHING;
+INSERT INTO city (name) SELECT DISTINCT city FROM sponsor WHERE city IS NOT NULL AND city != '' ON CONFLICT DO NOTHING;
+INSERT INTO city (name) SELECT DISTINCT city FROM gastronomy WHERE city IS NOT NULL AND city != '' ON CONFLICT DO NOTHING;
+INSERT INTO city (name) SELECT DISTINCT city FROM craft_market WHERE city IS NOT NULL AND city != '' ON CONFLICT DO NOTHING;
+INSERT INTO district (name) SELECT DISTINCT region FROM brewery WHERE region IS NOT NULL AND region != '' ON CONFLICT DO NOTHING;
+
+-- 3. Neue FK-Spalten hinzufügen
+ALTER TABLE brewery ADD COLUMN city_id BIGINT REFERENCES city(id) ON DELETE SET NULL;
+ALTER TABLE brewery ADD COLUMN district_id BIGINT REFERENCES district(id) ON DELETE SET NULL;
+ALTER TABLE sponsor ADD COLUMN city_id BIGINT REFERENCES city(id) ON DELETE SET NULL;
+ALTER TABLE gastronomy ADD COLUMN city_id BIGINT REFERENCES city(id) ON DELETE SET NULL;
+ALTER TABLE craft_market ADD COLUMN city_id BIGINT REFERENCES city(id) ON DELETE SET NULL;
+
+-- 4. Bestehende Werte in die neuen Spalten migrieren
+UPDATE brewery SET city_id = c.id FROM city c WHERE brewery.city = c.name;
+UPDATE brewery SET district_id = d.id FROM district d WHERE brewery.region = d.name;
+UPDATE sponsor SET city_id = c.id FROM city c WHERE sponsor.city = c.name;
+UPDATE gastronomy SET city_id = c.id FROM city c WHERE gastronomy.city = c.name;
+UPDATE craft_market SET city_id = c.id FROM city c WHERE craft_market.city = c.name;
+
+-- 5. Alte String-Spalten entfernen
+ALTER TABLE brewery DROP COLUMN city;
+ALTER TABLE brewery DROP COLUMN region;
+ALTER TABLE sponsor DROP COLUMN city;
+ALTER TABLE gastronomy DROP COLUMN city;
+ALTER TABLE craft_market DROP COLUMN city;

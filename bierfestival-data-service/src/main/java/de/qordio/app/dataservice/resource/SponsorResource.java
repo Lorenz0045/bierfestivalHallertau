@@ -9,6 +9,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import de.qordio.app.dataservice.entity.lookups.City;
 import de.qordio.app.dataservice.entity.masterdata.Sponsor;
 import de.qordio.app.dataservice.service.FileService;
 import io.quarkus.panache.common.Sort;
@@ -39,10 +40,15 @@ public class SponsorResource {
     @Inject
     FileService fileService;
 
+    public static class LookupDto {
+        public Long id;
+        public String name;
+    }
+
     public static class SponsorDto {
         public Long id;
         public String name;
-        public String city;
+        public LookupDto city;
         public String website;
         public String description;
         public String imgUrl;
@@ -52,22 +58,25 @@ public class SponsorResource {
             SponsorDto dto = new SponsorDto();
             dto.id = entity.id;
             dto.name = entity.name;
-            dto.city = entity.city;
+            if (entity.city != null) {
+                dto.city = new LookupDto();
+                dto.city.id = entity.city.id;
+                dto.city.name = entity.city.name;
+            }
             dto.website = entity.website;
             dto.description = entity.description;
             dto.imgUrl = entity.imgUrl;
             return dto;
         }
+    }
 
-        public Sponsor toEntity() {
-            Sponsor entity = new Sponsor();
-            entity.name = this.name;
-            entity.city = this.city;
-            entity.website = this.website;
-            entity.description = this.description;
-            entity.imgUrl = this.imgUrl;
-            return entity;
-        }
+    public static class SponsorUpdateDto {
+        public String name;
+        public RefId city;
+        public String website;
+        public String description;
+        public String imgUrl;
+        public static class RefId { public Long id; }
     }
 
     @GET
@@ -83,8 +92,9 @@ public class SponsorResource {
     @Transactional
     @Operation(summary = "Create Sponsor")
     @SecurityRequirement(name = "jwtAuth")
-    public Response create(@Valid SponsorDto dto) {
-        Sponsor entity = dto.toEntity();
+    public Response create(@Valid SponsorUpdateDto dto) {
+        Sponsor entity = new Sponsor();
+        mapDto(dto, entity);
         entity.persist();
         return Response.created(URI.create("/api/sponsors/" + entity.id)).entity(SponsorDto.fromEntity(entity)).build();
     }
@@ -95,23 +105,17 @@ public class SponsorResource {
     @Transactional
     @Operation(summary = "Update Sponsor")
     @SecurityRequirement(name = "jwtAuth")
-    public Response update(@PathParam("id") Long id, @Valid SponsorDto dto) {
+    public Response update(@PathParam("id") Long id, @Valid SponsorUpdateDto dto) {
         Optional<Sponsor> existingOpt = Sponsor.findByIdOptional(id);
         if (existingOpt.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
-        
+
         Sponsor existing = existingOpt.get();
         String oldImageUrl = existing.imgUrl;
-
-        existing.name = dto.name;
-        existing.city = dto.city;
-        existing.website = dto.website;
-        existing.description = dto.description;
-        existing.imgUrl = dto.imgUrl;
+        mapDto(dto, existing);
 
         if (oldImageUrl != null && !oldImageUrl.equals(existing.imgUrl)) {
             fileService.deleteFile(oldImageUrl);
         }
-
         return Response.ok(SponsorDto.fromEntity(existing)).build();
     }
 
@@ -127,12 +131,23 @@ public class SponsorResource {
             Sponsor entity = opt.get();
             String imageUrl = entity.imgUrl;
             entity.delete();
-
             if (imageUrl != null) {
                 fileService.deleteFile(imageUrl);
             }
             return Response.noContent().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    private void mapDto(SponsorUpdateDto dto, Sponsor entity) {
+        entity.name = dto.name;
+        entity.website = dto.website;
+        entity.description = dto.description;
+        entity.imgUrl = dto.imgUrl;
+        if (dto.city != null && dto.city.id != null) {
+            entity.city = City.findById(dto.city.id);
+        } else {
+            entity.city = null;
+        }
     }
 }

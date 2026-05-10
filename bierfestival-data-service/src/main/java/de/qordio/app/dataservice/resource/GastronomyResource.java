@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.qordio.app.dataservice.entity.lookups.City;
 import de.qordio.app.dataservice.entity.lookups.GastronomyType;
 import de.qordio.app.dataservice.entity.masterdata.Gastronomy;
 import de.qordio.app.dataservice.service.FileService;
@@ -33,39 +34,52 @@ public class GastronomyResource {
     @Inject
     FileService fileService;
 
+    public static class LookupDto {
+        public Long id;
+        public String name;
+    }
+
     public static class GastronomyDto {
         public Long id;
         public String name;
-        public String city;
+        public LookupDto city;
         public String website;
         public String imgUrl;
         public Double lat;
         public Double lon;
-        public GastronomyType type; // Neues Feld
-        
+        public LookupDto type;
+
         public static GastronomyDto fromEntity(Gastronomy entity) {
             GastronomyDto dto = new GastronomyDto();
             dto.id = entity.id;
             dto.name = entity.name;
-            dto.city = entity.city;
+            if (entity.city != null) {
+                dto.city = new LookupDto();
+                dto.city.id = entity.city.id;
+                dto.city.name = entity.city.name;
+            }
             dto.website = entity.website;
             dto.imgUrl = entity.imgUrl;
             dto.lat = entity.lat;
             dto.lon = entity.lon;
-            dto.type = entity.gastronomyType;
+            if (entity.gastronomyType != null) {
+                dto.type = new LookupDto();
+                dto.type.id = entity.gastronomyType.id;
+                dto.type.name = entity.gastronomyType.name;
+            }
             return dto;
         }
     }
 
     public static class GastronomyUpdateDto {
         public String name;
-        public String city;
+        public RefId city;
         public String website;
         public String imgUrl;
         public Double lat;
         public Double lon;
-        public TypeId type;
-        public static class TypeId { public Long id; }
+        public RefId type;
+        public static class RefId { public Long id; }
     }
 
     @GET
@@ -93,10 +107,10 @@ public class GastronomyResource {
     public Response update(@PathParam("id") Long id, GastronomyUpdateDto dto) {
         Gastronomy existing = Gastronomy.findById(id);
         if (existing == null) return Response.status(404).build();
-        
+
         String oldImage = existing.imgUrl;
         mapDto(dto, existing);
-        
+
         if (oldImage != null && !oldImage.equals(existing.imgUrl)) {
             fileService.deleteFile(oldImage);
         }
@@ -120,11 +134,15 @@ public class GastronomyResource {
 
     private void mapDto(GastronomyUpdateDto dto, Gastronomy entity) {
         entity.name = dto.name;
-        entity.city = dto.city;
         entity.website = dto.website;
         entity.imgUrl = dto.imgUrl;
         entity.lat = dto.lat;
         entity.lon = dto.lon;
+        if (dto.city != null && dto.city.id != null) {
+            entity.city = City.findById(dto.city.id);
+        } else {
+            entity.city = null;
+        }
         if (dto.type != null && dto.type.id != null) {
             entity.gastronomyType = GastronomyType.findById(dto.type.id);
         } else {

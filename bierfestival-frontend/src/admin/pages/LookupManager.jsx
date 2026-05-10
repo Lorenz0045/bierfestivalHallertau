@@ -7,7 +7,9 @@ import { useUser } from '../contexts/UserContext';
 const TABS = {
     BEER_TYPES: 'BEER_TYPES',
     FACILITY_TYPES: 'FACILITY_TYPES',
-    GASTRONOMY_TYPES: 'GASTRONOMY_TYPES'
+    GASTRONOMY_TYPES: 'GASTRONOMY_TYPES',
+    CITIES: 'CITIES',
+    DISTRICTS: 'DISTRICTS'
 };
 
 const LookupManager = () => {
@@ -37,11 +39,11 @@ const LookupManager = () => {
             columns: [
                 { key: 'id', label: 'ID' },
                 { key: 'name', label: 'Einrichtungsart' },
-                { 
-                    key: 'imgUrl', 
-                    label: 'Standard-Icon', 
+                {
+                    key: 'imgUrl',
+                    label: 'Standard-Icon',
                     sortable: false,
-                    render: (val) => val ? <img src={val} alt="Icon" style={{ height: '30px', borderRadius: '4px' }} /> : '-' 
+                    render: (val) => val ? <img src={val} alt="Icon" style={{ height: '30px', borderRadius: '4px' }} /> : '-'
                 }
             ],
             fields: [
@@ -58,6 +60,28 @@ const LookupManager = () => {
             ],
             fields: [
                 { name: 'name', label: 'Kategorie-Bezeichnung', type: 'text', required: true }
+            ]
+        },
+        [TABS.CITIES]: {
+            endpoint: '/api/cities',
+            title: 'Ort',
+            columns: [
+                { key: 'id', label: 'ID' },
+                { key: 'name', label: 'Ort' }
+            ],
+            fields: [
+                { name: 'name', label: 'Ortsname', type: 'text', required: true }
+            ]
+        },
+        [TABS.DISTRICTS]: {
+            endpoint: '/api/districts',
+            title: 'Landkreis',
+            columns: [
+                { key: 'id', label: 'ID' },
+                { key: 'name', label: 'Landkreis' }
+            ],
+            fields: [
+                { name: 'name', label: 'Landkreis-Bezeichnung', type: 'text', required: true }
             ]
         }
     };
@@ -120,25 +144,24 @@ const LookupManager = () => {
         }
     };
 
+    const tabStyle = (tab) => ({
+        background: 'none',
+        border: 'none',
+        padding: '0.5rem 1rem',
+        cursor: 'pointer',
+        fontWeight: activeTab === tab ? 'bold' : 'normal',
+        borderBottom: activeTab === tab ? '3px solid #2d6a4f' : 'none'
+    });
+
     return (
         <div>
             {/* Tab-Navigation */}
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
-                <button 
-                    onClick={() => setActiveTab(TABS.BEER_TYPES)} 
-                    style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: activeTab === TABS.BEER_TYPES ? 'bold' : 'normal', borderBottom: activeTab === TABS.BEER_TYPES ? '3px solid #2d6a4f' : 'none' }}>
-                    Biersorten
-                </button>
-                <button 
-                    onClick={() => setActiveTab(TABS.FACILITY_TYPES)} 
-                    style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: activeTab === TABS.FACILITY_TYPES ? 'bold' : 'normal', borderBottom: activeTab === TABS.FACILITY_TYPES ? '3px solid #2d6a4f' : 'none' }}>
-                    Einrichtungsarten
-                </button>
-                <button 
-                    onClick={() => setActiveTab(TABS.GASTRONOMY_TYPES)} 
-                    style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: activeTab === TABS.GASTRONOMY_TYPES ? 'bold' : 'normal', borderBottom: activeTab === TABS.GASTRONOMY_TYPES ? '3px solid #2d6a4f' : 'none' }}>
-                    Gastronomie-Kategorien
-                </button>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem', flexWrap: 'wrap' }}>
+                <button onClick={() => setActiveTab(TABS.BEER_TYPES)} style={tabStyle(TABS.BEER_TYPES)}>Biersorten</button>
+                <button onClick={() => setActiveTab(TABS.FACILITY_TYPES)} style={tabStyle(TABS.FACILITY_TYPES)}>Einrichtungsarten</button>
+                <button onClick={() => setActiveTab(TABS.GASTRONOMY_TYPES)} style={tabStyle(TABS.GASTRONOMY_TYPES)}>Gastronomie-Kategorien</button>
+                <button onClick={() => setActiveTab(TABS.CITIES)} style={tabStyle(TABS.CITIES)}>Orte</button>
+                <button onClick={() => setActiveTab(TABS.DISTRICTS)} style={tabStyle(TABS.DISTRICTS)}>Landkreise</button>
             </div>
 
             {/* Header mit Neu-Button */}
@@ -155,13 +178,13 @@ const LookupManager = () => {
             )}
 
             {/* Modal */}
-            <GenericFormModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-                onSubmit={handleFormSubmit} 
-                title={editingItem ? `${activeConfig.title} bearbeiten` : `Neue ${activeConfig.title} anlegen`} 
-                fields={activeConfig.fields} 
-                initialData={editingItem} 
+            <GenericFormModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleFormSubmit}
+                title={editingItem ? `${activeConfig.title} bearbeiten` : `Neue ${activeConfig.title} anlegen`}
+                fields={activeConfig.fields}
+                initialData={editingItem}
             />
         </div>
     );

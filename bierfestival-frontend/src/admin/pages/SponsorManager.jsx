@@ -4,8 +4,8 @@ import GenericFormModal from '../components/GenericFormModal';
 import apiRequest from '../../services/apiService';
 import { useUser } from '../contexts/UserContext';
 
-const API_BASE_URL = '/api/sponsors';
-
+const API_SPONSORS = '/api/sponsors';
+const API_CITIES = '/api/cities';
 
 const renderExternalLink = (url) => {
     if (!url) return '-';
@@ -16,6 +16,7 @@ const renderExternalLink = (url) => {
 const SponsorManager = () => {
     const { keycloakInstance } = useUser();
     const [sponsors, setSponsors] = useState([]);
+    const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
@@ -23,25 +24,29 @@ const SponsorManager = () => {
     const columns = [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
-        { key: 'city', label: 'Ort' },
+        { key: 'city', label: 'Ort', render: (_, row) => row.city?.name || '-' },
         { key: 'website', label: 'Website', render: (val) => renderExternalLink(val) },
         { key: 'imgUrl', label: 'Logo', sortable: false, render: (val) => val ? <img src={val} alt="Sponsor" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
     ];
 
     const formFields = [
         { name: 'name', label: 'Name', type: 'text', required: true },
-        { name: 'city', label: 'Ort', type: 'text' },
+        { name: 'cityId', label: 'Ort', type: 'select', options: cities.map(c => ({ id: c.id, name: c.name })), lookupEndpoint: '/api/cities' },
         { name: 'website', label: 'Website', type: 'text' },
         { name: 'description', label: 'Beschreibung', type: 'text' },
         { name: 'imgUrl', label: 'Logo', type: 'image' }
     ];
 
-    const loadSponsors = useCallback(async () => {
+    const loadData = useCallback(async () => {
         if (!keycloakInstance?.token) return;
         setLoading(true);
         try {
-            const data = await apiRequest(API_BASE_URL, 'GET', null, keycloakInstance.token);
-            setSponsors(data || []);
+            const [sponsorData, cityData] = await Promise.all([
+                apiRequest(API_SPONSORS, 'GET', null, keycloakInstance.token),
+                apiRequest(API_CITIES, 'GET', null, keycloakInstance.token)
+            ]);
+            setSponsors(sponsorData || []);
+            setCities(cityData || []);
         } catch (error) {
             console.error(error);
         } finally {
@@ -50,8 +55,8 @@ const SponsorManager = () => {
     }, [keycloakInstance]);
 
     useEffect(() => {
-        loadSponsors();
-    }, [loadSponsors]);
+        loadData();
+    }, [loadData]);
 
     const handleCreateNew = () => {
         setEditingItem(null);
@@ -59,7 +64,11 @@ const SponsorManager = () => {
     };
 
     const handleEdit = (item) => {
-        setEditingItem(item);
+        const itemForEdit = {
+            ...item,
+            cityId: item.city?.id || ''
+        };
+        setEditingItem(itemForEdit);
         setIsModalOpen(true);
     };
 
@@ -67,8 +76,8 @@ const SponsorManager = () => {
         if (!keycloakInstance?.token) return;
         if (window.confirm(`Sponsor "${item.name}" wirklich löschen?`)) {
             try {
-                await apiRequest(`${API_BASE_URL}/${item.id}`, 'DELETE', null, keycloakInstance.token);
-                loadSponsors();
+                await apiRequest(`${API_SPONSORS}/${item.id}`, 'DELETE', null, keycloakInstance.token);
+                loadData();
             } catch (error) {
                 console.error(error);
             }
@@ -77,16 +86,27 @@ const SponsorManager = () => {
 
     const handleFormSubmit = async (formData) => {
         if (!keycloakInstance?.token) return;
+        const payload = {
+            ...formData,
+            city: formData.cityId ? { id: parseInt(formData.cityId) } : null
+        };
+
         try {
             if (editingItem && editingItem.id) {
-                await apiRequest(`${API_BASE_URL}/${editingItem.id}`, 'PUT', formData, keycloakInstance.token);
+                await apiRequest(`${API_SPONSORS}/${editingItem.id}`, 'PUT', payload, keycloakInstance.token);
             } else {
-                await apiRequest(API_BASE_URL, 'POST', formData, keycloakInstance.token);
+                await apiRequest(API_SPONSORS, 'POST', payload, keycloakInstance.token);
             }
             setIsModalOpen(false);
-            loadSponsors();
+            loadData();
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const handleLookupCreated = (fieldName, newEntry) => {
+        if (fieldName === 'cityId') {
+            setCities(prev => [...prev, newEntry].sort((a, b) => a.name.localeCompare(b.name)));
         }
     };
 
@@ -101,7 +121,7 @@ const SponsorManager = () => {
                 </button>
             </div>
             <DataTable columns={columns} data={sponsors} onEdit={handleEdit} onDelete={handleDelete} />
-            <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Sponsor bearbeiten' : 'Neuer Sponsor'} fields={formFields} initialData={editingItem} />
+            <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Sponsor bearbeiten' : 'Neuer Sponsor'} fields={formFields} initialData={editingItem} onLookupCreated={handleLookupCreated} />
         </div>
     );
 };

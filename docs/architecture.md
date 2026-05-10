@@ -38,13 +38,14 @@
         ▼                        ▼
 ┌──────────────────┐     ┌───────────────────┐
 │  LocalStorage    │     │  Keycloak (Auth)   │
-│  (Tracking)      │     │  (Admin only)      │
-└──────────────────┘     └───────────────────┘
+│  (Tracking +     │     │  (Admin only)      │
+│   Retry Queue)   │     └───────────────────┘
+└──────────────────┘
 ```
 
 ### Prinzipien
 - **Mobile-First**: Die öffentliche App ist primär für Smartphone-Nutzer auf dem Festival konzipiert.
-- **Offline-Resilient**: Stammdaten werden aggressiv im Frontend-Cache gehalten (`cacheService`).
+- **Offline-Resilient**: Stammdaten werden aggressiv im Frontend-Cache gehalten (`cacheService`). Tracking-Sync-Fehler werden silent in eine Retry-Queue gestellt.
 - **Privacy-by-Design**: Tracking-Daten werden primär lokal im `localStorage` gespeichert. Die Synchronisation mit dem Backend erfolgt nur bei expliziter Zustimmung im Cookie-Banner (Kategorie "Festival Auswertung").
 
 ---
@@ -55,24 +56,28 @@
 
 | Entity | Tabelle | Beschreibung |
 |--------|---------|--------------|
-| `Brewery` | `brewery` | Brauereien mit Ort, Landkreis, Website, Logo |
-| `Beer` | `beer` | Biere mit Referenz zu Brewery & BeerType, Alkohol, Stammwürze (°P), mehrzeilige Beschreibung (TEXT) |
+| `Brewery` | `brewery` | Brauereien mit Referenz zu City + District, Website, Logo |
+| `Beer` | `beer` | Biere mit Referenz zu Brewery & BeerType, Alkohol, Stammwürze (°P), mehrzeilige Beschreibung (TEXT), `isNonAlcoholic` Flag |
 | `Tavern` | `tavern` | Schenken (Ausschankstellen) auf dem Festival mit Koordinaten |
 | `TavernBeer` | `tavern_beer` | M:N-Zuordnung Schenke↔Bier mit `sort_order` |
-| `Gastronomy` | `gastronomy` | Gastronomie-Betriebe mit Typ, Koordinaten |
-| `CraftMarket` | `craft_market` | Handwerkermärkte mit Beschreibung (TEXT), Website, Koordinaten, Icon |
+| `Gastronomy` | `gastronomy` | Gastronomie-Betriebe mit Typ, Referenz zu City, Koordinaten |
+| `CraftMarket` | `craft_market` | Handwerkermärkte mit Beschreibung (TEXT), Website, Referenz zu City, Koordinaten, Icon |
 | `Stage` | `stage` | Bühnen mit Koordinaten |
 | `Event` | `event` | Programmpunkte mit Start/Ende (`LocalDateTime`), Tagesname, Bühne |
 | `Facility` | `facility` | Einrichtungen (WC, Büro, Bushaltestelle) mit FacilityType |
-| `Sponsor` | `sponsor` | Sponsoren mit Logo, Website |
+| `Sponsor` | `sponsor` | Sponsoren mit Logo, Website, Referenz zu City |
 
 ### Lookup-Tabellen
 
-| Entity | Tabelle | Beschreibung |
-|--------|---------|--------------|
-| `BeerType` | `beer_type` | Biersorte (z.B. Helles, Weizen) |
-| `FacilityType` | `facility_type` | Einrichtungsart (z.B. WC, Büro) mit Standard-Icon |
-| `GastronomyType` | `gastronomy_type` | Gastronomie-Kategorie |
+| Entity | Tabelle | API-Endpoint | Beschreibung |
+|--------|---------|-------------|--------------|
+| `BeerType` | `beer_type` | `/api/beer-types` | Biersorte (z.B. Helles, Weizen) |
+| `FacilityType` | `facility_type` | `/api/facility-types` | Einrichtungsart (z.B. WC, Büro) mit Standard-Icon |
+| `GastronomyType` | `gastronomy_type` | `/api/gastronomy-types` | Gastronomie-Kategorie |
+| `City` | `city` | `/api/cities` | Orte (werden von Brewery, Sponsor, Gastronomy, CraftMarket referenziert) |
+| `District` | `district` | `/api/districts` | Landkreise (werden von Brewery referenziert) |
+
+> **Wichtig**: Ort und Landkreis sind normalisierte Lookup-Tabellen. Keine Entity speichert Ort/Landkreis als String-Feld. Stattdessen wird immer eine FK-Referenz (`city_id`, `district_id`) verwendet.
 
 ### Tracking-Tabellen
 
@@ -106,11 +111,18 @@ src/
 
 1. **GenericFormModal**: Ein einziger, konfigurierbarer Form-Modal wird für alle Admin-CRUD-Operationen verwendet. Die Feld-Konfiguration erfolgt deklarativ per Array (`type: 'text' | 'select' | 'checkbox' | 'image' | 'textarea' | 'number' | 'datetime-local'`).
 
-2. **BottomSheet**: Ausgelagerte, wiederverwendbare Modal-Komponente (`components/UI/BottomSheet.jsx`) für alle Overlay-Darstellungen.
+   **Erweiterte Select-Features:**
+   - **Suchfeld**: Bei > 5 Optionen erscheint automatisch ein Suchfilter über dem Select.
+   - **Inline-Lookup-Erstellung**: Wenn ein Feld `lookupEndpoint` hat, wird ein `+`-Button neben dem Select angezeigt. Darüber kann direkt im Modal ein neuer Lookup-Wert erstellt werden (POST an `lookupEndpoint`).
+   - **`onLookupCreated`-Callback**: Der Parent (Manager-Page) erhält den neu erstellten Eintrag und aktualisiert seine lokale Options-Liste sofort, ohne die gesamte Seite neu zu laden.
 
-3. **cacheService**: Statische API-Daten werden beim ersten Abruf im `localStorage` gecacht und bei nachfolgenden Aufrufen sofort geliefert (kein Netzwerk-Roundtrip).
+2. **Conditional Fields (`disabledWhen`)**: Formularfelder können über `disabledWhen: { field: 'isNonAlcoholic', value: true }` bedingt ausgegraut werden. Der Wert bleibt erhalten, wird aber nicht mehr editierbar.
 
-4. **Timestamps (LocalDateTime)**: Event-Zeiten werden im Backend als `LocalDateTime` (ohne Timezone) gespeichert und als ISO-String ohne `Z`-Suffix an das Frontend geliefert. Das Frontend darf diese **niemals** durch `new Date()` jagen, sondern muss sie als rohen String per `substring()` verarbeiten, um Timezone-Shifts zu vermeiden.
+3. **BottomSheet**: Ausgelagerte, wiederverwendbare Modal-Komponente (`components/UI/BottomSheet.jsx`) für alle Overlay-Darstellungen.
+
+4. **cacheService**: Statische API-Daten werden beim ersten Abruf im `localStorage` gecacht und bei nachfolgenden Aufrufen sofort geliefert (kein Netzwerk-Roundtrip).
+
+5. **Timestamps (LocalDateTime)**: Event-Zeiten werden im Backend als `LocalDateTime` (ohne Timezone) gespeichert und als ISO-String ohne `Z`-Suffix an das Frontend geliefert. Das Frontend darf diese **niemals** durch `new Date()` jagen, sondern muss sie als rohen String per `substring()` verarbeiten, um Timezone-Shifts zu vermeiden.
 
 ---
 
@@ -129,8 +141,34 @@ Jede Entity folgt einem einheitlichen Muster:
 
 ### DTO-Pattern
 
-- **ReadDto** (`XyzDto`): Enthält aufgelöste Referenzen (z.B. `BreweryDto` statt nur `brewery_id`).
-- **WriteDto** (`XyzCreateUpdateDto` / `XyzUpdateDto`): Enthält ID-Referenzen für verknüpfte Entities (z.B. `{ id: 42 }`).
+- **ReadDto** (`XyzDto`): Enthält aufgelöste Referenzen als verschachtelte `LookupDto` (z.B. `{ id: 1, name: "München" }` statt nur `city_id`).
+- **WriteDto** (`XyzUpdateDto`): Enthält ID-Referenzen als `RefId`-Objekte (z.B. `city: { id: 42 }`).
+
+### Lookup-Referenz-Pattern
+
+Alle Lookup-FK-Referenzen (City, District, GastronomyType, BeerType) folgen dem gleichen Schema:
+
+**Entity:**
+```java
+@ManyToOne(fetch = FetchType.EAGER)
+@JoinColumn(name = "city_id")
+public City city;
+```
+
+**WriteDto:**
+```java
+public RefId city;
+public static class RefId { public Long id; }
+```
+
+**mapDto:**
+```java
+if (dto.city != null && dto.city.id != null) {
+    entity.city = City.findById(dto.city.id);
+} else {
+    entity.city = null;
+}
+```
 
 ### FileService
 
@@ -155,10 +193,26 @@ Bilder werden über `/api/admin/uploads/image` hochgeladen. Der `FileService` ve
 3. **Device-ID**: Anonyme UUIDv4 (`deviceId`), gespeichert im `localStorage` über den `deviceService`.
 4. **Kein Auto-Restore**: Es wird bewusst kein Server→Client Sync durchgeführt. Die Daten leben und sterben mit dem Browser des Geräts.
 
+### Retry-Queue (Offline-Resilient Sync)
+
+Fehlgeschlagene Sync-Requests werden **silent** in eine `localStorage`-basierte Retry-Queue (`bierfestival_sync_queue`) geschrieben:
+
+- **Trigger**: Netzwerkfehler oder HTTP 5xx Antworten.
+- **Retry-Intervall**: 30 Sekunden.
+- **Max. Versuche**: 20 (~10 Minuten).
+- **4xx-Fehler**: Werden als permanente Fehler erkannt und nicht erneut versucht.
+- **App-Start**: Beim Laden des `trackingService`-Moduls wird geprüft, ob noch Einträge in der Queue sind, und der Timer ggf. automatisch gestartet.
+- **User-Sichtbarkeit**: **Keine**. Der User erhält niemals eine Fehlermeldung. Sync läuft vollständig im Hintergrund.
+
 ### Geschäftsregel
 
 - Ein Bier darf erst bewertet werden, wenn mindestens ein lokaler `drinkTimestamp` existiert.
 - Fällt der Counter auf 0 zurück (Minus-Button), wird eine vorhandene Bewertung automatisch gelöscht.
+
+### Alkoholfrei-Logik
+
+- Wenn `isNonAlcoholic === true`, wird das `alcoholPercentage`-Feld im Admin-Formular ausgegraut (nicht editierbar, Wert bleibt bestehen).
+- In allen öffentlichen Anzeigen wird bei alkoholfreien Bieren **"< 0,5%"** statt des gespeicherten Werts angezeigt.
 
 ---
 
@@ -192,19 +246,30 @@ fetchCachedData('/api/taverns') → localStorage['cache_/api/taverns']
 
 | Backend-Feld | Frontend-Label |
 |-------------|---------------|
-| `region` | **Landkreis** (nicht "Region") |
+| `city` (FK) | **Ort** (Select-Dropdown mit Lookup) |
+| `district` (FK) | **Landkreis** (Select-Dropdown mit Lookup) |
 | `originalGravity` | **Stammwürze** (immer mit Einheit **°P**) |
 | `alcoholPercentage` | **Alkoholgehalt** (immer mit Einheit **%**) |
 | `description` (Beer) | **Beschreibung** (mehrzeilig, max 2000 Zeichen) |
+| `isNonAlcoholic` | **Alkoholfrei** (Checkbox, beeinflusst Alkohol-Anzeige) |
+
+### Lookup-Felder im GenericFormModal (Checkliste)
+
+1. Im `formFields`-Array `type: 'select'`, `options: [...]` und `lookupEndpoint: '/api/...'` setzen.
+2. Im Manager den State für die Lookup-Daten anlegen und im `loadData` mitladen.
+3. Beim Bearbeiten das Item vorbereiten: `cityId: item.city?.id || ''`.
+4. Im Submit das Format `city: { id: parseInt(formData.cityId) }` erzeugen.
+5. `onLookupCreated`-Callback implementieren, der den neuen Eintrag in den lokalen State einfügt.
 
 ### Neuen Entity-Typ anlegen (Checkliste)
 
 1. Entity-Klasse in `entity/masterdata/` erstellen (Panache)
-2. Resource-Klasse in `resource/` erstellen (DTO + CRUD)
+2. Resource-Klasse in `resource/` erstellen (ReadDto, UpdateDto mit RefId, mapDto)
 3. SQL-Migration in `bierfestival-db-queries/t_master_data` ergänzen
 4. Frontend `Manager.jsx` in `admin/pages/` erstellen
 5. In `MasterDataPage.jsx` importieren, NavLink + Route hinzufügen
-6. **Diese Dokumentation aktualisieren!**
+6. Lookup-Daten (Cities, Districts, Types) im Manager-State laden
+7. `onLookupCreated` implementieren
 
 ---
 

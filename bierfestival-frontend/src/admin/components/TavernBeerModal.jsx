@@ -31,7 +31,8 @@ const TavernBeerModal = ({ isOpen, onClose, tavern, allBeers, keycloakToken, onS
             name: beerToAdd.name,
             breweryName: beerToAdd.brewery?.name || '',
             typeName: beerToAdd.beerType?.name || '',
-            alcoholPercentage: beerToAdd.alcoholPercentage
+            alcoholPercentage: beerToAdd.alcoholPercentage,
+            isNonAlcoholic: beerToAdd.isNonAlcoholic
         };
         setAssignedBeers([...assignedBeers, newAssigned]);
     };
@@ -203,7 +204,7 @@ const TavernBeerModal = ({ isOpen, onClose, tavern, allBeers, keycloakToken, onS
                                                 <div>
                                                     <strong style={{ display: 'block', fontSize: '1rem' }}>{beer.name}</strong>
                                                     <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                                                        {beer.breweryName} | {beer.typeName} | {beer.alcoholPercentage}% Alk.
+                                                        {beer.breweryName} | {beer.typeName} | {beer.isNonAlcoholic ? '< 0,5%' : `${beer.alcoholPercentage}%`} Alk.
                                                     </span>
                                                 </div>
                                             </div>

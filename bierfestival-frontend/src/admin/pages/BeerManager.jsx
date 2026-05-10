@@ -22,18 +22,18 @@ const BeerManager = () => {
         { key: 'name', label: 'Name' },
         { key: 'brewery', label: 'Brauerei', render: (_, row) => row.brewery?.name || '-' },
         { key: 'beerType', label: 'Sorte', render: (_, row) => row.beerType?.name || '-' },
-        { key: 'alcoholPercentage', label: 'Alkohol', render: (val) => val ? `${val} %` : '-' },
+        { key: 'alcoholPercentage', label: 'Alkohol', render: (val, row) => row.isNonAlcoholic ? '< 0,5%' : (val ? `${val} %` : '-') },
         { key: 'originalGravity', label: 'Stammwürze', render: (val) => val ? `${val} °P` : '-' },
         { key: 'isNonAlcoholic', label: 'Alkoholfrei', render: (val) => val ? 'Ja' : 'Nein' }
     ];
 
     const formFields = [
         { name: 'name', label: 'Name', type: 'text', required: true },
-        { name: 'breweryId', label: 'Brauerei', type: 'select', options: breweries.map(b => ({ id: b.id, name: b.name })), required: true },
-        { name: 'beerTypeId', label: 'Biersorte', type: 'select', options: beerTypes.map(t => ({ id: t.id, name: t.name })) },
-        { name: 'alcoholPercentage', label: 'Alkoholgehalt (%)', type: 'number', step: '0.1' },
-        { name: 'originalGravity', label: 'Stammwürze (°P)', type: 'number', step: '0.1' },
+        { name: 'breweryId', label: 'Brauerei', type: 'select', options: breweries.map(b => ({ id: b.id, name: b.name })), lookupEndpoint: '/api/breweries', required: true },
+        { name: 'beerTypeId', label: 'Biersorte', type: 'select', options: beerTypes.map(t => ({ id: t.id, name: t.name })), lookupEndpoint: '/api/beer-types' },
         { name: 'isNonAlcoholic', label: 'Alkoholfrei', type: 'checkbox' },
+        { name: 'alcoholPercentage', label: 'Alkoholgehalt (%)', type: 'number', step: '0.1', disabledWhen: { field: 'isNonAlcoholic', value: true } },
+        { name: 'originalGravity', label: 'Stammwürze (°P)', type: 'number', step: '0.1' },
         { name: 'description', label: 'Beschreibung', type: 'textarea', rows: 5, maxLength: 2000 }
     ];
 
@@ -108,6 +108,14 @@ const BeerManager = () => {
         }
     };
 
+    const handleLookupCreated = (fieldName, newEntry) => {
+        if (fieldName === 'beerTypeId') {
+            setBeerTypes(prev => [...prev, newEntry].sort((a, b) => a.name.localeCompare(b.name)));
+        }
+        // Note: breweryId lookupEndpoint creates a Brewery, not just a name lookup.
+        // The inline '+' will only work for simple name-only lookups like BeerType.
+    };
+
     if (loading) return <div>Lade Daten...</div>;
 
     return (
@@ -119,7 +127,7 @@ const BeerManager = () => {
                 </button>
             </div>
             <DataTable columns={columns} data={beers} onEdit={handleEdit} onDelete={handleDelete} />
-            <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Bier bearbeiten' : 'Neues Bier anlegen'} fields={formFields} initialData={editingItem} />
+            <GenericFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} title={editingItem ? 'Bier bearbeiten' : 'Neues Bier anlegen'} fields={formFields} initialData={editingItem} onLookupCreated={handleLookupCreated} />
         </div>
     );
 };

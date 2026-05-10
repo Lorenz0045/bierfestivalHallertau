@@ -49,6 +49,7 @@ public class TavernResource {
         public String breweryName;
         public String typeName;
         public BigDecimal alcoholPercentage;
+        public Boolean isNonAlcoholic;
         public Integer sortOrder;
 
         public static TavernBeerDto fromEntity(TavernBeer entity) {
@@ -58,6 +59,7 @@ public class TavernResource {
             dto.breweryName = entity.beer.brewery != null ? entity.beer.brewery.name : "";
             dto.typeName = entity.beer.beerType != null ? entity.beer.beerType.name : "";
             dto.alcoholPercentage = entity.beer.alcoholPercentage;
+            dto.isNonAlcoholic = entity.beer.isNonAlcoholic;
             dto.sortOrder = entity.sortOrder;
             return dto;
         }

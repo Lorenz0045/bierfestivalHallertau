@@ -1,11 +1,16 @@
 package de.qordio.app.dataservice.entity.masterdata;
 
+import de.qordio.app.dataservice.entity.lookups.City;
+import de.qordio.app.dataservice.entity.lookups.District;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -19,8 +24,13 @@ public class Brewery extends PanacheEntityBase {
     @Column(nullable = false)
     public String name;
 
-    public String city;
-    public String region;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "city_id")
+    public City city;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "district_id")
+    public District district;
 
     @Column(name = "is_hallertau")
     public Boolean isHallertau = false;

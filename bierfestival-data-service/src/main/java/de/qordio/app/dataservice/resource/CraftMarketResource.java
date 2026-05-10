@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.qordio.app.dataservice.entity.lookups.City;
 import de.qordio.app.dataservice.entity.masterdata.CraftMarket;
 import de.qordio.app.dataservice.service.FileService;
 import io.quarkus.panache.common.Sort;
@@ -37,12 +38,17 @@ public class CraftMarketResource {
     @Inject
     FileService fileService;
 
+    public static class LookupDto {
+        public Long id;
+        public String name;
+    }
+
     public static class CraftMarketDto {
         public Long id;
         public String name;
         public String description;
         public String website;
-        public String city;
+        public LookupDto city;
         public String imgUrl;
         public Double lat;
         public Double lon;
@@ -54,7 +60,11 @@ public class CraftMarketResource {
             dto.name = entity.name;
             dto.description = entity.description;
             dto.website = entity.website;
-            dto.city = entity.city;
+            if (entity.city != null) {
+                dto.city = new LookupDto();
+                dto.city.id = entity.city.id;
+                dto.city.name = entity.city.name;
+            }
             dto.imgUrl = entity.imgUrl;
             dto.lat = entity.lat;
             dto.lon = entity.lon;
@@ -66,10 +76,11 @@ public class CraftMarketResource {
         public String name;
         public String description;
         public String website;
-        public String city;
+        public RefId city;
         public String imgUrl;
         public Double lat;
         public Double lon;
+        public static class RefId { public Long id; }
     }
 
     @GET
@@ -132,9 +143,13 @@ public class CraftMarketResource {
         entity.name = dto.name;
         entity.description = dto.description;
         entity.website = dto.website;
-        entity.city = dto.city;
         entity.imgUrl = dto.imgUrl;
         entity.lat = dto.lat;
         entity.lon = dto.lon;
+        if (dto.city != null && dto.city.id != null) {
+            entity.city = City.findById(dto.city.id);
+        } else {
+            entity.city = null;
+        }
     }
 }

@@ -9,6 +9,8 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import de.qordio.app.dataservice.entity.lookups.City;
+import de.qordio.app.dataservice.entity.lookups.District;
 import de.qordio.app.dataservice.entity.masterdata.Brewery;
 import de.qordio.app.dataservice.service.FileService;
 import io.quarkus.panache.common.Sort;
@@ -39,11 +41,16 @@ public class BreweryResource {
     @Inject
     FileService fileService;
 
+    public static class LookupDto {
+        public Long id;
+        public String name;
+    }
+
     public static class BreweryDto {
         public Long id;
         public String name;
-        public String city;
-        public String region;
+        public LookupDto city;
+        public LookupDto district;
         public Boolean isHallertau;
         public String website;
         public String imgUrl;
@@ -53,24 +60,31 @@ public class BreweryResource {
             BreweryDto dto = new BreweryDto();
             dto.id = entity.id;
             dto.name = entity.name;
-            dto.city = entity.city;
-            dto.region = entity.region;
+            if (entity.city != null) {
+                dto.city = new LookupDto();
+                dto.city.id = entity.city.id;
+                dto.city.name = entity.city.name;
+            }
+            if (entity.district != null) {
+                dto.district = new LookupDto();
+                dto.district.id = entity.district.id;
+                dto.district.name = entity.district.name;
+            }
             dto.isHallertau = entity.isHallertau;
             dto.website = entity.website;
             dto.imgUrl = entity.imgUrl;
             return dto;
         }
+    }
 
-        public Brewery toEntity() {
-            Brewery entity = new Brewery();
-            entity.name = this.name;
-            entity.city = this.city;
-            entity.region = this.region;
-            entity.isHallertau = this.isHallertau != null ? this.isHallertau : false;
-            entity.website = this.website;
-            entity.imgUrl = this.imgUrl;
-            return entity;
-        }
+    public static class BreweryUpdateDto {
+        public String name;
+        public RefId city;
+        public RefId district;
+        public Boolean isHallertau;
+        public String website;
+        public String imgUrl;
+        public static class RefId { public Long id; }
     }
 
     @GET
@@ -86,8 +100,9 @@ public class BreweryResource {
     @Transactional
     @Operation(summary = "Create Brewery")
     @SecurityRequirement(name = "jwtAuth")
-    public Response create(@Valid BreweryDto dto) {
-        Brewery entity = dto.toEntity();
+    public Response create(@Valid BreweryUpdateDto dto) {
+        Brewery entity = new Brewery();
+        mapDto(dto, entity);
         entity.persist();
         return Response.created(URI.create("/api/breweries/" + entity.id)).entity(BreweryDto.fromEntity(entity)).build();
     }
@@ -98,25 +113,17 @@ public class BreweryResource {
     @Transactional
     @Operation(summary = "Update Brewery")
     @SecurityRequirement(name = "jwtAuth")
-    public Response update(@PathParam("id") Long id, @Valid BreweryDto dto) {
+    public Response update(@PathParam("id") Long id, @Valid BreweryUpdateDto dto) {
         Optional<Brewery> existingOpt = Brewery.findByIdOptional(id);
         if (existingOpt.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
-        
+
         Brewery existing = existingOpt.get();
         String oldImageUrl = existing.imgUrl;
+        mapDto(dto, existing);
 
-        existing.name = dto.name;
-        existing.city = dto.city;
-        existing.region = dto.region;
-        existing.isHallertau = dto.isHallertau != null ? dto.isHallertau : false;
-        existing.website = dto.website;
-        existing.imgUrl = dto.imgUrl;
-
-        // Altes Bild physisch löschen, falls es geändert oder entfernt wurde
         if (oldImageUrl != null && !oldImageUrl.equals(existing.imgUrl)) {
             fileService.deleteFile(oldImageUrl);
         }
-
         return Response.ok(BreweryDto.fromEntity(existing)).build();
     }
 
@@ -132,12 +139,28 @@ public class BreweryResource {
             Brewery entity = opt.get();
             String imageUrl = entity.imgUrl;
             entity.delete();
-            
             if (imageUrl != null) {
                 fileService.deleteFile(imageUrl);
             }
             return Response.noContent().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    private void mapDto(BreweryUpdateDto dto, Brewery entity) {
+        entity.name = dto.name;
+        entity.isHallertau = dto.isHallertau != null ? dto.isHallertau : false;
+        entity.website = dto.website;
+        entity.imgUrl = dto.imgUrl;
+        if (dto.city != null && dto.city.id != null) {
+            entity.city = City.findById(dto.city.id);
+        } else {
+            entity.city = null;
+        }
+        if (dto.district != null && dto.district.id != null) {
+            entity.district = District.findById(dto.district.id);
+        } else {
+            entity.district = null;
+        }
     }
 }
