@@ -143,11 +143,10 @@
 /* POI Detail Styles */
 .poiDetail { padding: 4px 0; }
 .poiImg {
-    width: 100%; max-height: 180px; object-fit: cover;
-    border-radius: var(--bf-radius-sm); margin-bottom: 12px;
+    max-height: 180px;
 }
 .poiType {
-    display: inline-block; font-size: 0.75rem; font-weight: 600;
+    display: none; font-size: 0.75rem; font-weight: 600;
     padding: 3px 10px; border-radius: var(--bf-radius-full);
     background: var(--bf-light-green); color: var(--bf-mid-green); margin-bottom: 10px;
 }
