@@ -15,7 +15,7 @@ services:
 
       # --- Keycloak JWT Validierung ---
       # Diese Variablen füllen die Platzhalter in application.properties für mp.jwt.verify.*
-      KEYCLOAK_AUTH_SERVER_URL: ${KEYCLOAK_AUTH_SERVER_URL:-https://keycloak.qordio.de/realms/bierfestival}
+      KEYCLOAK_AUTH_SERVER_URL: ${KEYCLOAK_AUTH_SERVER_URL:-https://keycloak.app.hallertauer-bierfestival.de/realms/bierfestival}
       # Client-ID des Backends selbst.
       KEYCLOAK_BACKEND_CLIENT_ID: ${KEYCLOAK_BACKEND_CLIENT_ID:-qordio-data-service}
       

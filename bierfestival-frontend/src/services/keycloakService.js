@@ -2,7 +2,7 @@ import Keycloak from 'keycloak-js';
 
 // KC_HOSTNAME aus docker-compose.yml ist hier wichtig für die URL
 const keycloakConfig = {
-  url: 'https://keycloak.qordio.de',                                    
+  url: 'https://keycloak.app.hallertauer-bierfestival.de',                                    
   realm: 'bierfestival', 
   clientId: 'qordio-frontend', // Frontend-Client-ID in Keycloak
 };

@@ -20,7 +20,7 @@
 | **Frontend** | React + Vite | SPA, Mobile-First |
 | **Styling** | CSS Modules | Pro Komponente isoliert |
 | **Backend** | Quarkus (Java) | REST-API, Panache ORM |
-| **Datenbank** | PostgreSQL | Hosted bei qordio.de |
+| **Datenbank** | PostgreSQL | Hosted bei app.hallertauer-bierfestival.de |
 | **Auth** | Keycloak | JWT-basiert, nur Admin-Bereich |
 | **Karte** | Leaflet (React-Leaflet) | OpenStreetMap Tiles |
 | **Deployment** | Docker Compose + Nginx | Multi-Container Setup |
