@@ -12,6 +12,10 @@ services:
       - /opt/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
       # für Auslieferung von hochgeladenen Bildern 
       - /home/lorenz/bierfestival_uploads:/var/www/bierfestival/uploads  # Der Pfad /var/www/bierfestival/uploads ist der Pfad *innerhalb* des Nginx-Proxy-Manager-Containers -> entspricht alias forwarding in nginx config
+      - /home/lorenz/srv/maps/data:/var/www/bierfestival/maps
+      # Pfad muss entsprechend zum Server passend angepasst werden, damit die hochgeladenen Bilder und Mapdaten auch vom Nginx-Proxy-Manager-Container aus erreichbar sind.
+      # z.B. - /root/bierfestival_uploads:/var/www/bierfestival/uploads
+      # - /root/bierfestival_maps:/var/www/bierfestival/maps
     networks:
       - nginx-proxy-manager
 networks:
@@ -21,5 +25,3 @@ networks:
 volumes:
   npm_data: {} # Leeres Mapping bedeutet: Docker erstellt dieses Volume mit Standardeinstellungen
   npm_letsencrypt: {} # Ebenso
-  bierfestival-data-service_bierfestival_uploads_data: # Korrekte Deklaration des externen Volumes
-     external: true
