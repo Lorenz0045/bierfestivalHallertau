@@ -34,7 +34,7 @@ services:
       - "18080" # Der interne Port, auf dem Quarkus standardmäßig lauscht.
     volumes:
       # Hier ist jetzt der direkte Pfad auf den Ubuntu-Server hinterlegt:
-      - /home/lorenz/bierfestival_uploads:/deployments/uploads
+      - /${USER_DIRECTORY:-root}/bierfestival_uploads:/deployments/uploads
     networks:
       - nginx-proxy-manager    # Erforderlich, damit Nginx den Service erreichen kann.
       - bierfestival-backend-network # Erforderlich für die Kommunikation mit der Postgres-Datenbank.
