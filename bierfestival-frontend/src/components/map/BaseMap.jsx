@@ -12,7 +12,7 @@ const FESTIVAL_BOUNDS = L.latLngBounds(
     [48.51183, 11.76635]  // North East 48.51183197823702, 11.766351596755545
 );
 
-const PMTILES_URL = "https://qordio.de/mapdata/attenkirchen.pmtiles";
+const PMTILES_URL = "https://app.hallertauer-bierfestival.de/mapdata/attenkirchen.pmtiles";
 
 /**
  * Native React-Leaflet Komponente erstellen aus dem Protomaps-Plugin.
@@ -50,65 +50,11 @@ const BaseMap = ({ center = [48.50555, 11.75896], zoom = 17, children, className
         >
             <AttributionControl prefix={false} position="bottomleft" />
 
-            <LayersControl position="topright">
-
-                <LayersControl.BaseLayer checked name="Self-Hosted (Flavor: Light)">
-                    <PMTilesLayer
-                        url={PMTILES_URL}
-                        flavor="light"
-                        attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    />
-                </LayersControl.BaseLayer>
-
-                <LayersControl.BaseLayer name="Self-Hosted (Flavor: Dark)">
-                    <PMTilesLayer
-                        url={PMTILES_URL}
-                        flavor="dark"
-                        attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    />
-                </LayersControl.BaseLayer>
-
-                <LayersControl.BaseLayer name="Self-Hosted (Flavor: Grayscale)">
-                    <PMTilesLayer
-                        url={PMTILES_URL}
-                        flavor="grayscale"
-                        attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    />
-                </LayersControl.BaseLayer>
-
-                <LayersControl.BaseLayer name="Self-Hosted (Flavor: Black)">
-                    <PMTilesLayer
-                        url={PMTILES_URL}
-                        flavor="black"
-                        attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    />
-                </LayersControl.BaseLayer>
-
-                <LayersControl.BaseLayer name="Self-Hosted (Flavor: White)">
-                    <PMTilesLayer
-                        url={PMTILES_URL}
-                        flavor="white"
-                        attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    />
-                </LayersControl.BaseLayer>
-
-                <LayersControl.BaseLayer checked name="Straßenkarte">
-                    <TileLayer
-                        attribution='&copy; OpenStreetMap'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        maxNativeZoom={19}
-                        maxZoom={25}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name="Satellit">
-                    <TileLayer
-                        attribution='Tiles &copy; Esri'
-                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                        maxNativeZoom={18}
-                        maxZoom={25}
-                    />
-                </LayersControl.BaseLayer>
-            </LayersControl>
+            <PMTilesLayer
+                url={PMTILES_URL}
+                flavor="light"
+                attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
 
             {/* Hier werden später Marker, Polygone etc. reingereicht */}
             {children}

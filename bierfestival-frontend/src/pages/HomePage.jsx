@@ -82,9 +82,6 @@ const MapControls = ({ festivalCoords, jumpCoords }) => {
                 </Marker>
             )}
             <div className={styles.controlsContainer}>
-                <button className={styles.mapButton} onClick={handleFestivalClick} title="Festival-Zentrum">
-                    <FaBeer />
-                </button>
                 <button
                     className={`${styles.mapButton} ${isFollowing ? styles.activeButton : ''}`}
                     onClick={handleLocateClick}

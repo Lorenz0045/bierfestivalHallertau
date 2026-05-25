@@ -20,7 +20,7 @@
 | **Frontend** | React + Vite | SPA, Mobile-First |
 | **Styling** | CSS Modules | Pro Komponente isoliert |
 | **Backend** | Quarkus (Java) | REST-API, Panache ORM |
-| **Datenbank** | PostgreSQL | Hosted bei qordio.de |
+| **Datenbank** | PostgreSQL | Hosted bei app.hallertauer-bierfestival.de |
 | **Auth** | Keycloak | JWT-basiert, nur Admin-Bereich |
 | **Karte** | Leaflet (React-Leaflet) | OpenStreetMap Tiles |
 | **Deployment** | Docker Compose + Nginx | Multi-Container Setup |
@@ -134,6 +134,15 @@ src/
 ---
 
 ## Backend-Architektur
+
+### Map-Daten
+
+Vector Tiles Liegen als .pmtiles Datei ab und werden vom nginx proxy ausgeliefert (Range Requests) und dann 1 Jahr vom Client gecached.
+Protomaps und leaflet rendern das ganze im react-frontend. Dort ist die URL zum server hart codiert.
+
+Vector-Tile Daten können über protomaps runtergeladen werden: https://docs.protomaps.com/basemaps/downloads
+
+Beispielcommand: pmtiles extract https://build.protomaps.com/20260524.pmtiles C:\Users\loren\Downloads\attenkirchen.pmtiles --maxzoom=16 --bbox=11.744,48.499,11.775,48.512
 
 ### REST-API Pattern
 
