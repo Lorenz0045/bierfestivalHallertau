@@ -70,6 +70,7 @@ const SchenkenPage = () => {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
+                <FaBeer className={styles.headerIcon} />
                 <h1 className={styles.title}>Schenken</h1>
                 <p className={styles.subtitle}>{taverns.length} Schenken am Bierfestival</p>
             </div>

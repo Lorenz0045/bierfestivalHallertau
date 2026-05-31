@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchCachedData } from '../services/cacheService';
-import { FaGuitar } from 'react-icons/fa';
+import { FaGuitar, FaCalendarAlt } from 'react-icons/fa';
 import EventItem from '../components/UI/EventItem'; // Neue Komponente importieren
 import styles from './ProgrammPage.module.css';
 
@@ -113,7 +113,9 @@ const ProgrammPage = () => {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
+                <FaCalendarAlt className={styles.headerIcon} />
                 <h1 className={styles.title}>Festival Programm</h1>
+                <p className={styles.subtitle}>Bands, Acts & Auftritte</p>
             </div>
 
             {/* Dynamische Tages-Navigation */}

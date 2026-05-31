@@ -17,11 +17,12 @@ const GenericFormModal = ({ isOpen, onClose, onSubmit, title, fields, initialDat
 
     useEffect(() => {
         if (isOpen) {
-            const defaultData = {};
+            // Preserve ALL initialData fields (lat, lon, etc.) even if not in form
+            const defaultData = initialData ? { ...initialData } : {};
             fields.forEach(field => {
                 if (initialData && initialData[field.name] !== undefined) {
                     defaultData[field.name] = initialData[field.name];
-                } else {
+                } else if (defaultData[field.name] === undefined) {
                     defaultData[field.name] = field.type === 'checkbox' ? false : '';
                 }
             });

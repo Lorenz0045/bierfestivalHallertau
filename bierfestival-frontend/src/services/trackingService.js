@@ -215,9 +215,9 @@ export const removeDrink = (beerId) => {
 
 export const rateBeer = (beerId, rating) => {
     const tracking = getLocalTracking();
-    // Regel: Ohne lokales Wissen über 'getrunken' ignorieren / werfen wir einen Fehler
-    if (!tracking[beerId] || !tracking[beerId].drinkTimestamps || tracking[beerId].drinkTimestamps.length === 0) {
-        throw new Error("Du musst das Bier erst probieren, bevor du es bewerten kannst!");
+    // Initialize beer entry if it doesn't exist yet
+    if (!tracking[beerId]) {
+        tracking[beerId] = { isOnMerkliste: false, drinkTimestamps: [], rating: null, ratedAt: null };
     }
 
     const now = new Date().toISOString();

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { FaBookmark, FaRegBookmark, FaMinus, FaPlus, FaBeer, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaBookmark, FaRegBookmark, FaMinus, FaPlus, FaBeer, FaChevronDown, FaChevronUp, FaMapMarkerAlt } from 'react-icons/fa';
 import styles from './BeerCard.module.css';
 
 /**
  * Zentrale Bier-Kachel – wird wiederverwendet in:
- * Suche-Tab, Schenken-Overlay, Mein Besuch
+ * Suche-Tab, Schenken-Overlay, Mein Besuch, Lageplan
  *
  * Props:
  * - beer: { beerId, name, breweryName, typeName, alcoholPercentage, isNonAlcoholic, description, originalGravity, breweryId }
@@ -14,7 +14,10 @@ import styles from './BeerCard.module.css';
  * - onRemoveDrink(beerId)
  * - onRate(beerId, rating)
  * - onBreweryClick(breweryId, breweryName) – optional: öffnet Brauerei-Detail
- * - compact: boolean – kompaktere Darstellung für Schenken-Overlay
+ * - onTavernClick(tavern) – optional: öffnet Schenke-Detail
+ * - onJumpToMap(tavern) – optional: springt zur Schenke auf der Karte
+ * - taverns: Array<{id, name, lat, lon}> – Schenken in denen das Bier ausgeschenkt wird
+ * - compact: boolean – kompaktere Darstellung
  * - drinkCount: number – override für aggregierten Count (Mein Besuch)
  */
 const BeerCard = ({
@@ -25,6 +28,9 @@ const BeerCard = ({
     onRemoveDrink,
     onRate,
     onBreweryClick,
+    onTavernClick,
+    onJumpToMap,
+    taverns = [],
     compact = false,
     drinkCount: drinkCountOverride
 }) => {
@@ -102,17 +108,15 @@ const BeerCard = ({
                     </button>
                 </div>
 
-                {/* Rating - Bierkrüge */}
-                <div className={`${styles.ratingRow} ${!hasDrunk ? styles.ratingDisabled : ''}`}>
+                {/* Rating - Bierkrüge (always enabled) */}
+                <div className={styles.ratingRow}>
                     {[1, 2, 3, 4, 5].map(level => (
                         <button
                             key={level}
                             className={`${styles.ratingMug} ${currentRating >= level ? styles.filled : styles.empty}`}
                             onClick={() => {
-                                if (!hasDrunk) return;
                                 onRate && onRate(beer.beerId, currentRating === level ? null : level);
                             }}
-                            disabled={!hasDrunk}
                             aria-label={`Bewertung ${level}`}
                         >
                             <FaBeer />
@@ -120,6 +124,34 @@ const BeerCard = ({
                     ))}
                 </div>
             </div>
+
+            {/* Schenke-Links (in welcher Schenke gibt es dieses Bier?) */}
+            {taverns.length > 0 && (
+                <div className={styles.tavernLinks}>
+                    <span className={styles.tavernLabel}>Erhältlich in:</span>
+                    <div className={styles.tavernList}>
+                        {taverns.map(t => (
+                            <button
+                                key={t.id}
+                                className={styles.tavernLinkBtn}
+                                onClick={() => onTavernClick && onTavernClick(t)}
+                            >
+                                {t.name}
+                            </button>
+                        ))}
+                        {/* Jump to first tavern on map */}
+                        {taverns[0]?.lat && taverns[0]?.lon && onJumpToMap && (
+                            <button
+                                className={styles.tavernMapBtn}
+                                onClick={() => onJumpToMap(taverns[0])}
+                                title={`${taverns[0].name} auf der Karte`}
+                            >
+                                <FaMapMarkerAlt /> Karte
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Expanded Details */}
             {expanded && (

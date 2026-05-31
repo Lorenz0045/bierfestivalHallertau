@@ -15,6 +15,12 @@
     font-size: 1rem;
 }
 
+/* Header (same style as Anreise) */
+.header { text-align: center; padding: 16px 0 8px; }
+.headerIcon { font-size: 2rem; color: var(--bf-primary-green); margin-bottom: 4px; }
+.title { font-size: 1.3rem; font-weight: 700; color: var(--bf-dark-green); margin: 0; }
+.subtitle { font-size: 0.8rem; color: var(--bf-text-muted); margin-top: 4px; }
+
 /* Mode Toggle */
 .modeToggle {
     display: flex;
@@ -55,284 +61,122 @@
     margin-bottom: 12px;
 }
 
-.searchBox {
-    position: relative;
-    margin-bottom: 10px;
-}
+.searchBox { position: relative; margin-bottom: 10px; }
+.searchIcon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--bf-gray-dark); font-size: 0.9rem; }
+.searchInput { width: 100%; padding: 10px 12px 10px 36px; border: 1px solid var(--bf-gray-mid); border-radius: var(--bf-radius-full); font-size: 0.9rem; font-family: inherit; background: var(--bf-bg); }
+.searchInput:focus { outline: none; border-color: var(--bf-primary-green); }
 
-.searchIcon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--bf-gray-dark);
-    font-size: 0.9rem;
-}
-
-.searchInput {
-    width: 100%;
-    padding: 10px 12px 10px 36px;
-    border: 1px solid var(--bf-gray-mid);
-    border-radius: var(--bf-radius-full);
-    font-size: 0.9rem;
-    font-family: inherit;
-    background: var(--bf-bg);
-    transition: border-color 0.2s;
-}
-
-.searchInput:focus {
-    outline: none;
-    border-color: var(--bf-primary-green);
-}
-
-.filterRow {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-    align-items: center;
-}
-
-.filterRow:last-child {
-    margin-bottom: 0;
-}
-
-.filterSelect {
-    flex: 1;
-    padding: 8px 10px;
-    border: 1px solid var(--bf-gray-mid);
-    border-radius: var(--bf-radius-sm);
-    font-size: 0.8rem;
-    font-family: inherit;
-    background: var(--bf-white);
-    color: var(--bf-text-dark);
-}
-
-.checkLabel {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--bf-text-dark);
-    white-space: nowrap;
-    cursor: pointer;
-}
-
-.checkLabel input[type="checkbox"] {
-    accent-color: var(--bf-primary-green);
-    width: 16px;
-    height: 16px;
-}
+.filterRow { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+.filterRow:last-child { margin-bottom: 0; }
+.filterSelect { flex: 1; padding: 8px 10px; border: 1px solid var(--bf-gray-mid); border-radius: var(--bf-radius-sm); font-size: 0.8rem; font-family: inherit; background: var(--bf-white); }
+.checkLabel { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 500; white-space: nowrap; cursor: pointer; }
+.checkLabel input[type="checkbox"] { accent-color: var(--bf-primary-green); width: 16px; height: 16px; }
 
 /* Category Filters (Orte) */
-.categoryFilters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
+.categoryFilters { display: flex; flex-wrap: wrap; gap: 6px; }
 .catBtn {
-    padding: 6px 12px;
-    border: 1px solid var(--bf-gray-mid);
-    border-radius: var(--bf-radius-full);
-    background: var(--bf-white);
-    color: var(--bf-text-dark);
-    font-size: 0.75rem;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.2s;
+    padding: 6px 12px; border: 1px solid var(--bf-gray-mid); border-radius: var(--bf-radius-full);
+    background: var(--bf-white); color: var(--bf-text-dark); font-size: 0.75rem; font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;
 }
-
-.catActive {
-    background: var(--bf-primary-green);
-    color: var(--bf-white);
-    border-color: var(--bf-primary-green);
-}
+.catActive { background: var(--bf-primary-green); color: var(--bf-white); border-color: var(--bf-primary-green); }
+.catIcon { width: 18px; height: 18px; object-fit: contain; }
 
 /* Result count */
-.resultCount {
-    font-size: 0.8rem;
-    color: var(--bf-text-muted);
-    margin-bottom: 10px;
-    padding-left: 4px;
-}
+.resultCount { font-size: 0.8rem; color: var(--bf-text-muted); margin-bottom: 10px; padding-left: 4px; }
 
 /* Beer Grid */
-.beerGrid {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+.beerGrid { display: flex; flex-direction: column; gap: 10px; }
 
 /* Ort Grid */
-.ortGrid {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
+.ortGrid { display: flex; flex-direction: column; gap: 8px; }
 
 .ortCard {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--bf-white);
-    border-radius: var(--bf-radius-md);
-    padding: 12px;
-    box-shadow: var(--bf-shadow-sm);
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-    border: 1px solid var(--bf-gray-light);
+    display: flex; align-items: center; gap: 12px; background: var(--bf-white);
+    border-radius: var(--bf-radius-md); padding: 12px; box-shadow: var(--bf-shadow-sm);
+    cursor: pointer; transition: box-shadow 0.2s; border: 1px solid var(--bf-gray-light);
+}
+.ortCard:hover { box-shadow: var(--bf-shadow-md); }
+
+/* Ort icon: square container, contain-fit for uploaded icons */
+.ortIconImg {
+    flex-shrink: 0; width: 48px; height: 48px; object-fit: contain;
+    border-radius: var(--bf-radius-sm); background: var(--bf-gray-light); padding: 4px;
+}
+.ortIconFallback {
+    flex-shrink: 0; width: 48px; height: 48px; border-radius: var(--bf-radius-sm);
+    background: var(--bf-light-green); color: var(--bf-mid-green); font-weight: 700;
+    display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
 }
 
-.ortCard:hover {
-    box-shadow: var(--bf-shadow-md);
-}
-
-.ortIcon {
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bf-light-green);
-    border-radius: var(--bf-radius-sm);
-}
-
-.ortInfo {
-    flex: 1;
-    min-width: 0;
-}
-
-.ortName {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--bf-dark-green);
-    margin: 0 0 2px;
-}
-
-.ortType {
-    font-size: 0.7rem;
-    color: var(--bf-text-muted);
-    margin-right: 8px;
-}
-
-.ortCity {
-    font-size: 0.7rem;
-    color: var(--bf-text-muted);
-}
+.ortInfo { flex: 1; min-width: 0; }
+.ortName { font-size: 0.9rem; font-weight: 700; color: var(--bf-dark-green); margin: 0 0 2px; }
+.ortType { font-size: 0.7rem; color: var(--bf-text-muted); margin-right: 8px; }
+.ortCity { font-size: 0.7rem; color: var(--bf-text-muted); }
 
 .ortMapBtn {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    background: var(--bf-light-green);
-    color: var(--bf-primary-green);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    transition: all 0.2s;
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; border: none;
+    background: var(--bf-light-green); color: var(--bf-primary-green); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 1rem;
 }
-
-.ortMapBtn:hover {
-    background: var(--bf-primary-green);
-    color: var(--bf-white);
-}
+.ortMapBtn:hover { background: var(--bf-primary-green); color: var(--bf-white); }
 
 /* Ort Detail Overlay */
-.ortDetail {
-    padding: 8px 0;
-}
+.ortDetail { padding: 8px 0; }
 
-.ortDetailImg {
-    width: 100%;
-    max-height: 180px;
-    object-fit: cover;
-    border-radius: var(--bf-radius-sm);
-    margin-bottom: 14px;
+/* Icons in overlays: square, contain-fit (80x80 or 120x120 source) */
+.ortDetailIcon {
+    width: 80px; height: 80px; object-fit: contain; border-radius: var(--bf-radius-sm);
+    background: var(--bf-gray-light); padding: 8px; margin-bottom: 12px; display: block;
 }
 
 .ortDetailType {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: var(--bf-radius-full);
-    background: var(--bf-light-green);
-    color: var(--bf-mid-green);
+    display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 3px 10px;
+    border-radius: var(--bf-radius-full); background: var(--bf-light-green); color: var(--bf-mid-green);
     margin-bottom: 10px;
 }
-
-.ortDetailDesc {
-    font-size: 0.88rem;
-    line-height: 1.6;
-    color: var(--bf-text-dark);
-    margin-bottom: 14px;
-    white-space: pre-line;
-}
-
-.ortDetailMeta {
-    font-size: 0.85rem;
-    color: var(--bf-text-muted);
-    margin-bottom: 6px;
-}
+.ortDetailDesc { font-size: 0.88rem; line-height: 1.6; color: var(--bf-text-dark); margin-bottom: 14px; white-space: pre-line; }
+.ortDetailMeta { font-size: 0.85rem; color: var(--bf-text-muted); margin-bottom: 6px; }
+.emptyNote { font-size: 0.85rem; color: var(--bf-text-muted); padding: 10px 0; }
 
 .ortWebsite {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    background: var(--bf-primary-green);
-    color: var(--bf-white) !important;
-    border-radius: var(--bf-radius-full);
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin: 8px 4px 8px 0;
-    transition: background 0.2s;
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+    background: var(--bf-primary-green); color: var(--bf-white) !important;
+    border-radius: var(--bf-radius-full); font-size: 0.85rem; font-weight: 600;
+    margin: 8px 4px 8px 0; transition: background 0.2s;
 }
-
-.ortWebsite:hover {
-    background: var(--bf-dark-green);
-}
+.ortWebsite:hover { background: var(--bf-dark-green); }
 
 .ortMapLink {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    background: var(--bf-gray-light);
-    color: var(--bf-dark-green);
-    border: none;
-    border-radius: var(--bf-radius-full);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    margin: 8px 0;
-    transition: background 0.2s;
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+    background: var(--bf-gray-light); color: var(--bf-dark-green); border: none;
+    border-radius: var(--bf-radius-full); font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; margin: 8px 0;
 }
+.ortMapLink:hover { background: var(--bf-gray-mid); }
 
-.ortMapLink:hover {
-    background: var(--bf-gray-mid);
-}
+.ortBeers { margin-top: 16px; }
+.ortBeers h4 { font-size: 0.95rem; color: var(--bf-dark-green); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.ortBeers > div { margin-bottom: 8px; }
 
-.ortBeers {
-    margin-top: 16px;
-}
+/* Stage Program with Day Tabs */
+.stageProgram { margin-top: 16px; }
+.stageProgram h4 { font-size: 0.95rem; color: var(--bf-dark-green); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
 
-.ortBeers h4 {
-    font-size: 0.95rem;
-    color: var(--bf-dark-green);
-    margin-bottom: 10px;
+.dayTabs { display: flex; gap: 6px; margin-bottom: 10px; overflow-x: auto; scrollbar-width: none; }
+.dayTabs::-webkit-scrollbar { display: none; }
+.dayTab {
+    flex: 0 0 auto; padding: 6px 14px; border: 1px solid var(--bf-gray-mid);
+    border-radius: var(--bf-radius-full); background: var(--bf-white); color: var(--bf-text-dark);
+    font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
 }
+.dayActive { background: var(--bf-primary-green); color: var(--bf-white); border-color: var(--bf-primary-green); }
 
-.ortBeers > div {
-    margin-bottom: 8px;
+.eventList { display: flex; flex-direction: column; gap: 4px; }
+.eventItem {
+    display: flex; gap: 10px; align-items: baseline; padding: 6px 0;
+    border-bottom: 1px solid var(--bf-gray-light);
 }
+.eventItem:last-child { border-bottom: none; }
+.eventTime { font-size: 0.8rem; font-weight: 600; color: var(--bf-primary-green); white-space: nowrap; min-width: 110px; }
+.eventName { font-size: 0.85rem; color: var(--bf-text-dark); }

@@ -315,14 +315,56 @@ Die App ist so konzipiert, dass sie für zukünftige Festivals **ohne Code-Ände
 - **Navbar**: 5 Tabs. Lageplan-Button ist erhöht in grünem Kreis.
 - **Lazy Loading**: Nur Admin lazy. Öffentliche Seiten sofort verfügbar.
 
+### Einheitlicher Seiten-Header
+
+Alle Tabs (Suche, Anreise, Programm, Schenken) nutzen dasselbe Header-Pattern:
+- Großes Icon (`headerIcon`, 2rem, grün)
+- Titel (1.3rem, dunkelgrün, 700)
+- Untertitel (0.8rem, grau)
+
 ### BeerCard-Komponente
 
 Zentrale Kachel (`components/UI/BeerCard.jsx`), wiederverwendet überall:
 - **Merken**: Bookmark-Toggle
 - **Getrunken**: Plus/Minus-Counter
-- **Bewertung**: 5 Bierkrüge (FaBeer), Gold wenn gefüllt. Erst nach Trinken aktiv.
+- **Bewertung**: 5 Bierkrüge (FaBeer), Gold wenn gefüllt. **Immer aktiv** – Bewertung erfordert KEIN vorheriges Trinken (UX-Entscheidung).
+- **Schenke-Links**: Zeigt an, in welchen Schenken das Bier erhältlich ist. Jump-Button zur ersten Schenke auf der Karte.
 - **Brauerei-Klick**: Öffnet Brauerei-Detail (BottomSheet mit Zurück-Pfeil).
 - **Expand**: Beschreibung, Stammwürze, Details.
+
+### Icon-Größen (Cards & Overlays)
+
+- **Schenken & Bühnen**: 120×120px (`poiImgLarge`)
+- **Alle anderen** (Gastro, Facilities, Marktstände, Sponsoren): 80×80px (`poiImgSmall`)
+- **Ort-Cards** in Suche-Tab: 48×48px, `object-fit: contain`
+- **Karten-Marker**: 44×44px (IconFactory)
+- Alle Icons nutzen `object-fit: contain` mit Padding und grauem Hintergrund, damit hochgeladene quadratische Icons korrekt dargestellt werden.
+- **Ausnahme: Lageplan** hier werden die Icons wie Original hochgeladen verwendet. Für potenzielles zukünftiges Styling kann: .imageIconInner in MapIcons.module.css verwendet werden.
+
+### Overlay-Navigation (Stack-basiert)
+
+Die SuchePage verwendet ein **Overlay-Stack**-Pattern:
+- `overlayStack: [{type, data, title}]`
+- Navigation: `pushOverlay()` → Drilldown, `popOverlay()` → Zurück
+- Ein einzelnes `<BottomSheet>` rendert den obersten Stack-Eintrag
+- Zurück-Pfeil erscheint automatisch bei Stack-Tiefe > 1
+- `closeAllOverlays()` schließt alles
+
+### Bühnen-Programm (Tagesaufteilung)
+
+Sowohl in Lageplan-Overlays als auch in Suche-Overlays werden Bühnen-Events nach Tagen gruppiert:
+- Sub-Komponente `StageEventsByDay` mit eigenen Day-Tabs
+- Datum aus ISO-String via `substring(0,10)` extrahiert (kein Timezone-Shift)
+- Chronologische Sortierung innerhalb eines Tages
+
+### Namenskonventionen
+
+| Alt | Neu |
+|-----|-----|
+| Handwerkerstand | **Marktstand** |
+| Handwerkermarkt (Backend-Entity bleibt) | **Marktstand** (Frontend-Label) |
+
+Die Backend-Entity heißt weiterhin `CraftMarket` / `craft-markets`, nur im Frontend wird einheitlich **Marktstand** angezeigt.
 
 ### SponsorBanner
 
@@ -337,10 +379,32 @@ Auto-Scroll alle 5s um 2 Logos, 4 sichtbar, pausiert bei Touch (8s Cooldown). Kl
 | `/api/bus/schedule` | GET | Vollständiger Fahrplan gruppiert nach Linie |
 
 **Nachtfahrt-Regel**: 00:00–04:00 Uhr → Vortag.
-**Rückfahrt**: Nur Abfahrtszeit.
+**Rückfahrt**: Nur Abfahrtszeit + Karten-Jump-Button zur Haltestelle.
 
 ### Mein Besuch – Aggregation
 
 - Tagesfilter mit Nachtfahrt-Regel
 - Gemerkte/Bewertete/Getrunkene Biere
 - Initial 5 Einträge, Mehr/Weniger-Button
+
+### Kategorie-Icons (Suche-Tab)
+
+Statt Emojis werden echte Icons aus `public/icons/` verwendet:
+- `Bühne_ms.webp` für Bühnen
+- `Gastro_os.webp` für Gastronomie
+- `Marktstand.ms.webp` für Marktstände
+- Schenken/Brauereien/Sponsoren nutzen ihre eigenen hochgeladenen Icons
+
+---
+
+## Admin-Architektur: GenericFormModal
+
+### Datenerhalt bei Bearbeitung
+
+`GenericFormModal` initialisiert `formData` mit **allen** Feldern aus `initialData` (Spread), nicht nur den im Formular sichtbaren. Dadurch bleiben Felder wie `lat`, `lon`, `type` etc. erhalten, auch wenn sie nicht im Formular bearbeitbar sind.
+
+```javascript
+const defaultData = initialData ? { ...initialData } : {};
+```
+
+Dies verhindert, dass beim Speichern nicht sichtbare Felder überschrieben/gelöscht werden.

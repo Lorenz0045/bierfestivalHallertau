@@ -4,10 +4,29 @@ import { fetchCachedData } from '../services/cacheService';
 import useTracking from '../hooks/useTracking';
 import BeerCard from '../components/UI/BeerCard';
 import BottomSheet from '../components/UI/BottomSheet';
-import EventItem from '../components/UI/EventItem';
 import { FaBeer, FaMapMarkerAlt, FaSearch, FaGlobe, FaLocationArrow, FaMapMarkedAlt, FaCalendarAlt } from 'react-icons/fa';
 import styles from './SuchePage.module.css';
 
+// Icons von public/icons/ – Pfade relativ zu public root
+const CATEGORY_ICONS = {
+    alle: '/icons/Bierfestival-Logo.png',
+    schenke: null,           // Schenken haben eigene hochgeladene Icons
+    buehne: '/icons/Bühne_ms.webp',
+    gastro: '/icons/Gastro_os.webp',
+    brauerei: null,          // Brauereien haben Logos
+    sponsor: null,           // Sponsoren haben Logos
+    marktstand: '/icons/Marktstand.ms.webp',
+};
+
+// Event-Helper: Tagesname aus ISO-String (ohne Timezone-Shift)
+const getEventDay = (isoStr) => {
+    if (!isoStr) return 'Sonstige';
+    return isoStr.substring(0, 10); // z.B. "2026-06-12"
+};
+const formatTime = (isoString) => {
+    if (!isoString) return '';
+    return isoString.substring(11, 16) + ' Uhr';
+};
 
 const SuchePage = () => {
     const [mode, setMode] = useState('bier'); // 'bier' | 'orte'
@@ -22,13 +41,13 @@ const SuchePage = () => {
     const [sponsors, setSponsors] = useState([]);
     const [craftMarkets, setCraftMarkets] = useState([]);
     const [facilities, setFacilities] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     // Filters - Bier
     const [searchText, setSearchText] = useState('');
     const [selectedType, setSelectedType] = useState('');
-    const [alcFilter, setAlcFilter] = useState('alle'); // 'alle' | 'ja' | 'nein'
+    const [alcFilter, setAlcFilter] = useState('alle');
     const [hallertauOnly, setHallertauOnly] = useState(false);
     const [selectedBrewery, setSelectedBrewery] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
@@ -37,10 +56,8 @@ const SuchePage = () => {
     // Filters - Orte
     const [ortCategory, setOrtCategory] = useState('alle');
 
-    // Detail overlays
-    const [selectedOrt, setSelectedOrt] = useState(null);
-    const [breweryDetail, setBreweryDetail] = useState(null);
-    const [overlayStack, setOverlayStack] = useState([]); // for back navigation
+    // Overlay stack for navigation
+    const [overlayStack, setOverlayStack] = useState([]); // [{type, data, title}]
 
     const { getBeerState, toggleMerkliste, logDrink, removeDrink, rateBeer } = useTracking();
     const navigate = useNavigate();
@@ -48,7 +65,7 @@ const SuchePage = () => {
     useEffect(() => {
         const loadAll = async () => {
             try {
-                const [beersData, breweriesData, typesData, tavernsData, stagesData, gastroData, sponsorsData, craftData, facilData] = await Promise.all([
+                const results = await Promise.all([
                     fetchCachedData('/api/beers'),
                     fetchCachedData('/api/breweries'),
                     fetchCachedData('/api/beer-types'),
@@ -60,16 +77,16 @@ const SuchePage = () => {
                     fetchCachedData('/api/facilities'),
                     fetchCachedData('/api/events'),
                 ]);
-                setBeers(beersData || []);
-                setBreweries(breweriesData || []);
-                setBeerTypes(typesData || []);
-                setTaverns(tavernsData || []);
-                setStages(stagesData || []);
-                setGastronomies(gastroData || []);
-                setSponsors(sponsorsData || []);
-                setCraftMarkets(craftData || []);
-                setFacilities(facilData || []);
-                setEvents(eventsData || []);
+                setBeers(results[0] || []);
+                setBreweries(results[1] || []);
+                setBeerTypes(results[2] || []);
+                setTaverns(results[3] || []);
+                setStages(results[4] || []);
+                setGastronomies(results[5] || []);
+                setSponsors(results[6] || []);
+                setCraftMarkets(results[7] || []);
+                setFacilities(results[8] || []);
+                setEvents(results[9] || []);
             } catch (err) {
                 console.error('Suche: Fehler beim Laden', err);
             } finally {
@@ -92,6 +109,18 @@ const SuchePage = () => {
         return Array.from(set).sort();
     }, [breweries]);
 
+    // Build beer→tavern lookup
+    const beerTavernMap = useMemo(() => {
+        const map = {};
+        taverns.forEach(t => {
+            (t.beers || []).forEach(b => {
+                if (!map[b.beerId]) map[b.beerId] = [];
+                map[b.beerId].push({ id: t.id, name: t.name, lat: t.lat, lon: t.lon });
+            });
+        });
+        return map;
+    }, [taverns]);
+
     // Filtered beers
     const filteredBeers = useMemo(() => {
         return beers.filter(beer => {
@@ -111,36 +140,52 @@ const SuchePage = () => {
         }).sort((a, b) => a.name.localeCompare(b.name));
     }, [beers, searchText, selectedType, alcFilter, hallertauOnly, selectedBrewery, selectedCity, selectedDistrict]);
 
-    // Filtered orte
+    // Filtered orte (Handwerker → Marktstand)
     const filteredOrte = useMemo(() => {
         const all = [];
-        if (ortCategory === 'alle' || ortCategory === 'schenke') taverns.forEach(t => all.push({ ...t, ortType: 'Schenke', ortIcon: '🍺' }));
-        if (ortCategory === 'alle' || ortCategory === 'buehne') stages.forEach(s => all.push({ ...s, ortType: 'Bühne', ortIcon: '🎵' }));
-        if (ortCategory === 'alle' || ortCategory === 'gastro') gastronomies.forEach(g => all.push({ ...g, ortType: 'Gastronomie', ortIcon: '🍴' }));
-        if (ortCategory === 'alle' || ortCategory === 'sponsor') sponsors.forEach(s => all.push({ ...s, ortType: 'Sponsor', ortIcon: '⭐' }));
-        if (ortCategory === 'alle' || ortCategory === 'handwerker') craftMarkets.forEach(c => all.push({ ...c, ortType: 'Handwerkerstand', ortIcon: '🔨' }));
-        if (ortCategory === 'alle' || ortCategory === 'brauerei') breweries.forEach(b => all.push({ ...b, ortType: 'Brauerei', ortIcon: '🏭' }));
+        if (ortCategory === 'alle' || ortCategory === 'schenke') taverns.forEach(t => all.push({ ...t, ortType: 'Schenke' }));
+        if (ortCategory === 'alle' || ortCategory === 'buehne') stages.forEach(s => all.push({ ...s, ortType: 'Bühne' }));
+        if (ortCategory === 'alle' || ortCategory === 'gastro') gastronomies.forEach(g => all.push({ ...g, ortType: 'Gastronomie' }));
+        if (ortCategory === 'alle' || ortCategory === 'sponsor') sponsors.forEach(s => all.push({ ...s, ortType: 'Sponsor' }));
+        if (ortCategory === 'alle' || ortCategory === 'marktstand') craftMarkets.forEach(c => all.push({ ...c, ortType: 'Marktstand' }));
+        if (ortCategory === 'alle' || ortCategory === 'brauerei') breweries.forEach(b => all.push({ ...b, ortType: 'Brauerei' }));
         return all.sort((a, b) => a.name.localeCompare(b.name));
     }, [ortCategory, taverns, stages, gastronomies, sponsors, craftMarkets, breweries]);
 
-    const handleBreweryClick = (breweryId) => {
-        const brewery = breweries.find(b => b.id === breweryId);
-        if (brewery) {
-            setOverlayStack(prev => [...prev, { type: 'ort', data: selectedOrt }]);
-            setBreweryDetail(brewery);
-        }
+    // Overlay helpers
+    const currentOverlay = overlayStack.length > 0 ? overlayStack[overlayStack.length - 1] : null;
+
+    const pushOverlay = (type, data, title) => {
+        setOverlayStack(prev => [...prev, { type, data, title: title || data?.name || '' }]);
     };
 
-    const handleBackFromBrewery = () => {
-        setBreweryDetail(null);
-        const prev = overlayStack.pop();
-        setOverlayStack([...overlayStack]);
+    const popOverlay = () => {
+        setOverlayStack(prev => prev.slice(0, -1));
+    };
+
+    const closeAllOverlays = () => {
+        setOverlayStack([]);
+    };
+
+    // Navigation handlers
+    const handleBreweryClick = (breweryId) => {
+        const brewery = breweries.find(b => b.id === breweryId);
+        if (brewery) pushOverlay('brauerei', brewery);
+    };
+
+    const handleTavernClick = (tavern) => {
+        const fullTavern = taverns.find(t => t.id === tavern.id) || tavern;
+        pushOverlay('schenke', fullTavern);
     };
 
     const handleJumpToMap = (item) => {
         if (item?.lat && item?.lon) {
             navigate('/', { state: { jumpToPoi: { lat: item.lat, lon: item.lon } } });
         }
+    };
+
+    const handleOrtClick = (ort) => {
+        pushOverlay('ort', ort);
     };
 
     const mapBeerForCard = (beer) => ({
@@ -155,12 +200,179 @@ const SuchePage = () => {
         originalGravity: beer.originalGravity,
     });
 
+    // Get icon for ort type
+    const getOrtIcon = (ort) => {
+        if (ort.imgUrl) return ort.imgUrl;
+        if (ort.ortType === 'Bühne') return '/icons/Bühne_ms.webp';
+        if (ort.ortType === 'Gastronomie') return '/icons/Gastro_os.webp';
+        if (ort.ortType === 'Marktstand') return '/icons/Marktstand.ms.webp';
+        return null;
+    };
+
+    // Group events by day for a stage
+    const getStageEventsByDay = (stageId) => {
+        const stageEvents = events.filter(e => e.stage?.id === stageId);
+        const groups = {};
+        stageEvents.forEach(ev => {
+            const day = ev.dayName || getEventDay(ev.startTime);
+            if (!groups[day]) groups[day] = [];
+            groups[day].push(ev);
+        });
+        Object.values(groups).forEach(arr => arr.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || '')));
+        return { groups, days: Object.keys(groups).sort((a, b) => {
+            const tA = groups[a][0]?.startTime ? new Date(groups[a][0].startTime).getTime() : 0;
+            const tB = groups[b][0]?.startTime ? new Date(groups[b][0].startTime).getTime() : 0;
+            return tA - tB;
+        })};
+    };
+
+    // Get brewery beers for a brewery
+    const getBreweryBeers = (breweryId) => beers.filter(b => b.brewery?.id === breweryId);
+
     if (loading) {
         return <div className={styles.page}><div className={styles.loading}>Daten werden geladen...</div></div>;
     }
 
+    // Render overlay content based on type
+    const renderOverlayContent = () => {
+        if (!currentOverlay) return null;
+        const { type, data } = currentOverlay;
+
+        if (type === 'ort' || type === 'schenke') {
+            const ort = data;
+            const ortIcon = getOrtIcon(ort);
+            return (
+                <div className={styles.ortDetail}>
+                    {ortIcon && <img src={ortIcon} alt={ort.name} className={styles.ortDetailIcon} />}
+                    <span className={styles.ortDetailType}>{ort.ortType}</span>
+                    {ort.description && <p className={styles.ortDetailDesc}>{ort.description}</p>}
+                    {ort.website && (
+                        <a href={ort.website} target="_blank" rel="noopener noreferrer" className={styles.ortWebsite}>
+                            <FaGlobe /> Website
+                        </a>
+                    )}
+                    {(ort.lat && ort.lon) && (
+                        <button className={styles.ortMapLink} onClick={() => handleJumpToMap(ort)}>
+                            <FaLocationArrow /> Auf dem Lageplan anzeigen
+                        </button>
+                    )}
+                    {ort.city && <p className={styles.ortDetailMeta}>📍 {ort.city.name || ort.city}</p>}
+
+                    {/* Schenke: Biere */}
+                    {(ort.ortType === 'Schenke' || type === 'schenke') && ort.beers?.length > 0 && (
+                        <div className={styles.ortBeers}>
+                            <h4><FaBeer /> Ausgeschenkte Biere ({ort.beers.length})</h4>
+                            {ort.beers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(b => {
+                                const fullBeer = beers.find(ab => ab.id === b.beerId);
+                                return (
+                                    <BeerCard
+                                        key={b.beerId}
+                                        beer={fullBeer ? mapBeerForCard(fullBeer) : { beerId: b.beerId, name: b.name, breweryName: b.breweryName, typeName: b.typeName, alcoholPercentage: b.alcoholPercentage, isNonAlcoholic: b.isNonAlcoholic }}
+                                        trackingState={getBeerState(b.beerId)}
+                                        onToggleMerkliste={toggleMerkliste}
+                                        onLogDrink={logDrink}
+                                        onRemoveDrink={removeDrink}
+                                        onRate={rateBeer}
+                                        onBreweryClick={handleBreweryClick}
+                                        compact
+                                    />
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Bühne: Programm mit Tagesaufteilung */}
+                    {ort.ortType === 'Bühne' && (() => {
+                        const { groups, days } = getStageEventsByDay(ort.id);
+                        if (days.length === 0) return <p className={styles.emptyNote}>Derzeit kein Programm gelistet.</p>;
+                        return (
+                            <StageEventsByDay groups={groups} days={days} />
+                        );
+                    })()}
+
+                    {/* Gastronomie: Typ */}
+                    {ort.ortType === 'Gastronomie' && ort.type && (
+                        <p className={styles.ortDetailMeta}>🍴 {ort.type.name}</p>
+                    )}
+
+                    {/* Brauerei-Biere (wenn Ort eine Brauerei ist) */}
+                    {ort.ortType === 'Brauerei' && (() => {
+                        const bBeers = getBreweryBeers(ort.id);
+                        return (
+                            <div className={styles.ortBeers}>
+                                <h4><FaBeer /> Biere dieser Brauerei ({bBeers.length})</h4>
+                                {bBeers.map(fullBeer => (
+                                    <BeerCard
+                                        key={fullBeer.id}
+                                        beer={mapBeerForCard(fullBeer)}
+                                        trackingState={getBeerState(fullBeer.id)}
+                                        onToggleMerkliste={toggleMerkliste}
+                                        onLogDrink={logDrink}
+                                        onRemoveDrink={removeDrink}
+                                        onRate={rateBeer}
+                                        taverns={beerTavernMap[fullBeer.id] || []}
+                                        onTavernClick={handleTavernClick}
+                                        onJumpToMap={handleJumpToMap}
+                                        compact
+                                    />
+                                ))}
+                                {bBeers.length === 0 && <p className={styles.emptyNote}>Derzeit keine Biere gelistet.</p>}
+                            </div>
+                        );
+                    })()}
+                </div>
+            );
+        }
+
+        if (type === 'brauerei') {
+            const brewery = data;
+            const bBeers = getBreweryBeers(brewery.id);
+            return (
+                <div className={styles.ortDetail}>
+                    {brewery.imgUrl && <img src={brewery.imgUrl} alt={brewery.name} className={styles.ortDetailIcon} />}
+                    <span className={styles.ortDetailType}>Brauerei</span>
+                    {brewery.description && <p className={styles.ortDetailDesc}>{brewery.description}</p>}
+                    {brewery.city && <p className={styles.ortDetailMeta}>📍 {brewery.city.name || brewery.city}</p>}
+                    {brewery.district && <p className={styles.ortDetailMeta}>🗺️ Landkreis {brewery.district.name || brewery.district}</p>}
+                    {brewery.website && (
+                        <a href={brewery.website} target="_blank" rel="noopener noreferrer" className={styles.ortWebsite}>
+                            <FaGlobe /> Website besuchen
+                        </a>
+                    )}
+                    <div className={styles.ortBeers}>
+                        <h4><FaBeer /> Biere dieser Brauerei ({bBeers.length})</h4>
+                        {bBeers.map(fullBeer => (
+                            <BeerCard
+                                key={fullBeer.id}
+                                beer={mapBeerForCard(fullBeer)}
+                                trackingState={getBeerState(fullBeer.id)}
+                                onToggleMerkliste={toggleMerkliste}
+                                onLogDrink={logDrink}
+                                onRemoveDrink={removeDrink}
+                                onRate={rateBeer}
+                                taverns={beerTavernMap[fullBeer.id] || []}
+                                onTavernClick={handleTavernClick}
+                                onJumpToMap={handleJumpToMap}
+                                compact
+                            />
+                        ))}
+                        {bBeers.length === 0 && <p className={styles.emptyNote}>Derzeit keine Biere gelistet.</p>}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <div className={styles.page}>
+            {/* Header (same style as Anreise) */}
+            <div className={styles.header}>
+                <FaSearch className={styles.headerIcon} />
+                <h1 className={styles.title}>Suche</h1>
+                <p className={styles.subtitle}>Biere, Brauereien & Orte entdecken</p>
+            </div>
+
             {/* Mode Toggle */}
             <div className={styles.modeToggle}>
                 <button className={`${styles.toggleBtn} ${mode === 'bier' ? styles.toggleActive : ''}`} onClick={() => setMode('bier')}>
@@ -225,6 +437,9 @@ const SuchePage = () => {
                                 onRemoveDrink={removeDrink}
                                 onRate={rateBeer}
                                 onBreweryClick={handleBreweryClick}
+                                taverns={beerTavernMap[beer.id] || []}
+                                onTavernClick={handleTavernClick}
+                                onJumpToMap={handleJumpToMap}
                             />
                         ))}
                     </div>
@@ -237,20 +452,23 @@ const SuchePage = () => {
                     <div className={styles.filterSection}>
                         <div className={styles.categoryFilters}>
                             {[
-                                { key: 'alle', label: 'Alle', icon: '📍' },
-                                { key: 'schenke', label: 'Schenken', icon: '🍺' },
-                                { key: 'buehne', label: 'Bühnen', icon: '🎵' },
-                                { key: 'gastro', label: 'Gastronomie', icon: '🍴' },
-                                { key: 'brauerei', label: 'Brauereien', icon: '🏭' },
-                                { key: 'sponsor', label: 'Sponsoren', icon: '⭐' },
-                                { key: 'handwerker', label: 'Handwerker', icon: '🔨' },
+                                { key: 'alle', label: 'Alle' },
+                                { key: 'schenke', label: 'Schenken' },
+                                { key: 'buehne', label: 'Bühnen' },
+                                { key: 'gastro', label: 'Gastronomie' },
+                                { key: 'brauerei', label: 'Brauereien' },
+                                { key: 'sponsor', label: 'Sponsoren' },
+                                { key: 'marktstand', label: 'Marktstände' },
                             ].map(cat => (
                                 <button
                                     key={cat.key}
                                     className={`${styles.catBtn} ${ortCategory === cat.key ? styles.catActive : ''}`}
                                     onClick={() => setOrtCategory(cat.key)}
                                 >
-                                    <span>{cat.icon}</span> {cat.label}
+                                    {CATEGORY_ICONS[cat.key] && (
+                                        <img src={CATEGORY_ICONS[cat.key]} alt="" className={styles.catIcon} />
+                                    )}
+                                    {cat.label}
                                 </button>
                             ))}
                         </div>
@@ -259,150 +477,75 @@ const SuchePage = () => {
                     <div className={styles.resultCount}>{filteredOrte.length} Orte gefunden</div>
 
                     <div className={styles.ortGrid}>
-                        {filteredOrte.map((ort, idx) => (
-                            <div key={`${ort.ortType}-${ort.id}-${idx}`} className={styles.ortCard} onClick={() => setSelectedOrt(ort)}>
-                                <div className={styles.ortIcon}>{ort.ortIcon}</div>
-                                <div className={styles.ortInfo}>
-                                    <h4 className={styles.ortName}>{ort.name}</h4>
-                                    <span className={styles.ortType}>{ort.ortType}</span>
-                                    {ort.city && <span className={styles.ortCity}>{ort.city.name || ort.city}</span>}
+                        {filteredOrte.map((ort, idx) => {
+                            const icon = getOrtIcon(ort);
+                            return (
+                                <div key={`${ort.ortType}-${ort.id}-${idx}`} className={styles.ortCard} onClick={() => handleOrtClick(ort)}>
+                                    {icon ? (
+                                        <img src={icon} alt={ort.name} className={styles.ortIconImg} />
+                                    ) : (
+                                        <div className={styles.ortIconFallback}>{ort.name?.substring(0, 2).toUpperCase()}</div>
+                                    )}
+                                    <div className={styles.ortInfo}>
+                                        <h4 className={styles.ortName}>{ort.name}</h4>
+                                        <span className={styles.ortType}>{ort.ortType}</span>
+                                        {ort.city && <span className={styles.ortCity}>{ort.city.name || ort.city}</span>}
+                                    </div>
+                                    {(ort.lat && ort.lon) && (
+                                        <button className={styles.ortMapBtn} onClick={e => { e.stopPropagation(); handleJumpToMap(ort); }} title="Auf Karte zeigen">
+                                            <FaMapMarkedAlt />
+                                        </button>
+                                    )}
                                 </div>
-                                {(ort.lat && ort.lon) && (
-                                    <button className={styles.ortMapBtn} onClick={e => { e.stopPropagation(); handleJumpToMap(ort); }} title="Auf Karte zeigen">
-                                        <FaMapMarkedAlt />
-                                    </button>
-                                )}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </>
             )}
 
-            {/* ========== ORT DETAIL OVERLAY ========== */}
+            {/* Central Overlay BottomSheet – navigierbar mit Zurück-Pfeil */}
             <BottomSheet
-                isOpen={!!selectedOrt && !breweryDetail}
-                onClose={() => { setSelectedOrt(null); setOverlayStack([]); }}
-                title={selectedOrt?.name || ''}
+                isOpen={overlayStack.length > 0}
+                onClose={closeAllOverlays}
+                onBack={overlayStack.length > 1 ? popOverlay : undefined}
+                showBack={overlayStack.length > 1}
+                title={currentOverlay?.title || ''}
             >
-                {selectedOrt && (
-                    <div className={styles.ortDetail}>
-                        {selectedOrt.imgUrl && <img src={selectedOrt.imgUrl} alt={selectedOrt.name} className={styles.ortDetailImg} />}
-                        <span className={styles.ortDetailType}>{selectedOrt.ortType}</span>
-                        {selectedOrt.description && <p className={styles.ortDetailDesc}>{selectedOrt.description}</p>}
-                        {selectedOrt.website && (
-                            <a href={selectedOrt.website} target="_blank" rel="noopener noreferrer" className={styles.ortWebsite}>
-                                <FaGlobe /> Website
-                            </a>
-                        )}
-                        {(selectedOrt.lat && selectedOrt.lon) && (
-                            <button className={styles.ortMapLink} onClick={() => handleJumpToMap(selectedOrt)}>
-                                <FaLocationArrow /> Auf dem Lageplan anzeigen
-                            </button>
-                        )}
-                        {/* Biere bei Schenken */}
-                        {selectedOrt.ortType === 'Schenke' && selectedOrt.beers?.length > 0 && (
-                            <div className={styles.ortBeers}>
-                                <h4>Ausgeschenkte Biere</h4>
-                                {selectedOrt.beers.map(b => {
-                                    const fullBeer = beers.find(ab => ab.id === b.beerId);
-                                    return (
-                                        <BeerCard
-                                            key={b.beerId}
-                                            beer={fullBeer ? mapBeerForCard(fullBeer) : { beerId: b.beerId, name: b.name, breweryName: b.breweryName, typeName: b.typeName, alcoholPercentage: b.alcoholPercentage, isNonAlcoholic: b.isNonAlcoholic }}
-                                            trackingState={getBeerState(b.beerId)}
-                                            onToggleMerkliste={toggleMerkliste}
-                                            onLogDrink={logDrink}
-                                            onRemoveDrink={removeDrink}
-                                            onRate={rateBeer}
-                                            onBreweryClick={handleBreweryClick}
-                                            compact={false}
-                                        />
-                                    )
-                                })}
-                            </div>
-                        )}
-
-                        {selectedOrt.ortType === 'Bühne' && (
-                            <div className={styles.ortEvents}>
-                                <h4 style={{ marginTop: '15px', color: 'var(--bf-dark-green)' }}><FaCalendarAlt /> Programm auf dieser Bühne</h4>
-                                {events.filter(e => e.stage?.id === selectedOrt.id)
-                                    .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
-                                    .map(ev => (
-                                        <EventItem key={ev.id} event={ev} />
-                                    ))}
-                                {events.filter(e => e.stage?.id === selectedOrt.id).length === 0 && (
-                                    <p>Derzeit kein Programm gelistet.</p>
-                                )}
-                            </div>
-                        )}
-
-                        {selectedOrt.ortType === 'Brauerei' && (
-                            <div className={styles.ortBeers}>
-                                <h4 style={{ marginTop: '15px', color: 'var(--bf-dark-green)' }}><FaBeer /> Biere dieser Brauerei auf dem Festival</h4>
-                                {beers.filter(b => b.brewery?.id === selectedOrt.id).map(fullBeer => (
-                                    <BeerCard
-                                        key={fullBeer.id}
-                                        beer={mapBeerForCard(fullBeer)}
-                                        trackingState={getBeerState(fullBeer.id)}
-                                        onToggleMerkliste={toggleMerkliste}
-                                        onLogDrink={logDrink}
-                                        onRemoveDrink={removeDrink}
-                                        onRate={rateBeer}
-                                        compact={false}
-                                    />
-                                ))}
-                                {beers.filter(b => b.brewery?.id === selectedOrt.id).length === 0 && (
-                                    <p>Derzeit keine Biere gelistet.</p>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                )}
+                {renderOverlayContent()}
             </BottomSheet>
+        </div>
+    );
+};
 
-            {/* ========== BRAUEREI DETAIL OVERLAY (Drilldown) ========== */}
-            <BottomSheet
-                isOpen={!!breweryDetail}
-                onClose={() => { setBreweryDetail(null); setOverlayStack([]); }}
-                onBack={handleBackFromBrewery}
-                showBack={true}
-                title={breweryDetail?.name || ''}
-            >
-                {breweryDetail && (
-                    <div className={styles.ortDetail}>
-                        {breweryDetail.imgUrl && <img src={breweryDetail.imgUrl} alt={breweryDetail.name} className={styles.ortDetailImg} />}
-                        <span className={styles.ortDetailType}>Brauerei</span>
-                        {breweryDetail.description && <p className={styles.ortDetailDesc}>{breweryDetail.description}</p>}
-                        {breweryDetail.city && <p className={styles.ortDetailMeta}>📍 {breweryDetail.city.name}</p>}
-                        {breweryDetail.district && <p className={styles.ortDetailMeta}>🗺️ Landkreis {breweryDetail.district.name}</p>}
-                        {breweryDetail.website && (
-                            <a href={breweryDetail.website} target="_blank" rel="noopener noreferrer" className={styles.ortWebsite}>
-                                <FaGlobe /> Website besuchen
-                            </a>
-                        )}
-                        {selectedOrt.ortType === 'Brauerei' && (
-                            <div className={styles.ortBeers}>
-                                <h4 style={{ marginTop: '15px', color: 'var(--bf-dark-green)' }}><FaBeer /> Biere dieser Brauerei auf dem Festival</h4>
-                                {beers.filter(b => b.brewery?.id === selectedOrt.id).map(fullBeer => (
-                                    <BeerCard
-                                        key={fullBeer.id}
-                                        beer={mapBeerForCard(fullBeer)}
-                                        trackingState={getBeerState(fullBeer.id)}
-                                        onToggleMerkliste={toggleMerkliste}
-                                        onLogDrink={logDrink}
-                                        onRemoveDrink={removeDrink}
-                                        onRate={rateBeer}
-                                        compact={false}
-                                    />
-                                ))}
-                                {beers.filter(b => b.brewery?.id === selectedOrt.id).length === 0 && (
-                                    <p>Derzeit keine Biere gelistet.</p>
-                                )}
-                            </div>
-                        )}
+// Sub-component: Stage events grouped by day
+const StageEventsByDay = ({ groups, days }) => {
+    const [selectedDay, setSelectedDay] = useState(days[0] || '');
+
+    return (
+        <div className={styles.stageProgram}>
+            <h4><FaCalendarAlt /> Programm</h4>
+            <div className={styles.dayTabs}>
+                {days.map(day => (
+                    <button
+                        key={day}
+                        className={`${styles.dayTab} ${selectedDay === day ? styles.dayActive : ''}`}
+                        onClick={() => setSelectedDay(day)}
+                    >
+                        {day}
+                    </button>
+                ))}
+            </div>
+            <div className={styles.eventList}>
+                {(groups[selectedDay] || []).map(ev => (
+                    <div key={ev.id} className={styles.eventItem}>
+                        <span className={styles.eventTime}>
+                            {ev.startTime ? ev.startTime.substring(11, 16) + ' Uhr' : ''}
+                            {ev.endTime ? ` – ${ev.endTime.substring(11, 16)} Uhr` : ''}
+                        </span>
+                        <span className={styles.eventName}>{ev.name}</span>
                     </div>
-                )}
-            </BottomSheet>
+                ))}
+            </div>
         </div>
     );
 };

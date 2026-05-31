@@ -6,9 +6,12 @@
 }
 
 .header {
-    margin-bottom: 24px;
+    margin-bottom: 12px;
     text-align: center;
+    padding: 16px 0 8px;
 }
+
+.headerIcon { font-size: 2rem; color: var(--bf-primary-green); margin-bottom: 4px; }
 
 .title {
     font-size: 1.3rem;
@@ -16,6 +19,8 @@
     margin: 0;
     font-weight: 700;
 }
+
+.subtitle { font-size: 0.8rem; color: var(--bf-text-muted); margin-top: 4px; }
 
 .loading,
 .emptyState {

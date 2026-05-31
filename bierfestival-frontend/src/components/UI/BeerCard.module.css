@@ -194,11 +194,6 @@
     gap: 2px;
 }
 
-.ratingDisabled {
-    opacity: 0.3;
-    pointer-events: none;
-}
-
 .ratingMug {
     background: none;
     border: none;
@@ -219,6 +214,67 @@
 
 .empty {
     color: var(--bf-gray-mid);
+}
+
+/* Tavern Links */
+.tavernLinks {
+    padding: 0 12px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.tavernLabel {
+    font-size: 0.7rem;
+    color: var(--bf-text-muted);
+    flex-shrink: 0;
+}
+
+.tavernList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.tavernLinkBtn {
+    background: none;
+    border: none;
+    font-size: 0.7rem;
+    color: var(--bf-primary-green);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: var(--bf-radius-full);
+    background: var(--bf-light-green);
+    transition: all 0.15s;
+}
+
+.tavernLinkBtn:hover {
+    background: var(--bf-primary-green);
+    color: var(--bf-white);
+}
+
+.tavernMapBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--bf-radius-full);
+    border: 1px solid var(--bf-gray-mid);
+    background: var(--bf-white);
+    color: var(--bf-dark-green);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.tavernMapBtn:hover {
+    background: var(--bf-primary-green);
+    color: var(--bf-white);
+    border-color: var(--bf-primary-green);
 }
 
 /* Expanded Details */
