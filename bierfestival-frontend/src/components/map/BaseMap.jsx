@@ -34,8 +34,8 @@ const PMTilesLayer = createLayerComponent(
         // Für statische Karten-URLs im Regelbetrieb nicht zwingend notwendig.
     }
 );
-
-const BaseMap = ({ center = [48.50555, 11.75896], zoom = 19, children, className, style }) => {
+// center // 48.50625898173736, 11.758379007005969
+const BaseMap = ({ center = [48.50626, 11.75838], zoom = 18, children, className, style }) => {
     return (
         <MapContainer
             center={center}
@@ -46,7 +46,7 @@ const BaseMap = ({ center = [48.50555, 11.75896], zoom = 19, children, className
             zoomControl={false}
             maxBounds={FESTIVAL_BOUNDS}
             maxBoundsViscosity={1.0}
-            minZoom={19}
+            minZoom={18}
         >
             <AttributionControl prefix={false} position="bottomleft" />
 
