@@ -197,6 +197,11 @@ const HomePage = () => {
 
     return (
         <div className={styles.mapWrapper}>
+            
+            <div className={styles.sponsorOverlay}>
+                <SponsorBanner />
+            </div>
+
             <button className={styles.infoButton} onClick={() => setShowInfoPanel(!showInfoPanel)} title="Informationen">
                 {showInfoPanel ? <FaTimes /> : <FaInfoCircle />}
             </button>
@@ -217,9 +222,7 @@ const HomePage = () => {
                 ))}
             </BaseMap>
 
-            <div className={styles.sponsorOverlay}>
-                <SponsorBanner />
-            </div>
+            
 
             {/* POI Detail BottomSheet */}
             <BottomSheet isOpen={!!selectedPoi} onClose={() => setSelectedPoi(null)} title={selectedPoi?.name || ''}>
