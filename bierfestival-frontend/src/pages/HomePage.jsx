@@ -211,7 +211,6 @@ const HomePage = () => {
                     <h4>Informationen</h4>
                     <Link to="/impressum" className={styles.infoLink} onClick={() => setShowInfoPanel(false)}>Impressum</Link>
                     <Link to="/datenschutz" className={styles.infoLink} onClick={() => setShowInfoPanel(false)}>Datenschutzerklärung</Link>
-                    <Link to="/nutzungsbedingungen" className={styles.infoLink} onClick={() => setShowInfoPanel(false)}>Nutzungsbedingungen</Link>
                 </div>
             )}
 

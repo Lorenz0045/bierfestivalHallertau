@@ -9,7 +9,6 @@ import AnreisePage from './pages/AnreisePage';
 import MeinBesuchPage from './pages/MeinBesuchPage';
 import ImpressumPage from './pages/ImpressumPage';
 import DatenschutzPage from './pages/DatenschutzPage';
-import NutzungsbedingungenPage from './pages/NutzungsbedingungenPage';
 import ScrollToTop from './components/UI/ScrollToTop';
 import CookieBanner from './components/UI/CookieBanner';
 import 'leaflet/dist/leaflet.css';
@@ -39,7 +38,6 @@ function App() {
             <Route path="/mein-besuch" element={<MeinBesuchPage />} />
             <Route path="/impressum" element={<ImpressumPage />} />
             <Route path="/datenschutz" element={<DatenschutzPage />} />
-            <Route path="/nutzungsbedingungen" element={<NutzungsbedingungenPage />} />
             <Route path="*" element={<div style={{ padding: 40, textAlign: 'center' }}>404 – Seite nicht gefunden</div>} />
           </Route>
           

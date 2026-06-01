@@ -121,7 +121,7 @@ const AdminMapManager = () => {
                 } else if (payload.facilityTypeId) {
                      payload.facilityType = { id: payload.facilityTypeId };
                 }
-
+ 
                 await apiRequest(`${ep.url}/${poi.id}`, 'PUT', payload, keycloakInstance.token);
             }
             alert(`${dirtyPois.length} Positionen erfolgreich gespeichert!`);

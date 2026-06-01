@@ -11,11 +11,9 @@ services:
       - /opt/nginx-proxy-manager/data:/data
       - /opt/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
       # für Auslieferung von hochgeladenen Bildern 
-      - /home/lorenz/bierfestival_uploads:/var/www/bierfestival/uploads  # Der Pfad /var/www/bierfestival/uploads ist der Pfad *innerhalb* des Nginx-Proxy-Manager-Containers -> entspricht alias forwarding in nginx config
-      - /home/lorenz/srv/maps/data:/var/www/bierfestival/maps
+      - /root/bierfestival_uploads:/var/www/bierfestival/uploads  # Der Pfad /var/www/bierfestival/uploads ist der Pfad *innerhalb* des Nginx-Proxy-Manager-Containers -> entspricht alias forwarding in nginx config
+      - /root/srv/maps/data:/var/www/bierfestival/maps
       # Pfad muss entsprechend zum Server passend angepasst werden, damit die hochgeladenen Bilder und Mapdaten auch vom Nginx-Proxy-Manager-Container aus erreichbar sind.
-      # z.B. - /root/bierfestival_uploads:/var/www/bierfestival/uploads
-      # - /root/bierfestival_maps:/var/www/bierfestival/maps
     networks:
       - nginx-proxy-manager
 networks:
