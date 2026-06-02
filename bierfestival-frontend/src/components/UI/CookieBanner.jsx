@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import ReactGA from 'react-ga4';
 import styles from './CookieBanner.module.css';
 
 export const CONSENT_KEY = 'bierfestival_consents';
@@ -8,8 +7,9 @@ const CookieBanner = () => {
     const [showBanner, setShowBanner] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     
+    // Variablen-Namen beibehalten, damit nichts anderes bricht
     const [statsConsent, setStatsConsent] = useState(true);
-    const [marketingConsent, setMarketingConsent] = useState(true);
+    const [marketingConsent, setMarketingConsent] = useState(false); // Default auf false, da es eh nicht mehr genutzt wird
 
     useEffect(() => {
         const consentData = localStorage.getItem(CONSENT_KEY);
@@ -17,11 +17,8 @@ const CookieBanner = () => {
             setShowBanner(true);
         } else {
             try {
-                const parsed = JSON.parse(consentData);
-                if (parsed.marketing) {
-                    ReactGA.initialize('G-XXXXXXXXXX');
-                    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
-                }
+                // Prüft nur noch, ob das JSON lesbar ist, falls ja -> Banner bleibt versteckt
+                JSON.parse(consentData);
             } catch (e) {
                 setShowBanner(true);
             }
@@ -29,18 +26,14 @@ const CookieBanner = () => {
     }, []);
 
     const saveConsents = (marketing, festivalSync) => {
+        // Gleiche Struktur beim Speichern beibehalten
         const consents = { marketing, festivalSync, necessary: true };
         localStorage.setItem(CONSENT_KEY, JSON.stringify(consents));
-        
-        if (marketing) {
-            ReactGA.initialize('G-XXXXXXXXXX');
-            ReactGA.send({ hitType: "pageview", page: window.location.pathname });
-        }
         
         setShowBanner(false);
     };
 
-    const handleAcceptAll = () => saveConsents(true, true);
+    const handleAcceptAll = () => saveConsents(true, true); // Google-Analytics wurde entfernt, platzhalter dafür existiert bereits mit marketing... zustimmung -> aktuell macht das nichts.
     const handleDeclineAll = () => saveConsents(false, false);
     const handleSaveSettings = () => saveConsents(marketingConsent, statsConsent);
 
@@ -51,7 +44,7 @@ const CookieBanner = () => {
             {!showSettings ? (
                 <div className={styles.content}>
                     <p className={styles.text}>
-                        Diese Website nutzt Technologien (z.B. Cookies und Local Storage), um Kernfunktionen bereitzustellen und die Nutzung zu analysieren. Deine (anonymen) Bewertungen helfen uns außerdem dabei, am Ende die besten Biere des Festivals zu küren! Du kannst deine Zustimmung widerrufen oder anpassen. <a href="/datenschutz">Datenschutzerklärung</a> | <a href="/impressum">Impressum</a>.
+                        Wir speichern notwendige Daten lokal auf deinem Gerät, damit die App reibungslos funktioniert. Wenn du am Ende für das beste Bier abstimmen möchtest, benötigen wir deine Zustimmung, um deine (anonymen) Bewertungen an unseren Server zu senden. <a href="/datenschutz">Datenschutz</a> | <a href="/impressum">Impressum</a>.
                     </p>
                     <div className={styles.buttons}>
                         <button onClick={() => setShowSettings(true)} className={styles.settingsButton}>Einstellungen</button>
@@ -61,30 +54,22 @@ const CookieBanner = () => {
                 </div>
             ) : (
                 <div className={styles.settingsContent}>
-                    <h3 className={styles.settingsTitle}>Cookie-Einstellungen</h3>
+                    <h3 className={styles.settingsTitle}>Einstellungen</h3>
                     
                     <div className={styles.category}>
                         <div className={styles.categoryHeader}>
-                            <strong>Notwendig (Berechtigungen & Speicherung)</strong>
+                            <strong>Notwendig (Lokale Speicherung)</strong>
                             <input type="checkbox" checked={true} disabled />
                         </div>
-                        <p className={styles.categoryDesc}>Speichert deine Daten ausschließlich lokal auf deinem Gerät, um dir den Bereich "Mein Festivalbesuch" zu ermöglichen. Zudem nutzt die App (nach nativer Browser-Freigabe) deine Geo-Location, damit du dich auf der Karte orientieren kannst. Es findet keine ungefragte Datenübertragung an Server statt.</p>
+                        <p className={styles.categoryDesc}>Speichert Basisdaten lokal, damit die App funktioniert. Es werden keine Daten gesendet.</p>
                     </div>
 
                     <div className={styles.category}>
                         <div className={styles.categoryHeader}>
-                            <strong>Festival Auswertung (Statistik)</strong>
+                            <strong>Bier-Bewertungen (Statistik)</strong>
                             <input type="checkbox" checked={statsConsent} onChange={(e) => setStatsConsent(e.target.checked)} />
                         </div>
-                        <p className={styles.categoryDesc}>Synchronisiert deine getrunkenen Biere und Bewertungen anonym mit unserem Server, um am Ende das Gewinner-Bier zu küren.</p>
-                    </div>
-
-                    <div className={styles.category}>
-                        <div className={styles.categoryHeader}>
-                            <strong>Marketing & Analysen (Google)</strong>
-                            <input type="checkbox" checked={marketingConsent} onChange={(e) => setMarketingConsent(e.target.checked)} />
-                        </div>
-                        <p className={styles.categoryDesc}>Wir nutzen Google Analytics 4, um zu verstehen, wie unsere Seite genutzt wird. Ohne diese Zustimmung wird GA blockiert.</p>
+                        <p className={styles.categoryDesc}>Speichert eine anonyme ID und sendet deine Bewertungen, damit deine Stimme für das beste Bier gezählt wird.</p>
                     </div>
                     
                     <div className={styles.buttons} style={{ marginTop: '16px' }}>
