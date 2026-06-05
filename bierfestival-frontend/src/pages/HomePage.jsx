@@ -47,15 +47,15 @@ const MapControls = ({ festivalCoords, jumpCoords }) => {
     }, [userPosition, isFollowing, map]);
 
     useEffect(() => {
-        if (jumpCoords) { setIsFollowing(false); map.flyTo([jumpCoords.lat, jumpCoords.lon], 18, { duration: 1.5 }); }
+        if (jumpCoords) { setIsFollowing(false); map.flyTo([jumpCoords.lat, jumpCoords.lon], 19, { duration: 1.5 }); }
     }, [jumpCoords, map]);
 
     useMapEvents({ dragstart: () => setIsFollowing(false) });
 
     const handleLocateClick = () => {
         if (isFollowing) { setIsFollowing(false); return; }
-        if (userPosition) { setIsFollowing(true); map.flyTo(userPosition, 18, { duration: 1.5 }); }
-        else { map.locate({ setView: true, maxZoom: 18 }); }
+        if (userPosition) { setIsFollowing(true); map.flyTo(userPosition, 19, { duration: 1.5 }); }
+        else { map.locate({ setView: true, maxZoom: 19 }); }
     };
 
     return (
