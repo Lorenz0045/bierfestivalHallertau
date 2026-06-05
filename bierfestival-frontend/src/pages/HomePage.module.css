@@ -66,7 +66,12 @@
 .sponsorOverlay { position: absolute; left: 0; right: 0; z-index: 999; }
 
 /* POI Detail Styles */
-.poiDetail { padding: 4px 0; }
+.poiDetail { 
+    padding: 4px 0 20px; 
+    max-height: 75vh; 
+    overflow-y: auto; 
+    scrollbar-width: thin;
+}
 
 /* Icons: Schenken & Bühnen = 120px, alle anderen = 80px */
 .poiImgLarge {
@@ -109,14 +114,27 @@
 }
 .dayActive { background: var(--bf-primary-green); color: var(--bf-white); border-color: var(--bf-primary-green); }
 
-.eventList { display: flex; flex-direction: column; gap: 4px; }
-.eventItem {
-    display: flex; gap: 10px; align-items: baseline;
-    padding: 6px 0; border-bottom: 1px solid var(--bf-gray-light);
+.stageProgram { margin-top: 14px; }
+.stageProgram h4 {
+    font-size: 0.95rem; color: var(--bf-dark-green); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
 }
-.eventItem:last-child { border-bottom: none; }
-.eventTime { font-size: 0.8rem; font-weight: 600; color: var(--bf-primary-green); white-space: nowrap; min-width: 110px; }
-.eventName { font-size: 0.85rem; color: var(--bf-text-dark); }
+
+.dayTabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
+.dayTabs::-webkit-scrollbar { display: none; }
+.dayTab {
+    flex: 0 0 auto; padding: 6px 14px; border: 1px solid var(--bf-gray-mid);
+    border-radius: var(--bf-radius-full); background: var(--bf-white); color: var(--bf-text-dark);
+    font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.dayActive { background: var(--bf-primary-green); color: var(--bf-white); border-color: var(--bf-primary-green); }
+
+.stageEventList { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+    margin-top: 8px;
+}
 
 /* Tavern Beers */
 .tavernBeers { margin-top: 14px; }

@@ -8,6 +8,7 @@ import { createPoiIcon } from '../components/map/IconFactory';
 import BottomSheet from '../components/UI/BottomSheet';
 import BeerCard from '../components/UI/BeerCard';
 import SponsorBanner from '../components/UI/SponsorBanner';
+import EventItem from '../components/UI/EventItem';
 import useTracking from '../hooks/useTracking';
 import { FaLocationArrow, FaBeer, FaInfoCircle, FaTimes, FaGlobe, FaCalendarAlt } from 'react-icons/fa';
 import styles from './HomePage.module.css';
@@ -69,7 +70,6 @@ const MapControls = ({ festivalCoords, jumpCoords }) => {
     );
 };
 
-// Sub-component: Stage events grouped by day
 const StageEventsByDay = ({ events, stageId }) => {
     const stageEvents = events.filter(e => e.stage?.id === stageId);
     const groups = {};
@@ -99,15 +99,16 @@ const StageEventsByDay = ({ events, stageId }) => {
                     </button>
                 ))}
             </div>
-            <div className={styles.eventList}>
+            
+            <div className={styles.stageEventList}>
                 {(groups[selectedDay] || []).map(ev => (
-                    <div key={ev.id} className={styles.eventItem}>
-                        <span className={styles.eventTime}>
-                            {ev.startTime ? ev.startTime.substring(11, 16) + ' Uhr' : ''}
-                            {ev.endTime ? ` – ${ev.endTime.substring(11, 16)} Uhr` : ''}
-                        </span>
-                        <span className={styles.eventName}>{ev.name}</span>
-                    </div>
+                    <EventItem 
+                        key={ev.id} 
+                        event={ev} 
+                        showStage={false} // Versteckt den Bühnen-Namen im Item
+                        // Absichtlich kein onJumpToMap übergeben! 
+                        // Dadurch wird der Map-Button in der EventItem Komponente automatisch ausgeblendet.
+                    />
                 ))}
             </div>
         </div>
@@ -296,6 +297,7 @@ const HomePage = () => {
                                             taverns={beerTavernMap[beer.beerId] || []}
                                             onJumpToMap={handleJumpToMap}
                                             compact
+                                            hideTavernLinks={true}
                                         />
                                     );
                                 })}

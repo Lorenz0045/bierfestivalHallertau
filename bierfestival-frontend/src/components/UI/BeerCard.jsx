@@ -32,7 +32,8 @@ const BeerCard = ({
     onJumpToMap,
     taverns = [],
     compact = false,
-    drinkCount: drinkCountOverride
+    drinkCount: drinkCountOverride,
+    hideTavernLinks = false
 }) => {
     const [expanded, setExpanded] = useState(false);
 
@@ -126,7 +127,7 @@ const BeerCard = ({
             </div>
 
             {/* Schenke-Links (in welcher Schenke gibt es dieses Bier?) */}
-            {taverns.length > 0 && (
+            {taverns.length > 0 && !hideTavernLinks && (
                 <div className={styles.tavernLinks}>
                     <span className={styles.tavernLabel}>Erhältlich in:</span>
                     <div className={styles.tavernList}>
