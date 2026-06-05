@@ -8,8 +8,8 @@ import 'leaflet/dist/leaflet.css';
 // Approximate bounds for the festival area (Hallertau center +/- 0.02 degrees)
 // This restricts the visible map area and saves Map API tiles/tokens.
 const FESTIVAL_BOUNDS = L.latLngBounds(
-    [48.50397, 11.75561], // South West 48.49950184977375, 11.747427129572412 // 48.50396659022299, 11.755612083985735
-    [48.51050, 11.76053]  // North East 48.51183197823702, 11.766351596755545 //  48.51050732499636, 11.760526589222717
+    [48.50526, 11.75660], // South West 48.49950184977375, 11.747427129572412 // 48.50396659022299, 11.755612083985735 // 48.505260100155766, 11.756601807429128
+    [48.50740, 11.76023]  // North East 48.51183197823702, 11.766351596755545 //  48.50740418106468, 11.760225854250459
 );
 
 const PMTILES_URL = "https://app.hallertauer-bierfestival.de/mapdata/attenkirchen.pmtiles";
