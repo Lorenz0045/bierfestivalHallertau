@@ -2,7 +2,7 @@
    HOME PAGE (LAGEPLAN) – Map Styles
    ========================================= */
 .mapWrapper {
-    height: calc(100vh - var(--bf-topbar-height) - var(--bf-navbar-height));
+    height: calc(100dvh - var(--bf-topbar-height) - var(--bf-navbar-height));
     width: 100%;
     position: relative;
     z-index: 1;
@@ -133,6 +133,6 @@
 
 @media (max-width: 768px) {
     .mapWrapper {
-        height: calc(100vh - var(--bf-topbar-height) - var(--bf-navbar-height) - env(safe-area-inset-bottom));
+        height: calc(100dvh - var(--bf-topbar-height) - var(--bf-navbar-height) - env(safe-area-inset-bottom));
     }
 }

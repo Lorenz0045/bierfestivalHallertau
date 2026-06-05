@@ -78,25 +78,32 @@ const SchenkenPage = () => {
             <div className={styles.tavernList}>
                 {taverns.map(tavern => (
                     <div key={tavern.id} className={styles.tavernCard}>
-                        {tavern.imgUrl && (
-                            <img src={tavern.imgUrl} alt={tavern.name} className={styles.tavernImage} />
-                        )}
-                        <div className={styles.tavernContent}>
-                            <h3 className={styles.tavernName}>{tavern.name}</h3>
-                            <div className={styles.actionButtons}>
-                                <button
-                                    className={styles.beersButton}
-                                    onClick={() => setSelectedTavern(tavern)}
-                                >
-                                    <FaBeer />
-                                    <span>
-                                        {tavern.beers?.length
-                                            ? `${tavern.beers.length} Biere`
-                                            : 'Keine Biere gelistet'}
-                                    </span>
-                                    {tavern.beers?.length > 0 && <FaAngleRight className={styles.arrowIcon} />}
-                                </button>
+                        
+                        <div className={styles.imageWrapper}>
+                            {tavern.imgUrl ? (
+                                <img src={tavern.imgUrl} alt={tavern.name} className={styles.tavernImage} />
+                            ) : (
+                                <FaBeer className={styles.placeholderIcon} />
+                            )}
+                        </div>
 
+                        <div className={styles.tavernContent}>
+                            <button
+                                className={styles.beersButton}
+                                onClick={() => setSelectedTavern(tavern)}
+                            >
+                                <FaBeer />
+                                <span>
+                                    {tavern.beers?.length
+                                        ? `${tavern.beers.length} Biere`
+                                        : 'Keine Biere gelistet'}
+                                </span>
+                                {tavern.beers?.length > 0 && <FaAngleRight className={styles.arrowIcon} />}
+                            </button>
+
+                            {/* Untere Reihe: Name und Karte-Button nebeneinander */}
+                            <div className={styles.infoRow}>
+                                <h3 className={styles.tavernName}>{tavern.name}</h3>
                                 <button
                                     className={styles.mapBtn}
                                     onClick={() => handleJumpToMap(tavern)}
@@ -106,6 +113,7 @@ const SchenkenPage = () => {
                                 </button>
                             </div>
                         </div>
+                        
                     </div>
                 ))}
             </div>
