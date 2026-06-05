@@ -179,7 +179,17 @@ const HomePage = () => {
         return map;
     }, [taverns]);
 
-    const handleMarkerClick = (poi) => setSelectedPoi(poi);
+    const handleMarkerClick = (poi) => {
+        const noOverlayNames = ['Kasse', 'WC', 'Festbuero', 'Kinderprogramm', 'Jugendzelt', 'Rotes Kreuz', 'Parkplatz']; 
+
+        if (poi.type === 'facility') {
+            if (noOverlayNames.includes(poi.facilityType.name)) {
+                return; 
+            }
+        }
+
+        setSelectedPoi(poi);
+    };
 
     const handleJumpToMap = (item) => {
         if (item?.lat && item?.lon) {
