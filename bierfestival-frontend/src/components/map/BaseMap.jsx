@@ -46,7 +46,7 @@ const BaseMap = ({ center = [48.50626, 11.75838], zoom = 18, children, className
             zoomControl={false}
             maxBounds={FESTIVAL_BOUNDS}
             maxBoundsViscosity={1.0}
-            minZoom={18}
+            minZoom={19}
         >
             <AttributionControl prefix={false} position="bottomleft" />
 
