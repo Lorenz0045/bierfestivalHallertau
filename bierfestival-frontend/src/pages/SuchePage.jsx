@@ -4,6 +4,7 @@ import { fetchCachedData } from '../services/cacheService';
 import useTracking from '../hooks/useTracking';
 import BeerCard from '../components/UI/BeerCard';
 import BottomSheet from '../components/UI/BottomSheet';
+import EventItem from '../components/UI/EventItem';
 import { FaBeer, FaMapMarkerAlt, FaSearch, FaGlobe, FaLocationArrow, FaMapMarkedAlt, FaCalendarAlt } from 'react-icons/fa';
 import styles from './SuchePage.module.css';
 
@@ -219,11 +220,13 @@ const SuchePage = () => {
             groups[day].push(ev);
         });
         Object.values(groups).forEach(arr => arr.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || '')));
-        return { groups, days: Object.keys(groups).sort((a, b) => {
-            const tA = groups[a][0]?.startTime ? new Date(groups[a][0].startTime).getTime() : 0;
-            const tB = groups[b][0]?.startTime ? new Date(groups[b][0].startTime).getTime() : 0;
-            return tA - tB;
-        })};
+        return {
+            groups, days: Object.keys(groups).sort((a, b) => {
+                const tA = groups[a][0]?.startTime ? new Date(groups[a][0].startTime).getTime() : 0;
+                const tB = groups[b][0]?.startTime ? new Date(groups[b][0].startTime).getTime() : 0;
+                return tA - tB;
+            })
+        };
     };
 
     // Get brewery beers for a brewery
@@ -243,20 +246,42 @@ const SuchePage = () => {
             const ortIcon = getOrtIcon(ort);
             return (
                 <div className={styles.ortDetail}>
-                    {ortIcon && <img src={ortIcon} alt={ort.name} className={styles.ortDetailIcon} />}
-                    <span className={styles.ortDetailType}>{ort.ortType}</span>
+
+                    <div className={styles.detailHeaderRow}>
+                        <div className={styles.detailHeaderIconWrapper}>
+                            {ortIcon ? (
+                                <img src={ortIcon} alt={ort.name} className={styles.detailHeaderImg} />
+                            ) : (
+                                <div className={styles.detailHeaderFallback}>{ort.name?.substring(0, 2).toUpperCase()}</div>
+                            )}
+                        </div>
+
+                        <div className={styles.detailHeaderInfo}>
+                            <span className={styles.detailTypeBadge}>{ort.ortType}</span>
+                            {ort.city && <span className={styles.detailMetaText}>📍 {ort.city.name || ort.city}</span>}
+                            {ort.ortType === 'Gastronomie' && ort.type && (
+                                <span className={styles.detailMetaText}>🍴 {ort.type.name}</span>
+                            )}
+                        </div>
+
+                        <div className={styles.detailHeaderActions}>
+                            {ort.website && (
+                                <div className={styles.actionWrapper}>
+                                    <a href={ort.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                        <FaGlobe /> Zur Website
+                                    </a>
+                                </div>
+                            )}
+                            {(ort.lat && ort.lon) && (
+                                <button className={styles.mapBtn} onClick={() => handleJumpToMap(ort)}>
+                                    <FaLocationArrow /> Karte
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Beschreibung & Unter-Inhalte */}
                     {ort.description && <p className={styles.ortDetailDesc}>{ort.description}</p>}
-                    {ort.website && (
-                        <a href={ort.website} target="_blank" rel="noopener noreferrer" className={styles.ortWebsite}>
-                            <FaGlobe /> Website
-                        </a>
-                    )}
-                    {(ort.lat && ort.lon) && (
-                        <button className={styles.ortMapLink} onClick={() => handleJumpToMap(ort)}>
-                            <FaLocationArrow /> Auf dem Lageplan anzeigen
-                        </button>
-                    )}
-                    {ort.city && <p className={styles.ortDetailMeta}>📍 {ort.city.name || ort.city}</p>}
 
                     {/* Schenke: Biere */}
                     {(ort.ortType === 'Schenke' || type === 'schenke') && ort.beers?.length > 0 && (
@@ -289,11 +314,6 @@ const SuchePage = () => {
                             <StageEventsByDay groups={groups} days={days} />
                         );
                     })()}
-
-                    {/* Gastronomie: Typ */}
-                    {ort.ortType === 'Gastronomie' && ort.type && (
-                        <p className={styles.ortDetailMeta}>🍴 {ort.type.name}</p>
-                    )}
 
                     {/* Brauerei-Biere (wenn Ort eine Brauerei ist) */}
                     {ort.ortType === 'Brauerei' && (() => {
@@ -329,16 +349,36 @@ const SuchePage = () => {
             const bBeers = getBreweryBeers(brewery.id);
             return (
                 <div className={styles.ortDetail}>
-                    {brewery.imgUrl && <img src={brewery.imgUrl} alt={brewery.name} className={styles.ortDetailIcon} />}
-                    <span className={styles.ortDetailType}>Brauerei</span>
+
+                    {/* NEU: Flex-Header Row auch für Brauerei */}
+                    <div className={styles.detailHeaderRow}>
+                        <div className={styles.detailHeaderIconWrapper}>
+                            {brewery.imgUrl ? (
+                                <img src={brewery.imgUrl} alt={brewery.name} className={styles.detailHeaderImg} />
+                            ) : (
+                                <div className={styles.detailHeaderFallback}>{brewery.name?.substring(0, 2).toUpperCase()}</div>
+                            )}
+                        </div>
+
+                        <div className={styles.detailHeaderInfo}>
+                            <span className={styles.detailTypeBadge}>Brauerei</span>
+                            {brewery.city && <span className={styles.detailMetaText}>📍 {brewery.city.name || brewery.city}</span>}
+                            {brewery.district && <span className={styles.detailMetaText}>🗺️ {brewery.district.name || brewery.district}</span>}
+                        </div>
+
+                        <div className={styles.detailHeaderActions}>
+                            {brewery.website && (
+                                <div className={styles.actionWrapper}>
+                                    <a href={brewery.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                        <FaGlobe /> Zur Website
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {brewery.description && <p className={styles.ortDetailDesc}>{brewery.description}</p>}
-                    {brewery.city && <p className={styles.ortDetailMeta}>📍 {brewery.city.name || brewery.city}</p>}
-                    {brewery.district && <p className={styles.ortDetailMeta}>🗺️ Landkreis {brewery.district.name || brewery.district}</p>}
-                    {brewery.website && (
-                        <a href={brewery.website} target="_blank" rel="noopener noreferrer" className={styles.ortWebsite}>
-                            <FaGlobe /> Website besuchen
-                        </a>
-                    )}
+
                     <div className={styles.ortBeers}>
                         <h4><FaBeer /> Biere dieser Brauerei ({bBeers.length})</h4>
                         {bBeers.map(fullBeer => (
@@ -535,15 +575,13 @@ const StageEventsByDay = ({ groups, days }) => {
                     </button>
                 ))}
             </div>
-            <div className={styles.eventList}>
+            <div className={styles.stageEventList}>
                 {(groups[selectedDay] || []).map(ev => (
-                    <div key={ev.id} className={styles.eventItem}>
-                        <span className={styles.eventTime}>
-                            {ev.startTime ? ev.startTime.substring(11, 16) + ' Uhr' : ''}
-                            {ev.endTime ? ` – ${ev.endTime.substring(11, 16)} Uhr` : ''}
-                        </span>
-                        <span className={styles.eventName}>{ev.name}</span>
-                    </div>
+                    <EventItem 
+                        key={ev.id} 
+                        event={ev} 
+                        showStage={false} 
+                    />
                 ))}
             </div>
         </div>

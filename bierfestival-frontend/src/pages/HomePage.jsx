@@ -141,7 +141,11 @@ const HomePage = () => {
                 try {
                     const data = await fetchCachedData(ep.url);
                     if (data) {
-                        const placed = data.filter(item => item.lat && item.lon).map(item => ({ ...item, type: ep.type }));
+                        const placed = data.filter(item => item.lat && item.lon).map(item => ({ 
+                            ...item, 
+                            gastronomyType: ep.type === 'gastronomy' ? item.type : item.gastronomyType,
+                            type: ep.type 
+                        }));
                         allPlacedPois = [...allPlacedPois, ...placed];
                     }
                 } catch (error) {
@@ -156,15 +160,19 @@ const HomePage = () => {
     const [events, setEvents] = useState([]);
     const [allBeers, setAllBeers] = useState([]);
     const [taverns, setTaverns] = useState([]);
+    const [breweries, setBreweries] = useState([]);
+    const [breweryDetail, setBreweryDetail] = useState(null); 
     useEffect(() => {
         Promise.all([
             fetchCachedData('/api/events'),
             fetchCachedData('/api/beers'),
             fetchCachedData('/api/taverns'),
-        ]).then(([evData, beerData, tavernData]) => {
+            fetchCachedData('/api/breweries'),
+        ]).then(([evData, beerData, tavernData, breweryData]) => {
             if (evData) setEvents(evData);
             if (beerData) setAllBeers(beerData);
             if (tavernData) setTaverns(tavernData);
+            if (breweryData) setBreweries(breweryData);
         }).catch(() => { });
     }, []);
 
@@ -190,6 +198,11 @@ const HomePage = () => {
         }
 
         setSelectedPoi(poi);
+    };
+
+    const handleBreweryClick = (breweryId) => {
+        const brewery = breweries.find(b => b.id === breweryId);
+        if (brewery) setBreweryDetail(brewery);
     };
 
     const handleJumpToMap = (item) => {
@@ -235,31 +248,58 @@ const HomePage = () => {
             
 
             {/* POI Detail BottomSheet */}
-            <BottomSheet isOpen={!!selectedPoi} onClose={() => setSelectedPoi(null)} title={selectedPoi?.name || ''}>
+            <BottomSheet isOpen={!!selectedPoi && !breweryDetail} onClose={() => setSelectedPoi(null)} title={selectedPoi?.name || ''}>
                 {selectedPoi && (
                     <div className={styles.poiDetail}>
-                        {selectedPoi.imgUrl && (
-                            <img
-                                src={selectedPoi.imgUrl}
-                                alt={selectedPoi.name}
-                                className={isLargeIcon(selectedPoi.type) ? styles.poiImgLarge : styles.poiImgSmall}
-                            />
-                        )}
-                        <span className={styles.poiType}>{getPoiTypeLabel(selectedPoi.type)}</span>
+                        
+                        {/* NEU: Flex-Header Row synchronisiert mit SuchePage */}
+                        <div className={styles.detailHeaderRow}>
+                            <div className={styles.detailHeaderIconWrapper}>
+                                {selectedPoi.imgUrl || selectedPoi.facilityType?.imgUrl ? (
+                                    <img
+                                        src={selectedPoi.imgUrl || selectedPoi.facilityType.imgUrl}
+                                        alt={selectedPoi.name}
+                                        className={styles.detailHeaderImg}
+                                    />
+                                ) : (
+                                    <div className={styles.detailHeaderFallback}>
+                                        {selectedPoi.name?.substring(0, 2).toUpperCase()}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={styles.detailHeaderInfo}>
+                                <span className={styles.detailTypeBadge}>{getPoiTypeLabel(selectedPoi.type)}</span>
+                                
+                                {selectedPoi.city && (
+                                    <span className={styles.detailMetaText}>📍 {selectedPoi.city.name || selectedPoi.city}</span>
+                                )}
+                                {selectedPoi.district && (
+                                    <span className={styles.detailMetaText}>🗺️ {selectedPoi.district.name || selectedPoi.district}</span>
+                                )}
+
+                                {/* Spezifische Typen */}
+                                {selectedPoi.type === 'gastronomy' && selectedPoi.gastronomyType && (
+                                    <span className={styles.detailMetaText}>🍴 {selectedPoi.gastronomyType.name || selectedPoi.type?.name}</span>
+                                )}
+                                {selectedPoi.type === 'facility' && selectedPoi.facilityType && (
+                                    <span className={styles.detailMetaText}>ℹ️ {selectedPoi.facilityType.name}</span>
+                                )}
+                            </div>
+
+                            <div className={styles.detailHeaderActions}>
+                                {selectedPoi.website && (
+                                    <div className={styles.actionWrapper}>
+                                        <a href={selectedPoi.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                            <FaGlobe /> Zur Website
+                                        </a>
+                                    </div>
+                                )}
+                                {/* HIER KEIN KARTEN-BUTTON, da wir schon auf der Karte sind! */}
+                            </div>
+                        </div>
 
                         {selectedPoi.description && <p className={styles.poiDesc}>{selectedPoi.description}</p>}
-                        {selectedPoi.website && (
-                            <a href={selectedPoi.website} target="_blank" rel="noopener noreferrer" className={styles.poiWebsite}>
-                                <FaGlobe /> Website besuchen
-                            </a>
-                        )}
-
-                        {selectedPoi.type === 'gastronomy' && selectedPoi.type && (
-                            <p className={styles.poiMeta}>🍴 {selectedPoi.gastronomyType?.name || selectedPoi.type?.name}</p>
-                        )}
-                        {selectedPoi.type === 'facility' && selectedPoi.facilityType && (
-                            <p className={styles.poiMeta}>ℹ️ {selectedPoi.facilityType.name}</p>
-                        )}
 
                         {/* Bühne: Programm mit Tagesaufteilung */}
                         {selectedPoi.type === 'stage' && (
@@ -296,8 +336,9 @@ const HomePage = () => {
                                             onRate={rateBeer}
                                             taverns={beerTavernMap[beer.beerId] || []}
                                             onJumpToMap={handleJumpToMap}
-                                            compact
+                                            compact={true}
                                             hideTavernLinks={true}
+                                            onBreweryClick={handleBreweryClick}
                                         />
                                     );
                                 })}
@@ -305,6 +346,79 @@ const HomePage = () => {
                         )}
                     </div>
                 )}
+            </BottomSheet>
+            {/* Brauerei Detail Drill-down */}
+            <BottomSheet
+                isOpen={!!breweryDetail}
+                onClose={() => setBreweryDetail(null)}
+                onBack={() => setBreweryDetail(null)}
+                showBack={true}
+                title={breweryDetail?.name || ''}
+            >
+                {breweryDetail && (() => {
+                    // Biere für diese Brauerei filtern
+                    const bBeers = allBeers.filter(b => b.brewery?.id === breweryDetail.id);
+                    
+                    return (
+                        <div className={styles.poiDetail}>
+                            <div className={styles.detailHeaderRow}>
+                                <div className={styles.detailHeaderIconWrapper}>
+                                    {breweryDetail.imgUrl ? (
+                                        <img src={breweryDetail.imgUrl} alt={breweryDetail.name} className={styles.detailHeaderImg} />
+                                    ) : (
+                                        <div className={styles.detailHeaderFallback}>{breweryDetail.name?.substring(0, 2).toUpperCase()}</div>
+                                    )}
+                                </div>
+
+                                <div className={styles.detailHeaderInfo}>
+                                    <span className={styles.detailTypeBadge}>Brauerei</span>
+                                    {breweryDetail.city && <span className={styles.detailMetaText}>📍 {breweryDetail.city.name || breweryDetail.city}</span>}
+                                    {breweryDetail.district && <span className={styles.detailMetaText}>🗺️ {breweryDetail.district.name || breweryDetail.district}</span>}
+                                </div>
+
+                                <div className={styles.detailHeaderActions}>
+                                    {breweryDetail.website && (
+                                        <div className={styles.actionWrapper}>
+                                            <a href={breweryDetail.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                                <FaGlobe /> Zur Website
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {breweryDetail.description && <p className={styles.poiDesc}>{breweryDetail.description}</p>}
+
+                            {/* NEU: Biere der Brauerei */}
+                            <div className={styles.tavernBeers}>
+                                <h4><FaBeer /> Biere dieser Brauerei ({bBeers.length})</h4>
+                                {bBeers.map(fullBeer => (
+                                    <BeerCard
+                                        key={fullBeer.id}
+                                        beer={{
+                                            beerId: fullBeer.id, name: fullBeer.name,
+                                            breweryName: fullBeer.brewery?.name, breweryId: fullBeer.brewery?.id,
+                                            typeName: fullBeer.beerType?.name,
+                                            alcoholPercentage: fullBeer.alcoholPercentage,
+                                            isNonAlcoholic: fullBeer.isNonAlcoholic,
+                                            description: fullBeer.description,
+                                            originalGravity: fullBeer.originalGravity,
+                                        }}
+                                        trackingState={getBeerState(fullBeer.id)}
+                                        onToggleMerkliste={toggleMerkliste}
+                                        onLogDrink={logDrink}
+                                        onRemoveDrink={removeDrink}
+                                        onRate={rateBeer}
+                                        taverns={beerTavernMap[fullBeer.id] || []}
+                                        onJumpToMap={handleJumpToMap}
+                                        compact={true}
+                                    />
+                                ))}
+                                {bBeers.length === 0 && <p className={styles.poiMeta}>Derzeit keine Biere gelistet.</p>}
+                            </div>
+                        </div>
+                    );
+                })()}
             </BottomSheet>
         </div>
     );
