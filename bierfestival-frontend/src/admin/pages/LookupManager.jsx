@@ -9,7 +9,8 @@ const TABS = {
     FACILITY_TYPES: 'FACILITY_TYPES',
     GASTRONOMY_TYPES: 'GASTRONOMY_TYPES',
     CITIES: 'CITIES',
-    DISTRICTS: 'DISTRICTS'
+    DISTRICTS: 'DISTRICTS',
+    SPONSOR_TIERS: 'SPONSOR_TIERS'
 };
 
 const LookupManager = () => {
@@ -82,6 +83,26 @@ const LookupManager = () => {
             ],
             fields: [
                 { name: 'name', label: 'Landkreis-Bezeichnung', type: 'text', required: true }
+            ]
+        },
+        [TABS.SPONSOR_TIERS]: {
+            endpoint: '/api/sponsor-tiers',
+            title: 'Sponsoren-Tier',
+            columns: [
+                { key: 'id', label: 'ID' },
+                { key: 'name', label: 'Tier-Name' },
+                { key: 'sortOrder', label: 'Sortierung' },
+                {
+                    key: 'imgUrl',
+                    label: 'Icon',
+                    sortable: false,
+                    render: (val) => val ? <img src={val} alt="Icon" style={{ height: '30px', borderRadius: '4px' }} /> : '-'
+                }
+            ],
+            fields: [
+                { name: 'name', label: 'Tier-Name (z.B. Platin)', type: 'text', required: true },
+                { name: 'sortOrder', label: 'Sortierung (z.B. 1 für höchste Prio)', type: 'number', required: true },
+                { name: 'imgUrl', label: 'Tier Icon', type: 'image' }
             ]
         }
     };
@@ -162,6 +183,7 @@ const LookupManager = () => {
                 <button onClick={() => setActiveTab(TABS.GASTRONOMY_TYPES)} style={tabStyle(TABS.GASTRONOMY_TYPES)}>Gastronomie-Kategorien</button>
                 <button onClick={() => setActiveTab(TABS.CITIES)} style={tabStyle(TABS.CITIES)}>Orte</button>
                 <button onClick={() => setActiveTab(TABS.DISTRICTS)} style={tabStyle(TABS.DISTRICTS)}>Landkreise</button>
+                <button onClick={() => setActiveTab(TABS.SPONSOR_TIERS)} style={tabStyle(TABS.SPONSOR_TIERS)}>Sponsoren-Tiers</button>
             </div>
 
             {/* Header mit Neu-Button */}

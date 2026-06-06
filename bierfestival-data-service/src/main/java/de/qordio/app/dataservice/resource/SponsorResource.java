@@ -45,10 +45,18 @@ public class SponsorResource {
         public String name;
     }
 
+    public static class SponsorTierRefDto {
+        public Long id;
+        public String name;
+        public Integer sortOrder;
+        public String imgUrl;
+    }
+
     public static class SponsorDto {
         public Long id;
         public String name;
         public LookupDto city;
+        public SponsorTierRefDto tier;
         public String website;
         public String description;
         public String imgUrl;
@@ -63,6 +71,13 @@ public class SponsorResource {
                 dto.city.id = entity.city.id;
                 dto.city.name = entity.city.name;
             }
+            if (entity.tier != null) {
+                dto.tier = new SponsorTierRefDto();
+                dto.tier.id = entity.tier.id;
+                dto.tier.name = entity.tier.name;
+                dto.tier.sortOrder = entity.tier.sortOrder;
+                dto.tier.imgUrl = entity.tier.imgUrl;
+            }
             dto.website = entity.website;
             dto.description = entity.description;
             dto.imgUrl = entity.imgUrl;
@@ -73,6 +88,7 @@ public class SponsorResource {
     public static class SponsorUpdateDto {
         public String name;
         public RefId city;
+        public RefId tier;
         public String website;
         public String description;
         public String imgUrl;
@@ -148,6 +164,11 @@ public class SponsorResource {
             entity.city = City.findById(dto.city.id);
         } else {
             entity.city = null;
+        }
+        if (dto.tier != null && dto.tier.id != null) {
+            entity.tier = de.qordio.app.dataservice.entity.lookups.SponsorTier.findById(dto.tier.id);
+        } else {
+            entity.tier = null;
         }
     }
 }

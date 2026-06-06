@@ -6,6 +6,7 @@ import { useUser } from '../contexts/UserContext';
 
 const API_SPONSORS = '/api/sponsors';
 const API_CITIES = '/api/cities';
+const API_TIERS = '/api/sponsor-tiers'; 
 
 const renderExternalLink = (url) => {
     if (!url) return '-';
@@ -17,6 +18,7 @@ const SponsorManager = () => {
     const { keycloakInstance } = useUser();
     const [sponsors, setSponsors] = useState([]);
     const [cities, setCities] = useState([]);
+    const [tiers, setTiers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
@@ -24,6 +26,7 @@ const SponsorManager = () => {
     const columns = [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
+        { key: 'tier', label: 'Tier', render: (_, row) => row.tier?.name || '-' },
         { key: 'city', label: 'Ort', render: (_, row) => row.city?.name || '-' },
         { key: 'website', label: 'Website', render: (val) => renderExternalLink(val) },
         { key: 'imgUrl', label: 'Logo', sortable: false, render: (val) => val ? <img src={val} alt="Sponsor" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
@@ -31,6 +34,7 @@ const SponsorManager = () => {
 
     const formFields = [
         { name: 'name', label: 'Name', type: 'text', required: true },
+        { name: 'tierId', label: 'Sponsoren-Tier', type: 'select', options: tiers.map(t => ({ id: t.id, name: t.name })), lookupEndpoint: API_TIERS },
         { name: 'cityId', label: 'Ort', type: 'select', options: cities.map(c => ({ id: c.id, name: c.name })), lookupEndpoint: '/api/cities' },
         { name: 'website', label: 'Website', type: 'text' },
         { name: 'description', label: 'Beschreibung', type: 'text' },
@@ -43,10 +47,12 @@ const SponsorManager = () => {
         try {
             const [sponsorData, cityData] = await Promise.all([
                 apiRequest(API_SPONSORS, 'GET', null, keycloakInstance.token),
-                apiRequest(API_CITIES, 'GET', null, keycloakInstance.token)
+                apiRequest(API_CITIES, 'GET', null, keycloakInstance.token),
+                apiRequest(API_TIERS, 'GET', null, keycloakInstance.token)
             ]);
             setSponsors(sponsorData || []);
             setCities(cityData || []);
+            setTiers(tierData || []);
         } catch (error) {
             console.error(error);
         } finally {
@@ -66,7 +72,8 @@ const SponsorManager = () => {
     const handleEdit = (item) => {
         const itemForEdit = {
             ...item,
-            cityId: item.city?.id || ''
+            cityId: item.city?.id || '',
+            tierId: item.tier?.id || ''
         };
         setEditingItem(itemForEdit);
         setIsModalOpen(true);
@@ -88,7 +95,8 @@ const SponsorManager = () => {
         if (!keycloakInstance?.token) return;
         const payload = {
             ...formData,
-            city: formData.cityId ? { id: parseInt(formData.cityId) } : null
+            city: formData.cityId ? { id: parseInt(formData.cityId) } : null,
+            tier: formData.tierId ? { id: parseInt(formData.tierId) } : null
         };
 
         try {
@@ -107,6 +115,9 @@ const SponsorManager = () => {
     const handleLookupCreated = (fieldName, newEntry) => {
         if (fieldName === 'cityId') {
             setCities(prev => [...prev, newEntry].sort((a, b) => a.name.localeCompare(b.name)));
+        }
+        if (fieldName === 'tierId') { 
+            setTiers(prev => [...prev, newEntry].sort((a, b) => a.sortOrder - b.sortOrder));
         }
     };
 

@@ -226,3 +226,12 @@ CREATE TABLE bus_departure (
     direction VARCHAR(50) NOT NULL, -- 'HINFAHRT' oder 'RUECKFAHRT'
     departure_time TIMESTAMP(6) WITH TIME ZONE NOT NULL
 );
+
+CREATE TABLE sponsor_tier (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    img_url VARCHAR(500),
+    sort_order INT NOT NULL DEFAULT 0
+);
+
+ALTER TABLE sponsor ADD COLUMN sponsor_tier_id BIGINT REFERENCES sponsor_tier(id) ON DELETE SET NULL;

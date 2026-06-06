@@ -1,6 +1,7 @@
 package de.qordio.app.dataservice.entity.masterdata;
 
 import de.qordio.app.dataservice.entity.lookups.City;
+import de.qordio.app.dataservice.entity.lookups.SponsorTier;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,4 +33,8 @@ public class Sponsor extends PanacheEntityBase {
 
     @Column(name = "img_url")
     public String imgUrl;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sponsor_tier_id")
+    public SponsorTier tier;
 }

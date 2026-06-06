@@ -20,7 +20,19 @@ const SponsorBanner = () => {
         const load = async () => {
             try {
                 const data = await fetchCachedData('/api/sponsors');
-                if (data && data.length > 0) setSponsors(data);
+                if (data && data.length > 0) {
+                    const sortedData = [...data].sort((a, b) => {
+                        const orderA = a.tier?.sortOrder ?? 999;
+                        const orderB = b.tier?.sortOrder ?? 999;
+                        
+                        if (orderA === orderB) {
+                            return a.name.localeCompare(b.name);
+                        }
+                        return orderA - orderB;
+                    });
+                    
+                    setSponsors(sortedData);
+                }
             } catch (err) {
                 console.error('Sponsor load error:', err);
             }
@@ -101,6 +113,15 @@ const SponsorBanner = () => {
                             <p className={styles.detailDesc}>{selectedSponsor.description}</p>
                         )}
                         <div className={styles.detailMeta}>
+                            {selectedSponsor.tier && (
+                                <span className={styles.metaItem}>
+                                    {selectedSponsor.tier.imgUrl ? (
+                                        <img src={selectedSponsor.tier.imgUrl} alt="Tier Icon" style={{height: '16px', marginRight: '4px'}}/>
+                                    ) : null}
+                                    <strong>{selectedSponsor.tier.name}</strong>
+                                </span>
+                            )}
+                            
                             {selectedSponsor.city && (
                                 <span className={styles.metaItem}>
                                     <FaMapMarkerAlt /> {selectedSponsor.city.name || selectedSponsor.city}
