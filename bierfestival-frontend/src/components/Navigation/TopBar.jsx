@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaBeer } from 'react-icons/fa';
+import { FaClipboardList } from 'react-icons/fa';
 import styles from './TopBar.module.css';
 
 const TopBar = () => {
@@ -14,7 +14,7 @@ const TopBar = () => {
                 </div>
             </div>
             <NavLink to="/mein-besuch" className={({ isActive }) => `${styles.userButton} ${isActive ? styles.active : ''}`}>
-                <FaBeer className={styles.icon} />
+                <FaClipboardList className={styles.icon} />
                 <span>Mein Besuch</span>
             </NavLink>
         </header>

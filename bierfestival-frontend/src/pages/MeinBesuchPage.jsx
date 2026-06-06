@@ -5,7 +5,7 @@ import useTracking from '../hooks/useTracking';
 import BeerCard from '../components/UI/BeerCard';
 import BottomSheet from '../components/UI/BottomSheet';
 import SponsorBanner from '../components/UI/SponsorBanner';
-import { FaBookmark, FaBeer, FaStar, FaChevronDown, FaChevronUp, FaGlobe } from 'react-icons/fa';
+import { FaBookmark, FaBeer, FaStar, FaChevronDown, FaChevronUp, FaGlobe, FaClipboardList } from 'react-icons/fa';
 import styles from './MeinBesuchPage.module.css';
 
 // Nachtfahrt-Regel: 00:00–04:00 → Vortag
@@ -37,9 +37,9 @@ const MeinBesuchPage = () => {
     // Brewery drill-down
     const [breweryDetail, setBreweryDetail] = useState(null);
 
-    const INITIAL_COUNT = 5;
+    const INITIAL_COUNT = 3;
 
-    const [taverns, setTaverns] = useState([]); 
+    const [taverns, setTaverns] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -199,184 +199,187 @@ const MeinBesuchPage = () => {
     }
 
     return (
-        <div className={styles.page}>
-            <div className={styles.header}>
-                <h1 className={styles.title}>Mein Besuch</h1>
-                <p className={styles.subtitle}>Deine persönliche Festival-Übersicht</p>
-            </div>
-
-            {/* Datums-Filter */}
-            <div className={styles.dayFilter}>
-                {availableDays.map(day => (
-                    <button
-                        key={day}
-                        className={`${styles.dayBtn} ${dayFilter === day ? styles.dayActive : ''}`}
-                        onClick={() => setDayFilter(day)}
-                    >
-                        {day === 'alle' ? 'Alle Tage' : day}
-                    </button>
-                ))}
-            </div>
-
-            {/* Gemerkte Biere */}
-            <div className={styles.section}>
-                <h2 className={styles.sectionTitle}><FaBookmark className={styles.sectionIcon} /> Gemerkte Biere <span className={styles.count}>({merklisteBiere.length})</span></h2>
-                <div className={styles.filterToggles}>
-                    <label className={styles.toggleLabel}>
-                        <input type="checkbox" checked={showDrunkInMerkliste} onChange={e => setShowDrunkInMerkliste(e.target.checked)} />
-                        Auch getrunkene zeigen
-                    </label>
-                    <label className={styles.toggleLabel}>
-                        <input type="checkbox" checked={showRatedInMerkliste} onChange={e => setShowRatedInMerkliste(e.target.checked)} />
-                        Auch bewertete zeigen
-                    </label>
-                </div>
-                {merklisteBiere.length === 0 ? (
-                    <p className={styles.empty}>Keine gemerkten Biere. Entdecke Biere im Suche-Tab!</p>
-                ) : (
-                    <>
-                        <div className={styles.beerList}>
-                            {(showAllMerkliste ? merklisteBiere : merklisteBiere.slice(0, INITIAL_COUNT)).map(item => (
-                                <BeerCard
-                                    key={item.beerId}
-                                    beer={mapBeerForCard(item.beer)}
-                                    trackingState={item.state}
-                                    onToggleMerkliste={toggleMerkliste}
-                                    onLogDrink={logDrink}
-                                    onRemoveDrink={removeDrink}
-                                    onRate={rateBeer}
-                                    onBreweryClick={handleBreweryClick}
-                                    compact
-                                />
-                            ))}
-                        </div>
-                        {merklisteBiere.length > INITIAL_COUNT && (
-                            <button className={styles.toggleMore} onClick={() => setShowAllMerkliste(!showAllMerkliste)}>
-                                {showAllMerkliste ? <><FaChevronUp /> Weniger anzeigen</> : <><FaChevronDown /> Alle {merklisteBiere.length} anzeigen</>}
-                            </button>
-                        )}
-                    </>
-                )}
-            </div>
-
-            {/* Bestbewertete */}
-            {renderSection('Meine Bestbewerteten', <FaStar className={styles.sectionIcon} />, bestRated, showAllBest, setShowAllBest)}
-
-            {/* Meistgetrunken */}
-            {renderSection('Am meisten getrunken', <FaBeer className={styles.sectionIcon} />, mostDrunk, showAllDrunk, setShowAllDrunk, true)}
-
-            {/* Sponsoren */}
-            <div className={styles.sponsorSection}>
-                <h3 className={styles.sponsorTitle}>Unterstützt von</h3>
+        <div className={styles.wrapper}>
+            <div className={styles.sponsorOverlay}>
                 <SponsorBanner onSponsorClick={(sponsor) => setSelectedSponsor(sponsor)} />
             </div>
+            <div className={styles.page}>
+                <div className={styles.header}>
+                    <FaClipboardList className={styles.headerIcon} /> 
+                    <h1 className={styles.title}>Mein Besuch</h1>
+                    <p className={styles.subtitle}>Deine persönliche Festival-Übersicht</p>
+                </div>
 
-            {/* Sponsoren Detail Drill-down */}
-            <BottomSheet
-                isOpen={!!selectedSponsor}
-                onClose={() => setSelectedSponsor(null)}
-                showBack={false}
-                title={selectedSponsor?.name || ''}
-            >
-                {selectedSponsor && (
-                    <div className={styles.breweryDetail}>
-                        <div className={styles.detailHeaderRow}>
-                            <div className={styles.detailHeaderIconWrapper}>
-                                {selectedSponsor.imgUrl ? (
-                                    <img src={selectedSponsor.imgUrl} alt={selectedSponsor.name} className={styles.detailHeaderImg} />
-                                ) : (
-                                    <div className={styles.detailHeaderFallback}>{selectedSponsor.name?.substring(0, 2).toUpperCase()}</div>
-                                )}
-                            </div>
-                            <div className={styles.detailHeaderInfo}>
-                                {/* HIER: Tier Name & Icon direkt als grünes Badge! */}
-                                <span className={styles.detailTypeBadge}>
-                                    {selectedSponsor.tier?.imgUrl && <img src={selectedSponsor.tier.imgUrl} alt="Tier" style={{ height: '14px', marginRight: '4px', verticalAlign: 'middle' }} />}
-                                    {selectedSponsor.tier?.name || 'Sponsor'}
-                                </span>
-                                {selectedSponsor.city && <span className={styles.detailMetaText}>📍 {selectedSponsor.city.name || selectedSponsor.city}</span>}
-                            </div>
-                            <div className={styles.detailHeaderActions}>
-                                {selectedSponsor.website && (
-                                    <div className={styles.actionWrapper}>
-                                        <a href={selectedSponsor.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
-                                            <FaGlobe /> Zur Website
-                                        </a>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        {selectedSponsor.description && <p className={styles.breweryDesc}>{selectedSponsor.description}</p>}
+                {/* Datums-Filter */}
+                <div className={styles.dayFilter}>
+                    {availableDays.map(day => (
+                        <button
+                            key={day}
+                            className={`${styles.dayBtn} ${dayFilter === day ? styles.dayActive : ''}`}
+                            onClick={() => setDayFilter(day)}
+                        >
+                            {day === 'alle' ? 'Alle Tage' : day}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Gemerkte Biere */}
+                <div className={styles.section}>
+                    <h2 className={styles.sectionTitle}><FaBookmark className={styles.sectionIcon} /> Gemerkte Biere <span className={styles.count}>({merklisteBiere.length})</span></h2>
+                    <div className={styles.filterToggles}>
+                        <label className={styles.toggleLabel}>
+                            <input type="checkbox" checked={showDrunkInMerkliste} onChange={e => setShowDrunkInMerkliste(e.target.checked)} />
+                            Auch getrunkene zeigen
+                        </label>
+                        <label className={styles.toggleLabel}>
+                            <input type="checkbox" checked={showRatedInMerkliste} onChange={e => setShowRatedInMerkliste(e.target.checked)} />
+                            Auch bewertete zeigen
+                        </label>
                     </div>
-                )}
-            </BottomSheet>
+                    {merklisteBiere.length === 0 ? (
+                        <p className={styles.empty}>Keine gemerkten Biere. Entdecke Biere im Suche-Tab!</p>
+                    ) : (
+                        <>
+                            <div className={styles.beerList}>
+                                {(showAllMerkliste ? merklisteBiere : merklisteBiere.slice(0, INITIAL_COUNT)).map(item => (
+                                    <BeerCard
+                                        key={item.beerId}
+                                        beer={mapBeerForCard(item.beer)}
+                                        trackingState={item.state}
+                                        onToggleMerkliste={toggleMerkliste}
+                                        onLogDrink={logDrink}
+                                        onRemoveDrink={removeDrink}
+                                        onRate={rateBeer}
+                                        onBreweryClick={handleBreweryClick}
+                                        compact
+                                    />
+                                ))}
+                            </div>
+                            {merklisteBiere.length > INITIAL_COUNT && (
+                                <button className={styles.toggleMore} onClick={() => setShowAllMerkliste(!showAllMerkliste)}>
+                                    {showAllMerkliste ? <><FaChevronUp /> Weniger anzeigen</> : <><FaChevronDown /> Alle {merklisteBiere.length} anzeigen</>}
+                                </button>
+                            )}
+                        </>
+                    )}
+                </div>
 
-            {/* Brauerei Detail */}
-            <BottomSheet
-                isOpen={!!breweryDetail}
-                onClose={() => setBreweryDetail(null)}
-                showBack={false}
-                title={breweryDetail?.name || ''}
-            >
-                {breweryDetail && (() => {
-                    // NEU: Biere für diese Brauerei filtern
-                    const bBeers = beers.filter(b => b.brewery?.id === breweryDetail.id);
+                {/* Bestbewertete */}
+                {renderSection('Meine Bestbewerteten', <FaStar className={styles.sectionIcon} />, bestRated, showAllBest, setShowAllBest)}
 
-                    return (
+                {/* Meistgetrunken */}
+                {renderSection('Am meisten getrunken', <FaBeer className={styles.sectionIcon} />, mostDrunk, showAllDrunk, setShowAllDrunk, true)}
+
+                {/* Sponsoren */}
+
+
+                {/* Sponsoren Detail Drill-down */}
+                <BottomSheet
+                    isOpen={!!selectedSponsor}
+                    onClose={() => setSelectedSponsor(null)}
+                    showBack={false}
+                    title={selectedSponsor?.name || ''}
+                >
+                    {selectedSponsor && (
                         <div className={styles.breweryDetail}>
                             <div className={styles.detailHeaderRow}>
                                 <div className={styles.detailHeaderIconWrapper}>
-                                    {breweryDetail.imgUrl ? (
-                                        <img src={breweryDetail.imgUrl} alt={breweryDetail.name} className={styles.detailHeaderImg} />
+                                    {selectedSponsor.imgUrl ? (
+                                        <img src={selectedSponsor.imgUrl} alt={selectedSponsor.name} className={styles.detailHeaderImg} />
                                     ) : (
-                                        <div className={styles.detailHeaderFallback}>{breweryDetail.name?.substring(0, 2).toUpperCase()}</div>
+                                        <div className={styles.detailHeaderFallback}>{selectedSponsor.name?.substring(0, 2).toUpperCase()}</div>
                                     )}
                                 </div>
-
                                 <div className={styles.detailHeaderInfo}>
-                                    <span className={styles.detailTypeBadge}>Brauerei</span>
-                                    {breweryDetail.city && <span className={styles.detailMetaText}>📍 {breweryDetail.city.name || breweryDetail.city}</span>}
-                                    {breweryDetail.district && <span className={styles.detailMetaText}>🗺️ {breweryDetail.district.name || breweryDetail.district}</span>}
+                                    {/* HIER: Tier Name & Icon direkt als grünes Badge! */}
+                                    <span className={styles.detailTypeBadge}>
+                                        {selectedSponsor.tier?.imgUrl && <img src={selectedSponsor.tier.imgUrl} alt="Tier" style={{ height: '14px', marginRight: '4px', verticalAlign: 'middle' }} />}
+                                        {selectedSponsor.tier?.name || 'Sponsor'}
+                                    </span>
+                                    {selectedSponsor.city && <span className={styles.detailMetaText}>📍 {selectedSponsor.city.name || selectedSponsor.city}</span>}
                                 </div>
-
                                 <div className={styles.detailHeaderActions}>
-                                    {breweryDetail.website && (
+                                    {selectedSponsor.website && (
                                         <div className={styles.actionWrapper}>
-                                            <a href={breweryDetail.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                            <a href={selectedSponsor.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
                                                 <FaGlobe /> Zur Website
                                             </a>
                                         </div>
                                     )}
                                 </div>
                             </div>
-                            
-                            {breweryDetail.description && <p className={styles.breweryDesc}>{breweryDetail.description}</p>}
-
-                            {/* NEU: Biere der Brauerei */}
-                            <div className={styles.beerList} style={{ marginTop: '16px' }}>
-                                <h4 style={{ fontSize: '0.95rem', color: 'var(--bf-dark-green)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <FaBeer /> Biere dieser Brauerei ({bBeers.length})
-                                </h4>
-                                {bBeers.map(fullBeer => (
-                                    <BeerCard
-                                        key={fullBeer.id}
-                                        beer={mapBeerForCard(fullBeer)}
-                                        trackingState={getBeerState(fullBeer.id)}
-                                        onToggleMerkliste={toggleMerkliste}
-                                        onLogDrink={logDrink}
-                                        onRemoveDrink={removeDrink}
-                                        onRate={rateBeer}
-                                        taverns={beerTavernMap[fullBeer.id] || []}
-                                        onJumpToMap={handleJumpToMap}
-                                        compact={true}
-                                    />
-                                ))}
-                                {bBeers.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--bf-text-muted)' }}>Derzeit keine Biere gelistet.</p>}
-                            </div>
+                            {selectedSponsor.description && <p className={styles.breweryDesc}>{selectedSponsor.description}</p>}
                         </div>
-                    );
-                })()}
-            </BottomSheet>
+                    )}
+                </BottomSheet>
+
+                {/* Brauerei Detail */}
+                <BottomSheet
+                    isOpen={!!breweryDetail}
+                    onClose={() => setBreweryDetail(null)}
+                    showBack={false}
+                    title={breweryDetail?.name || ''}
+                >
+                    {breweryDetail && (() => {
+                        // NEU: Biere für diese Brauerei filtern
+                        const bBeers = beers.filter(b => b.brewery?.id === breweryDetail.id);
+
+                        return (
+                            <div className={styles.breweryDetail}>
+                                <div className={styles.detailHeaderRow}>
+                                    <div className={styles.detailHeaderIconWrapper}>
+                                        {breweryDetail.imgUrl ? (
+                                            <img src={breweryDetail.imgUrl} alt={breweryDetail.name} className={styles.detailHeaderImg} />
+                                        ) : (
+                                            <div className={styles.detailHeaderFallback}>{breweryDetail.name?.substring(0, 2).toUpperCase()}</div>
+                                        )}
+                                    </div>
+
+                                    <div className={styles.detailHeaderInfo}>
+                                        <span className={styles.detailTypeBadge}>Brauerei</span>
+                                        {breweryDetail.city && <span className={styles.detailMetaText}>📍 {breweryDetail.city.name || breweryDetail.city}</span>}
+                                        {breweryDetail.district && <span className={styles.detailMetaText}>🗺️ {breweryDetail.district.name || breweryDetail.district}</span>}
+                                    </div>
+
+                                    <div className={styles.detailHeaderActions}>
+                                        {breweryDetail.website && (
+                                            <div className={styles.actionWrapper}>
+                                                <a href={breweryDetail.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                                    <FaGlobe /> Zur Website
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {breweryDetail.description && <p className={styles.breweryDesc}>{breweryDetail.description}</p>}
+
+                                {/* NEU: Biere der Brauerei */}
+                                <div className={styles.beerList} style={{ marginTop: '16px' }}>
+                                    <h4 style={{ fontSize: '0.95rem', color: 'var(--bf-dark-green)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <FaBeer /> Biere dieser Brauerei ({bBeers.length})
+                                    </h4>
+                                    {bBeers.map(fullBeer => (
+                                        <BeerCard
+                                            key={fullBeer.id}
+                                            beer={mapBeerForCard(fullBeer)}
+                                            trackingState={getBeerState(fullBeer.id)}
+                                            onToggleMerkliste={toggleMerkliste}
+                                            onLogDrink={logDrink}
+                                            onRemoveDrink={removeDrink}
+                                            onRate={rateBeer}
+                                            taverns={beerTavernMap[fullBeer.id] || []}
+                                            onJumpToMap={handleJumpToMap}
+                                            compact={true}
+                                        />
+                                    ))}
+                                    {bBeers.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--bf-text-muted)' }}>Derzeit keine Biere gelistet.</p>}
+                                </div>
+                            </div>
+                        );
+                    })()}
+                </BottomSheet>
+            </div>
         </div>
     );
 };
