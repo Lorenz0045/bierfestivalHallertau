@@ -1,3 +1,10 @@
+.wrapper {
+    height: calc(100dvh - var(--bf-topbar-height) - var(--bf-navbar-height));
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
 /* =========================================
    SCHENKEN PAGE – Festival Design
    ========================================= */
@@ -135,3 +142,8 @@
 .actionLabel { font-size: 0.75rem; font-weight: 700; color: var(--bf-dark-green); }
 .websiteBtn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--bf-primary-green); color: var(--bf-white) !important; border-radius: var(--bf-radius-full); font-size: 0.85rem; font-weight: 600; transition: background 0.2s; text-decoration: none; }
 .websiteBtn:hover { background: var(--bf-dark-green); }
+
+
+.sponsorDesc { font-size: 0.88rem; line-height: 1.6; color: var(--bf-text-dark); margin-bottom: 14px; white-space: pre-line; }
+
+.sponsorOverlay { }

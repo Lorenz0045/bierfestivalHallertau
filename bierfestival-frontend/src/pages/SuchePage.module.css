@@ -1,6 +1,13 @@
 /* =========================================
    SUCHE PAGE – Bier & Orte Suche
    ========================================= */
+.wrapper {
+    height: calc(100dvh - var(--bf-topbar-height) - var(--bf-navbar-height));
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
 .page {
     padding: 0 12px 20px;
     width: 100%;
@@ -269,3 +276,24 @@
     gap: 12px; 
     margin-top: 8px;
 }
+
+
+.sponsorDesc { font-size: 0.88rem; line-height: 1.6; color: var(--bf-text-dark); margin-bottom: 14px; white-space: pre-line; }
+
+.sponsorOverlay { }
+
+/* =========================================
+   Detail Header Layout (Flexbox) für Sponsoren Overlay
+   ========================================= */
+.detailHeaderRow { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.detailHeaderIconWrapper { flex-shrink: 0; width: 70px; height: 70px; background: var(--bf-gray-light); border-radius: var(--bf-radius-md); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #e0e0e0; }
+.detailHeaderImg { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+.detailHeaderFallback { font-size: 1.4rem; font-weight: 700; color: var(--bf-mid-green); background: var(--bf-light-green); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.detailHeaderInfo { flex: 1; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.detailTypeBadge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: var(--bf-radius-full); background: var(--bf-light-green); color: var(--bf-mid-green); }
+.detailMetaText { font-size: 0.8rem; color: var(--bf-text-muted); }
+.detailHeaderActions { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.actionWrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.actionLabel { font-size: 0.75rem; font-weight: 700; color: var(--bf-dark-green); }
+.websiteBtn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--bf-primary-green); color: var(--bf-white) !important; border-radius: var(--bf-radius-full); font-size: 0.85rem; font-weight: 600; transition: background 0.2s; text-decoration: none; }
+.websiteBtn:hover { background: var(--bf-dark-green); }

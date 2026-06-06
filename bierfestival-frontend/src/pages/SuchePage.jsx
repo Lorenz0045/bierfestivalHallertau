@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchCachedData } from '../services/cacheService';
 import useTracking from '../hooks/useTracking';
 import BeerCard from '../components/UI/BeerCard';
+import SponsorBanner from '../components/UI/SponsorBanner';
 import BottomSheet from '../components/UI/BottomSheet';
 import EventItem from '../components/UI/EventItem';
 import { FaBeer, FaMapMarkerAlt, FaSearch, FaGlobe, FaLocationArrow, FaMapMarkedAlt, FaCalendarAlt } from 'react-icons/fa';
@@ -62,6 +63,8 @@ const SuchePage = () => {
 
     const { getBeerState, toggleMerkliste, logDrink, removeDrink, rateBeer } = useTracking();
     const navigate = useNavigate();
+
+    const [selectedSponsor, setSelectedSponsor] = useState(null);
 
     useEffect(() => {
         const loadAll = async () => {
@@ -405,154 +408,200 @@ const SuchePage = () => {
     };
 
     return (
-        <div className={styles.page}>
-            {/* Header (same style as Anreise) */}
-            <div className={styles.header}>
-                <FaSearch className={styles.headerIcon} />
-                <h1 className={styles.title}>Suche</h1>
-                <p className={styles.subtitle}>Biere, Brauereien & Orte entdecken</p>
+        <div className={styles.wrapper}>
+
+            <div className={styles.sponsorOverlay}>
+                <SponsorBanner onSponsorClick={(sponsor) => setSelectedSponsor(sponsor)} />
             </div>
 
-            {/* Mode Toggle */}
-            <div className={styles.modeToggle}>
-                <button className={`${styles.toggleBtn} ${mode === 'bier' ? styles.toggleActive : ''}`} onClick={() => setMode('bier')}>
-                    <FaBeer /> Biere
-                </button>
-                <button className={`${styles.toggleBtn} ${mode === 'orte' ? styles.toggleActive : ''}`} onClick={() => setMode('orte')}>
-                    <FaMapMarkerAlt /> Orte
-                </button>
-            </div>
 
-            {/* ========== BIER SUCHE ========== */}
-            {mode === 'bier' && (
-                <>
-                    <div className={styles.filterSection}>
-                        <div className={styles.searchBox}>
-                            <FaSearch className={styles.searchIcon} />
-                            <input type="text" placeholder="Bier oder Brauerei suchen…" value={searchText} onChange={e => setSearchText(e.target.value)} className={styles.searchInput} />
-                        </div>
-                        <div className={styles.filterRow}>
-                            <select value={selectedType} onChange={e => setSelectedType(e.target.value)} className={styles.filterSelect}>
-                                <option value="">Alle Biertypen</option>
-                                {beerTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                            </select>
-                            <select value={alcFilter} onChange={e => setAlcFilter(e.target.value)} className={styles.filterSelect}>
-                                <option value="alle">Alkohol: Alle</option>
-                                <option value="ja">Mit Alkohol</option>
-                                <option value="nein">Alkoholfrei</option>
-                            </select>
-                        </div>
-                        <div className={styles.filterRow}>
-                            <select value={selectedBrewery} onChange={e => setSelectedBrewery(e.target.value)} className={styles.filterSelect}>
-                                <option value="">Alle Brauereien</option>
-                                {breweries.sort((a, b) => a.name.localeCompare(b.name)).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                            </select>
-                            <label className={styles.checkLabel}>
-                                <input type="checkbox" checked={hallertauOnly} onChange={e => setHallertauOnly(e.target.checked)} />
-                                Hallertau
-                            </label>
-                        </div>
-                        <div className={styles.filterRow}>
-                            <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)} className={styles.filterSelect}>
-                                <option value="">Alle Orte</option>
-                                {cities.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                            <select value={selectedDistrict} onChange={e => setSelectedDistrict(e.target.value)} className={styles.filterSelect}>
-                                <option value="">Alle Landkreise</option>
-                                {districts.map(d => <option key={d} value={d}>{d}</option>)}
-                            </select>
-                        </div>
-                    </div>
+            <div className={styles.page}>
+                {/* Header (same style as Anreise) */}
+                <div className={styles.header}>
+                    <FaSearch className={styles.headerIcon} />
+                    <h1 className={styles.title}>Suche</h1>
+                    <p className={styles.subtitle}>Biere, Brauereien & Orte entdecken</p>
+                </div>
 
-                    <div className={styles.resultCount}>{filteredBeers.length} Biere gefunden</div>
+                {/* Mode Toggle */}
+                <div className={styles.modeToggle}>
+                    <button className={`${styles.toggleBtn} ${mode === 'bier' ? styles.toggleActive : ''}`} onClick={() => setMode('bier')}>
+                        <FaBeer /> Biere
+                    </button>
+                    <button className={`${styles.toggleBtn} ${mode === 'orte' ? styles.toggleActive : ''}`} onClick={() => setMode('orte')}>
+                        <FaMapMarkerAlt /> Orte
+                    </button>
+                </div>
 
-                    <div className={styles.beerGrid}>
-                        {filteredBeers.map(beer => (
-                            <BeerCard
-                                key={beer.id}
-                                beer={mapBeerForCard(beer)}
-                                trackingState={getBeerState(beer.id)}
-                                onToggleMerkliste={toggleMerkliste}
-                                onLogDrink={logDrink}
-                                onRemoveDrink={removeDrink}
-                                onRate={rateBeer}
-                                onBreweryClick={handleBreweryClick}
-                                taverns={beerTavernMap[beer.id] || []}
-                                onTavernClick={handleTavernClick}
-                                onJumpToMap={handleJumpToMap}
-                            />
-                        ))}
-                    </div>
-                </>
-            )}
+                {/* ========== BIER SUCHE ========== */}
+                {mode === 'bier' && (
+                    <>
+                        <div className={styles.filterSection}>
+                            <div className={styles.searchBox}>
+                                <FaSearch className={styles.searchIcon} />
+                                <input type="text" placeholder="Bier oder Brauerei suchen…" value={searchText} onChange={e => setSearchText(e.target.value)} className={styles.searchInput} />
+                            </div>
+                            <div className={styles.filterRow}>
+                                <select value={selectedType} onChange={e => setSelectedType(e.target.value)} className={styles.filterSelect}>
+                                    <option value="">Alle Biertypen</option>
+                                    {beerTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                </select>
+                                <select value={alcFilter} onChange={e => setAlcFilter(e.target.value)} className={styles.filterSelect}>
+                                    <option value="alle">Alkohol: Alle</option>
+                                    <option value="ja">Mit Alkohol</option>
+                                    <option value="nein">Alkoholfrei</option>
+                                </select>
+                            </div>
+                            <div className={styles.filterRow}>
+                                <select value={selectedBrewery} onChange={e => setSelectedBrewery(e.target.value)} className={styles.filterSelect}>
+                                    <option value="">Alle Brauereien</option>
+                                    {breweries.sort((a, b) => a.name.localeCompare(b.name)).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                </select>
+                                <label className={styles.checkLabel}>
+                                    <input type="checkbox" checked={hallertauOnly} onChange={e => setHallertauOnly(e.target.checked)} />
+                                    Hallertau
+                                </label>
+                            </div>
+                            <div className={styles.filterRow}>
+                                <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)} className={styles.filterSelect}>
+                                    <option value="">Alle Orte</option>
+                                    {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                                <select value={selectedDistrict} onChange={e => setSelectedDistrict(e.target.value)} className={styles.filterSelect}>
+                                    <option value="">Alle Landkreise</option>
+                                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                                </select>
+                            </div>
+                        </div>
 
-            {/* ========== ORTE SUCHE ========== */}
-            {mode === 'orte' && (
-                <>
-                    <div className={styles.filterSection}>
-                        <div className={styles.categoryFilters}>
-                            {[
-                                { key: 'alle', label: 'Alle' },
-                                { key: 'schenke', label: 'Schenken' },
-                                { key: 'buehne', label: 'Bühnen' },
-                                { key: 'gastro', label: 'Gastronomie' },
-                                { key: 'brauerei', label: 'Brauereien' },
-                                { key: 'sponsor', label: 'Sponsoren' },
-                                { key: 'marktstand', label: 'Marktstände' },
-                            ].map(cat => (
-                                <button
-                                    key={cat.key}
-                                    className={`${styles.catBtn} ${ortCategory === cat.key ? styles.catActive : ''}`}
-                                    onClick={() => setOrtCategory(cat.key)}
-                                >
-                                    {CATEGORY_ICONS[cat.key] && (
-                                        <img src={CATEGORY_ICONS[cat.key]} alt="" className={styles.catIcon} />
-                                    )}
-                                    {cat.label}
-                                </button>
+                        <div className={styles.resultCount}>{filteredBeers.length} Biere gefunden</div>
+
+                        <div className={styles.beerGrid}>
+                            {filteredBeers.map(beer => (
+                                <BeerCard
+                                    key={beer.id}
+                                    beer={mapBeerForCard(beer)}
+                                    trackingState={getBeerState(beer.id)}
+                                    onToggleMerkliste={toggleMerkliste}
+                                    onLogDrink={logDrink}
+                                    onRemoveDrink={removeDrink}
+                                    onRate={rateBeer}
+                                    onBreweryClick={handleBreweryClick}
+                                    taverns={beerTavernMap[beer.id] || []}
+                                    onTavernClick={handleTavernClick}
+                                    onJumpToMap={handleJumpToMap}
+                                />
                             ))}
                         </div>
-                    </div>
+                    </>
+                )}
 
-                    <div className={styles.resultCount}>{filteredOrte.length} Orte gefunden</div>
+                {/* ========== ORTE SUCHE ========== */}
+                {mode === 'orte' && (
+                    <>
+                        <div className={styles.filterSection}>
+                            <div className={styles.categoryFilters}>
+                                {[
+                                    { key: 'alle', label: 'Alle' },
+                                    { key: 'schenke', label: 'Schenken' },
+                                    { key: 'buehne', label: 'Bühnen' },
+                                    { key: 'gastro', label: 'Gastronomie' },
+                                    { key: 'brauerei', label: 'Brauereien' },
+                                    { key: 'sponsor', label: 'Sponsoren' },
+                                    { key: 'marktstand', label: 'Marktstände' },
+                                ].map(cat => (
+                                    <button
+                                        key={cat.key}
+                                        className={`${styles.catBtn} ${ortCategory === cat.key ? styles.catActive : ''}`}
+                                        onClick={() => setOrtCategory(cat.key)}
+                                    >
+                                        {CATEGORY_ICONS[cat.key] && (
+                                            <img src={CATEGORY_ICONS[cat.key]} alt="" className={styles.catIcon} />
+                                        )}
+                                        {cat.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-                    <div className={styles.ortGrid}>
-                        {filteredOrte.map((ort, idx) => {
-                            const icon = getOrtIcon(ort);
-                            return (
-                                <div key={`${ort.ortType}-${ort.id}-${idx}`} className={styles.ortCard} onClick={() => handleOrtClick(ort)}>
-                                    {icon ? (
-                                        <img src={icon} alt={ort.name} className={styles.ortIconImg} />
-                                    ) : (
-                                        <div className={styles.ortIconFallback}>{ort.name?.substring(0, 2).toUpperCase()}</div>
-                                    )}
-                                    <div className={styles.ortInfo}>
-                                        <h4 className={styles.ortName}>{ort.name}</h4>
-                                        <span className={styles.ortType}>{ort.ortType}</span>
-                                        {ort.city && <span className={styles.ortCity}>{ort.city.name || ort.city}</span>}
+                        <div className={styles.resultCount}>{filteredOrte.length} Orte gefunden</div>
+
+                        <div className={styles.ortGrid}>
+                            {filteredOrte.map((ort, idx) => {
+                                const icon = getOrtIcon(ort);
+                                return (
+                                    <div key={`${ort.ortType}-${ort.id}-${idx}`} className={styles.ortCard} onClick={() => handleOrtClick(ort)}>
+                                        {icon ? (
+                                            <img src={icon} alt={ort.name} className={styles.ortIconImg} />
+                                        ) : (
+                                            <div className={styles.ortIconFallback}>{ort.name?.substring(0, 2).toUpperCase()}</div>
+                                        )}
+                                        <div className={styles.ortInfo}>
+                                            <h4 className={styles.ortName}>{ort.name}</h4>
+                                            <span className={styles.ortType}>{ort.ortType}</span>
+                                            {ort.city && <span className={styles.ortCity}>{ort.city.name || ort.city}</span>}
+                                        </div>
+                                        {(ort.lat && ort.lon) && (
+                                            <button className={styles.ortMapBtn} onClick={e => { e.stopPropagation(); handleJumpToMap(ort); }} title="Auf Karte zeigen">
+                                                <FaMapMarkedAlt />
+                                            </button>
+                                        )}
                                     </div>
-                                    {(ort.lat && ort.lon) && (
-                                        <button className={styles.ortMapBtn} onClick={e => { e.stopPropagation(); handleJumpToMap(ort); }} title="Auf Karte zeigen">
-                                            <FaMapMarkedAlt />
-                                        </button>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
+
+                {/* Central Overlay BottomSheet – navigierbar mit Zurück-Pfeil */}
+                <BottomSheet
+                    isOpen={overlayStack.length > 0}
+                    onClose={closeAllOverlays}
+                    onBack={overlayStack.length > 1 ? popOverlay : undefined}
+                    showBack={overlayStack.length > 1}
+                    title={currentOverlay?.title || ''}
+                >
+                    {renderOverlayContent()}
+                </BottomSheet>
+
+                <BottomSheet
+                    isOpen={!!selectedSponsor}
+                    onClose={() => setSelectedSponsor(null)}
+                    showBack={false}
+                    title={selectedSponsor?.name || ''}
+                >
+                    {selectedSponsor && (
+                        <div style={{ padding: '8px 0' }}>
+                            <div className={styles.detailHeaderRow}>
+                                <div className={styles.detailHeaderIconWrapper}>
+                                    {selectedSponsor.imgUrl ? (
+                                        <img src={selectedSponsor.imgUrl} alt={selectedSponsor.name} className={styles.detailHeaderImg} />
+                                    ) : (
+                                        <div className={styles.detailHeaderFallback}>{selectedSponsor.name?.substring(0, 2).toUpperCase()}</div>
                                     )}
                                 </div>
-                            );
-                        })}
-                    </div>
-                </>
-            )}
-
-            {/* Central Overlay BottomSheet – navigierbar mit Zurück-Pfeil */}
-            <BottomSheet
-                isOpen={overlayStack.length > 0}
-                onClose={closeAllOverlays}
-                onBack={overlayStack.length > 1 ? popOverlay : undefined}
-                showBack={overlayStack.length > 1}
-                title={currentOverlay?.title || ''}
-            >
-                {renderOverlayContent()}
-            </BottomSheet>
+                                <div className={styles.detailHeaderInfo}>
+                                    <span className={styles.detailTypeBadge}>
+                                        {selectedSponsor.tier?.imgUrl && <img src={selectedSponsor.tier.imgUrl} alt="Tier Icon" style={{ height: '14px', marginRight: '4px', verticalAlign: 'middle' }} />}
+                                        {selectedSponsor.tier?.name || 'Sponsor'}
+                                    </span>
+                                    {selectedSponsor.city && <span className={styles.detailMetaText}>📍 {selectedSponsor.city.name || selectedSponsor.city}</span>}
+                                </div>
+                                <div className={styles.detailHeaderActions}>
+                                    {selectedSponsor.website && (
+                                        <div className={styles.actionWrapper}>
+                                            <a href={selectedSponsor.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                                <FaGlobe /> Zur Website
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            {selectedSponsor.description && <p className={styles.sponsorDesc}>{selectedSponsor.description}</p>}
+                        </div>
+                    )}
+                </BottomSheet>
+            </div>
         </div>
     );
 };
@@ -577,10 +626,10 @@ const StageEventsByDay = ({ groups, days }) => {
             </div>
             <div className={styles.stageEventList}>
                 {(groups[selectedDay] || []).map(ev => (
-                    <EventItem 
-                        key={ev.id} 
-                        event={ev} 
-                        showStage={false} 
+                    <EventItem
+                        key={ev.id}
+                        event={ev}
+                        showStage={false}
                     />
                 ))}
             </div>
