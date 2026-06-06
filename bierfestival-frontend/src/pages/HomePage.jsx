@@ -99,15 +99,15 @@ const StageEventsByDay = ({ events, stageId }) => {
                     </button>
                 ))}
             </div>
-            
+
             <div className={styles.stageEventList}>
                 {(groups[selectedDay] || []).map(ev => (
-                    <EventItem 
-                        key={ev.id} 
-                        event={ev} 
+                    <EventItem
+                        key={ev.id}
+                        event={ev}
                         showStage={false} // Versteckt den Bühnen-Namen im Item
-                        // Absichtlich kein onJumpToMap übergeben! 
-                        // Dadurch wird der Map-Button in der EventItem Komponente automatisch ausgeblendet.
+                    // Absichtlich kein onJumpToMap übergeben! 
+                    // Dadurch wird der Map-Button in der EventItem Komponente automatisch ausgeblendet.
                     />
                 ))}
             </div>
@@ -141,10 +141,10 @@ const HomePage = () => {
                 try {
                     const data = await fetchCachedData(ep.url);
                     if (data) {
-                        const placed = data.filter(item => item.lat && item.lon).map(item => ({ 
-                            ...item, 
+                        const placed = data.filter(item => item.lat && item.lon).map(item => ({
+                            ...item,
                             gastronomyType: ep.type === 'gastronomy' ? item.type : item.gastronomyType,
-                            type: ep.type 
+                            type: ep.type
                         }));
                         allPlacedPois = [...allPlacedPois, ...placed];
                     }
@@ -161,7 +161,7 @@ const HomePage = () => {
     const [allBeers, setAllBeers] = useState([]);
     const [taverns, setTaverns] = useState([]);
     const [breweries, setBreweries] = useState([]);
-    const [breweryDetail, setBreweryDetail] = useState(null); 
+    const [breweryDetail, setBreweryDetail] = useState(null);
     useEffect(() => {
         Promise.all([
             fetchCachedData('/api/events'),
@@ -189,11 +189,11 @@ const HomePage = () => {
     }, [taverns]);
 
     const handleMarkerClick = (poi) => {
-        const noOverlayNames = ['Kasse', 'WC', 'Festbuero', 'Kinderprogramm', 'Jugendzelt', 'Rotes Kreuz', 'Parkplatz']; 
+        const noOverlayNames = ['Kasse', 'WC', 'Festbuero', 'Kinderprogramm', 'Jugendzelt', 'Rotes Kreuz', 'Parkplatz'];
 
         if (poi.type === 'facility') {
             if (noOverlayNames.includes(poi.facilityType.name)) {
-                return; 
+                return;
             }
         }
 
@@ -221,9 +221,9 @@ const HomePage = () => {
 
     return (
         <div className={styles.mapWrapper}>
-            
+
             <div className={styles.sponsorOverlay}>
-                <SponsorBanner />
+                <SponsorBanner onSponsorClick={(sponsor) => setSelectedPoi({ ...sponsor, type: 'sponsor' })} />
             </div>
 
             <button className={styles.infoButton} onClick={() => setShowInfoPanel(!showInfoPanel)} title="Informationen">
@@ -245,60 +245,98 @@ const HomePage = () => {
                 ))}
             </BaseMap>
 
-            
+
 
             {/* POI Detail BottomSheet */}
             <BottomSheet isOpen={!!selectedPoi && !breweryDetail} onClose={() => setSelectedPoi(null)} title={selectedPoi?.name || ''}>
                 {selectedPoi && (
                     <div className={styles.poiDetail}>
-                        
-                        {/* NEU: Flex-Header Row synchronisiert mit SuchePage */}
-                        <div className={styles.detailHeaderRow}>
-                            <div className={styles.detailHeaderIconWrapper}>
-                                {selectedPoi.imgUrl || selectedPoi.facilityType?.imgUrl ? (
-                                    <img
-                                        src={selectedPoi.imgUrl || selectedPoi.facilityType.imgUrl}
-                                        alt={selectedPoi.name}
-                                        className={styles.detailHeaderImg}
-                                    />
-                                ) : (
-                                    <div className={styles.detailHeaderFallback}>
-                                        {selectedPoi.name?.substring(0, 2).toUpperCase()}
-                                    </div>
-                                )}
+
+                        {/* =========================================
+                            REGULÄRER POI HEADER (Nicht-Sponsor)
+                            ========================================= */}
+                        {selectedPoi.type !== 'sponsor' && (
+                            <div className={styles.detailHeaderRow}>
+                                <div className={styles.detailHeaderIconWrapper}>
+                                    {selectedPoi.imgUrl || selectedPoi.facilityType?.imgUrl ? (
+                                        <img
+                                            src={selectedPoi.imgUrl || selectedPoi.facilityType.imgUrl}
+                                            alt={selectedPoi.name}
+                                            className={styles.detailHeaderImg}
+                                        />
+                                    ) : (
+                                        <div className={styles.detailHeaderFallback}>
+                                            {selectedPoi.name?.substring(0, 2).toUpperCase()}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className={styles.detailHeaderInfo}>
+                                    <span className={styles.detailTypeBadge}>{getPoiTypeLabel(selectedPoi.type)}</span>
+
+                                    {selectedPoi.city && (
+                                        <span className={styles.detailMetaText}>📍 {selectedPoi.city.name || selectedPoi.city}</span>
+                                    )}
+                                    {selectedPoi.district && (
+                                        <span className={styles.detailMetaText}>🗺️ {selectedPoi.district.name || selectedPoi.district}</span>
+                                    )}
+
+                                    {/* Spezifische Typen */}
+                                    {selectedPoi.type === 'gastronomy' && selectedPoi.gastronomyType && (
+                                        <span className={styles.detailMetaText}>🍴 {selectedPoi.gastronomyType.name || selectedPoi.type?.name}</span>
+                                    )}
+                                    {selectedPoi.type === 'facility' && selectedPoi.facilityType && (
+                                        <span className={styles.detailMetaText}>ℹ️ {selectedPoi.facilityType.name}</span>
+                                    )}
+                                </div>
+
+                                <div className={styles.detailHeaderActions}>
+                                    {selectedPoi.website && (
+                                        <div className={styles.actionWrapper}>
+                                            <a href={selectedPoi.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                                <FaGlobe /> Zur Website
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+                        )}
 
-                            <div className={styles.detailHeaderInfo}>
-                                <span className={styles.detailTypeBadge}>{getPoiTypeLabel(selectedPoi.type)}</span>
-                                
-                                {selectedPoi.city && (
-                                    <span className={styles.detailMetaText}>📍 {selectedPoi.city.name || selectedPoi.city}</span>
-                                )}
-                                {selectedPoi.district && (
-                                    <span className={styles.detailMetaText}>🗺️ {selectedPoi.district.name || selectedPoi.district}</span>
-                                )}
-
-                                {/* Spezifische Typen */}
-                                {selectedPoi.type === 'gastronomy' && selectedPoi.gastronomyType && (
-                                    <span className={styles.detailMetaText}>🍴 {selectedPoi.gastronomyType.name || selectedPoi.type?.name}</span>
-                                )}
-                                {selectedPoi.type === 'facility' && selectedPoi.facilityType && (
-                                    <span className={styles.detailMetaText}>ℹ️ {selectedPoi.facilityType.name}</span>
-                                )}
+                        {/* =========================================
+                            SPONSOR HEADER
+                            ========================================= */}
+                        {selectedPoi.type === 'sponsor' && (
+                            <div className={styles.detailHeaderRow}>
+                                <div className={styles.detailHeaderIconWrapper}>
+                                    {selectedPoi.imgUrl ? (
+                                        <img src={selectedPoi.imgUrl} alt={selectedPoi.name} className={styles.detailHeaderImg} />
+                                    ) : (
+                                        <div className={styles.detailHeaderFallback}>{selectedPoi.name?.substring(0, 2).toUpperCase()}</div>
+                                    )}
+                                </div>
+                                <div className={styles.detailHeaderInfo}>
+                                    {/* HIER: Tier Name & Icon direkt als grünes Badge! */}
+                                    <span className={styles.detailTypeBadge}>
+                                        {selectedPoi.tier?.imgUrl && <img src={selectedPoi.tier.imgUrl} alt="Tier" style={{ height: '14px', marginRight: '4px', verticalAlign: 'middle' }} />}
+                                        {selectedPoi.tier?.name || 'Sponsor'}
+                                    </span>
+                                    {selectedPoi.city && <span className={styles.detailMetaText}>📍 {selectedPoi.city.name || selectedPoi.city}</span>}
+                                </div>
+                                <div className={styles.detailHeaderActions}>
+                                    {selectedPoi.website && (
+                                        <div className={styles.actionWrapper}>
+                                            <a href={selectedPoi.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                                <FaGlobe /> Zur Website
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+                        )}
 
-                            <div className={styles.detailHeaderActions}>
-                                {selectedPoi.website && (
-                                    <div className={styles.actionWrapper}>
-                                        <a href={selectedPoi.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
-                                            <FaGlobe /> Zur Website
-                                        </a>
-                                    </div>
-                                )}
-                                {/* HIER KEIN KARTEN-BUTTON, da wir schon auf der Karte sind! */}
-                            </div>
-                        </div>
-
+                        {/* =========================================
+                            GEMEINSAMER INHALT
+                            ========================================= */}
                         {selectedPoi.description && <p className={styles.poiDesc}>{selectedPoi.description}</p>}
 
                         {/* Bühne: Programm mit Tagesaufteilung */}
@@ -334,11 +372,11 @@ const HomePage = () => {
                                             onLogDrink={logDrink}
                                             onRemoveDrink={removeDrink}
                                             onRate={rateBeer}
+                                            onBreweryClick={handleBreweryClick}
                                             taverns={beerTavernMap[beer.beerId] || []}
                                             onJumpToMap={handleJumpToMap}
                                             compact={true}
                                             hideTavernLinks={true}
-                                            onBreweryClick={handleBreweryClick}
                                         />
                                     );
                                 })}
@@ -358,7 +396,7 @@ const HomePage = () => {
                 {breweryDetail && (() => {
                     // Biere für diese Brauerei filtern
                     const bBeers = allBeers.filter(b => b.brewery?.id === breweryDetail.id);
-                    
+
                     return (
                         <div className={styles.poiDetail}>
                             <div className={styles.detailHeaderRow}>
@@ -386,7 +424,7 @@ const HomePage = () => {
                                     )}
                                 </div>
                             </div>
-                            
+
                             {breweryDetail.description && <p className={styles.poiDesc}>{breweryDetail.description}</p>}
 
                             {/* NEU: Biere der Brauerei */}

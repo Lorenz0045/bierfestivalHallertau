@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { fetchCachedData } from '../../services/cacheService';
-import BottomSheet from './BottomSheet';
-import { FaGlobe, FaMapMarkerAlt } from 'react-icons/fa';
 import styles from './SponsorBanner.module.css';
 
 /**
  * Horizontale Sponsor-Logo-Leiste mit Auto-Scroll (alle 5s um 2 Logos weiter).
- * Klick öffnet Sponsor-Detail als BottomSheet.
+ * Klick reicht Sponsor-Detail per onSponsorClick nach oben.
  */
-const SponsorBanner = () => {
+const SponsorBanner = ({ onSponsorClick }) => {
     const [sponsors, setSponsors] = useState([]);
-    const [selectedSponsor, setSelectedSponsor] = useState(null);
     const scrollRef = useRef(null);
     const autoScrollTimer = useRef(null);
     const userInteracting = useRef(false);
@@ -24,13 +21,11 @@ const SponsorBanner = () => {
                     const sortedData = [...data].sort((a, b) => {
                         const orderA = a.tier?.sortOrder ?? 999;
                         const orderB = b.tier?.sortOrder ?? 999;
-                        
                         if (orderA === orderB) {
                             return a.name.localeCompare(b.name);
                         }
                         return orderA - orderB;
                     });
-                    
                     setSponsors(sortedData);
                 }
             } catch (err) {
@@ -74,74 +69,31 @@ const SponsorBanner = () => {
     if (sponsors.length === 0) return null;
 
     return (
-        <>
-            <div className={styles.banner}>
-                <div
-                    className={styles.scroll}
-                    ref={scrollRef}
-                    onTouchStart={handleUserTouch}
-                    onMouseDown={handleUserTouch}
-                >
-                    {sponsors.map(sponsor => (
-                        <button
-                            key={sponsor.id}
-                            className={styles.logoBtn}
-                            onClick={() => setSelectedSponsor(sponsor)}
-                            title={sponsor.name}
-                        >
-                            {sponsor.imgUrl ? (
-                                <img src={sponsor.imgUrl} alt={sponsor.name} className={styles.logoImg} />
-                            ) : (
-                                <div className={styles.logoFallback}>{sponsor.name.substring(0, 2)}</div>
-                            )}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <BottomSheet
-                isOpen={!!selectedSponsor}
-                onClose={() => setSelectedSponsor(null)}
-                title={selectedSponsor?.name || ''}
+        <div className={styles.banner}>
+            <div
+                className={styles.scroll}
+                ref={scrollRef}
+                onTouchStart={handleUserTouch}
+                onMouseDown={handleUserTouch}
             >
-                {selectedSponsor && (
-                    <div className={styles.detail}>
-                        {selectedSponsor.imgUrl && (
-                            <img src={selectedSponsor.imgUrl} alt={selectedSponsor.name} className={styles.detailImg} />
+                {sponsors.map(sponsor => (
+                    <button
+                        key={sponsor.id}
+                        className={styles.logoBtn}
+                        onClick={() => {
+                            if (onSponsorClick) onSponsorClick(sponsor);
+                        }}
+                        title={sponsor.name}
+                    >
+                        {sponsor.imgUrl ? (
+                            <img src={sponsor.imgUrl} alt={sponsor.name} className={styles.logoImg} />
+                        ) : (
+                            <div className={styles.logoFallback}>{sponsor.name.substring(0, 2)}</div>
                         )}
-                        {selectedSponsor.description && (
-                            <p className={styles.detailDesc}>{selectedSponsor.description}</p>
-                        )}
-                        <div className={styles.detailMeta}>
-                            {selectedSponsor.tier && (
-                                <span className={styles.metaItem}>
-                                    {selectedSponsor.tier.imgUrl ? (
-                                        <img src={selectedSponsor.tier.imgUrl} alt="Tier Icon" style={{height: '16px', marginRight: '4px'}}/>
-                                    ) : null}
-                                    <strong>{selectedSponsor.tier.name}</strong>
-                                </span>
-                            )}
-                            
-                            {selectedSponsor.city && (
-                                <span className={styles.metaItem}>
-                                    <FaMapMarkerAlt /> {selectedSponsor.city.name || selectedSponsor.city}
-                                </span>
-                            )}
-                        </div>
-                        {selectedSponsor.website && (
-                            <a
-                                href={selectedSponsor.website}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={styles.websiteLink}
-                            >
-                                <FaGlobe /> Website besuchen
-                            </a>
-                        )}
-                    </div>
-                )}
-            </BottomSheet>
-        </>
+                    </button>
+                ))}
+            </div>
+        </div>
     );
 };
 
