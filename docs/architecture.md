@@ -131,6 +131,8 @@ src/
 
 7. **Client-Side Data Enrichment (Offline-First)**: Da z.B. in der `Tavern` Entity nur eine flache Liste von Bieren ausgeliefert wird, lädt das Frontend an betroffenen Stellen (Schenken/Lageplan) parallel den `/api/beers` Endpoint via `cacheService` und reichert die Bier-Kacheln clientseitig mit den vollständigen Metadaten (wie Description, originalGravity) an, ohne zusätzliche Backend-Last zu erzeugen.
 
+8. **Globaler Event-Bus ("Tap to Top")**: Die App nutzt native Browser-Events (`CustomEvent('bf-tab-reclick')`). Klickt ein Nutzer auf einen bereits aktiven Tab in der Navbar/TopBar, wird ein Event gesendet. Die zugehörige Page fängt dieses ab, schließt alle offenen Overlays/BottomSheet-Stacks und scrollt weich nach oben (`window.scrollTo(0,0)`).
+
 ---
 
 ## Backend-Architektur
@@ -309,6 +311,9 @@ Die App ist so konzipiert, dass sie für zukünftige Festivals **ohne Code-Ände
 | `--bf-accent-blue` | `#6478A8` | Alkoholfrei-Badge |
 | `--bf-bg` | `#FAFAF5` | Warmer Off-White Hintergrund |
 
+### Faceted Search (Facettierte Suche)
+Der "Suche"-Tab (Bier-Suche) nutzt dynamische Dropdowns. Wählen User einen Filter (z. B. "Brauerei Weihenstephan"), passen sich die anderen Dropdowns (Biertyp, Ort, Landkreis) automatisch an und zeigen nur noch Optionen, für die es tatsächliche Ergebnisse gibt. Dies verhindert "0-Ergebnisse-Sackgassen". Ein "Filter zurücksetzen"-Button erscheint, sobald Filter aktiv sind.
+
 ### Navigation
 
 - **TopBar**: Dunkelgrün-Gradient, Logo links, Mein Besuch rechts (Gold bei aktiv).
@@ -321,6 +326,13 @@ Alle Tabs (Suche, Anreise, Programm, Schenken) nutzen dasselbe Header-Pattern:
 - Großes Icon (`headerIcon`, 2rem, grün)
 - Titel (1.3rem, dunkelgrün, 700)
 - Untertitel (0.8rem, grau)
+
+### Einheitliches Overlay-Header-Layout (Flexbox)
+
+Alle BottomSheets (für Brauereien, Schenken, Bühnen, Sponsoren etc.) verwenden ein einheitliches Flex-Grid-Layout:
+- Links (`flex-shrink: 0`): Quadratisches Icon (70x70px, `object-fit: contain`) mit grauem Hintergrund oder Initialen-Fallback.
+- Mitte (`flex: 1`): Info-Spalte (Typ-Badge, Ort, Landkreis). Bei Sponsoren wird das Sponsoren-Tier direkt als Badge mit Icon integriert (statt des generischen Worts "Sponsor").
+- Rechts (`flex-shrink: 0`): Call-to-Action-Spalte (Zur Website / Auf der Karte zeigen).
 
 ### BeerCard-Komponente
 
