@@ -6,7 +6,7 @@ import BeerCard from '../components/UI/BeerCard';
 import SponsorBanner from '../components/UI/SponsorBanner';
 import BottomSheet from '../components/UI/BottomSheet';
 import EventItem from '../components/UI/EventItem';
-import { FaBeer, FaMapMarkerAlt, FaSearch, FaGlobe, FaLocationArrow, FaMapMarkedAlt, FaCalendarAlt } from 'react-icons/fa';
+import { FaBeer, FaMapMarkerAlt, FaSearch, FaGlobe, FaLocationArrow, FaMapMarkedAlt, FaCalendarAlt, FaTimes } from 'react-icons/fa';
 import styles from './SuchePage.module.css';
 
 // Icons von public/icons/ – Pfade relativ zu public root
@@ -100,6 +100,18 @@ const SuchePage = () => {
         loadAll();
     }, []);
 
+    // Listener für "Tap to Top" & "Overlays schließen"
+    useEffect(() => {
+        const handleTabReclick = (e) => {
+            if (e.detail === '/suche') {
+                closeAllOverlays(); // Schließt den Overlay-Stack
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scrollt hoch
+            }
+        };
+        window.addEventListener('bf-tab-reclick', handleTabReclick);
+        return () => window.removeEventListener('bf-tab-reclick', handleTabReclick);
+    }, []);
+
     // Derived: unique cities, districts from breweries
     const cities = useMemo(() => {
         const set = new Set();
@@ -126,23 +138,64 @@ const SuchePage = () => {
     }, [taverns]);
 
     // Filtered beers
-    const filteredBeers = useMemo(() => {
+    // Filter-Helfer: Prüft, ob irgendwelche Filter aktiv sind
+    const hasActiveFilters = searchText || selectedType || alcFilter !== 'alle' || hallertauOnly || selectedBrewery || selectedCity || selectedDistrict;
+
+    const resetFilters = () => {
+        setSearchText('');
+        setSelectedType('');
+        setAlcFilter('alle');
+        setHallertauOnly(false);
+        setSelectedBrewery('');
+        setSelectedCity('');
+        setSelectedDistrict('');
+    };
+
+    // Filter-Logik für Faceted Search: 
+    // Erlaubt das Ausklammern eines bestimmten Filters, um dynamische Dropdown-Optionen zu berechnen
+    const getValidBeers = (excludeFilter) => {
         return beers.filter(beer => {
-            if (searchText && !beer.name.toLowerCase().includes(searchText.toLowerCase()) &&
+            if (excludeFilter !== 'search' && searchText && !beer.name.toLowerCase().includes(searchText.toLowerCase()) &&
                 !(beer.brewery?.name || '').toLowerCase().includes(searchText.toLowerCase())) return false;
-            if (selectedType && beer.beerType?.id?.toString() !== selectedType) return false;
-            if (alcFilter === 'nein' && !beer.isNonAlcoholic) return false;
-            if (alcFilter === 'ja' && beer.isNonAlcoholic) return false;
-            if (selectedBrewery && beer.brewery?.id?.toString() !== selectedBrewery) return false;
-            if (selectedCity && beer.brewery?.city?.name !== selectedCity) return false;
-            if (selectedDistrict && beer.brewery?.district?.name !== selectedDistrict) return false;
-            if (hallertauOnly && !(beer.brewery?.district?.name || '').toLowerCase().includes('hallertau') &&
+            if (excludeFilter !== 'type' && selectedType && beer.beerType?.id?.toString() !== selectedType) return false;
+            if (excludeFilter !== 'alc' && alcFilter === 'nein' && !beer.isNonAlcoholic) return false;
+            if (excludeFilter !== 'alc' && alcFilter === 'ja' && beer.isNonAlcoholic) return false;
+            if (excludeFilter !== 'brewery' && selectedBrewery && beer.brewery?.id?.toString() !== selectedBrewery) return false;
+            if (excludeFilter !== 'city' && selectedCity && beer.brewery?.city?.name !== selectedCity) return false;
+            if (excludeFilter !== 'district' && selectedDistrict && beer.brewery?.district?.name !== selectedDistrict) return false;
+            if (excludeFilter !== 'hallertau' && hallertauOnly && !(beer.brewery?.district?.name || '').toLowerCase().includes('hallertau') &&
                 !(beer.brewery?.district?.name || '').toLowerCase().includes('freising') &&
                 !(beer.brewery?.district?.name || '').toLowerCase().includes('pfaffenhofen') &&
                 !(beer.brewery?.district?.name || '').toLowerCase().includes('kelheim')) return false;
             return true;
-        }).sort((a, b) => a.name.localeCompare(b.name));
-    }, [beers, searchText, selectedType, alcFilter, hallertauOnly, selectedBrewery, selectedCity, selectedDistrict]);
+        });
+    };
+
+    // Das finale Array der tatsächlich angezeigten Biere
+    const filteredBeers = useMemo(() => getValidBeers(null).sort((a, b) => a.name.localeCompare(b.name)),
+        [beers, searchText, selectedType, alcFilter, hallertauOnly, selectedBrewery, selectedCity, selectedDistrict]
+    );
+
+    // Dynamische Dropdown-Optionen (nur Optionen, die Ergebnisse liefern)
+    const availableTypes = useMemo(() => {
+        const validIds = new Set(getValidBeers('type').map(b => b.beerType?.id?.toString()));
+        return beerTypes.filter(t => validIds.has(t.id.toString()));
+    }, [beers, beerTypes, searchText, alcFilter, selectedBrewery, selectedCity, selectedDistrict, hallertauOnly]);
+
+    const availableBreweries = useMemo(() => {
+        const validIds = new Set(getValidBeers('brewery').map(b => b.brewery?.id?.toString()));
+        return breweries.filter(b => validIds.has(b.id.toString())).sort((a, b) => a.name.localeCompare(b.name));
+    }, [beers, breweries, searchText, selectedType, alcFilter, selectedCity, selectedDistrict, hallertauOnly]);
+
+    const availableCities = useMemo(() => {
+        const validNames = new Set(getValidBeers('city').map(b => b.brewery?.city?.name).filter(Boolean));
+        return Array.from(validNames).sort();
+    }, [beers, searchText, selectedType, alcFilter, selectedBrewery, selectedDistrict, hallertauOnly]);
+
+    const availableDistricts = useMemo(() => {
+        const validNames = new Set(getValidBeers('district').map(b => b.brewery?.district?.name).filter(Boolean));
+        return Array.from(validNames).sort();
+    }, [beers, searchText, selectedType, alcFilter, selectedBrewery, selectedCity, hallertauOnly]);
 
     // Filtered orte (Handwerker → Marktstand)
     const filteredOrte = useMemo(() => {
@@ -437,41 +490,53 @@ const SuchePage = () => {
                 {mode === 'bier' && (
                     <>
                         <div className={styles.filterSection}>
+
                             <div className={styles.searchBox}>
                                 <FaSearch className={styles.searchIcon} />
                                 <input type="text" placeholder="Bier oder Brauerei suchen…" value={searchText} onChange={e => setSearchText(e.target.value)} className={styles.searchInput} />
                             </div>
+
                             <div className={styles.filterRow}>
                                 <select value={selectedType} onChange={e => setSelectedType(e.target.value)} className={styles.filterSelect}>
                                     <option value="">Alle Biertypen</option>
-                                    {beerTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                    {availableTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                 </select>
                                 <select value={alcFilter} onChange={e => setAlcFilter(e.target.value)} className={styles.filterSelect}>
-                                    <option value="alle">Alkohol: Alle</option>
-                                    <option value="ja">Mit Alkohol</option>
+                                    <option value="alle">Alkoholgehalt (Alle)</option>
+                                    <option value="ja">Alkoholhaltig</option>
                                     <option value="nein">Alkoholfrei</option>
                                 </select>
                             </div>
+
                             <div className={styles.filterRow}>
                                 <select value={selectedBrewery} onChange={e => setSelectedBrewery(e.target.value)} className={styles.filterSelect}>
                                     <option value="">Alle Brauereien</option>
-                                    {breweries.sort((a, b) => a.name.localeCompare(b.name)).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                    {availableBreweries.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                                 </select>
                                 <label className={styles.checkLabel}>
                                     <input type="checkbox" checked={hallertauOnly} onChange={e => setHallertauOnly(e.target.checked)} />
                                     Hallertau
                                 </label>
                             </div>
+
                             <div className={styles.filterRow}>
                                 <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)} className={styles.filterSelect}>
                                     <option value="">Alle Orte</option>
-                                    {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                                    {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
                                 <select value={selectedDistrict} onChange={e => setSelectedDistrict(e.target.value)} className={styles.filterSelect}>
                                     <option value="">Alle Landkreise</option>
-                                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                                    {availableDistricts.map(d => <option key={d} value={d}>{d}</option>)}
                                 </select>
                             </div>
+
+                            {hasActiveFilters && (
+                                <div className={styles.resetRow}>
+                                    <button className={styles.resetBtn} onClick={resetFilters}>
+                                        <FaTimes /> Filter zurücksetzen
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className={styles.resultCount}>{filteredBeers.length} Biere gefunden</div>
@@ -497,61 +562,63 @@ const SuchePage = () => {
                 )}
 
                 {/* ========== ORTE SUCHE ========== */}
-                {mode === 'orte' && (
-                    <>
-                        <div className={styles.filterSection}>
-                            <div className={styles.categoryFilters}>
-                                {[
-                                    { key: 'alle', label: 'Alle' },
-                                    { key: 'schenke', label: 'Schenken' },
-                                    { key: 'buehne', label: 'Bühnen' },
-                                    { key: 'gastro', label: 'Gastronomie' },
-                                    { key: 'brauerei', label: 'Brauereien' },
-                                    { key: 'sponsor', label: 'Sponsoren' },
-                                    { key: 'marktstand', label: 'Marktstände' },
-                                ].map(cat => (
-                                    <button
-                                        key={cat.key}
-                                        className={`${styles.catBtn} ${ortCategory === cat.key ? styles.catActive : ''}`}
-                                        onClick={() => setOrtCategory(cat.key)}
-                                    >
-                                        {CATEGORY_ICONS[cat.key] && (
-                                            <img src={CATEGORY_ICONS[cat.key]} alt="" className={styles.catIcon} />
-                                        )}
-                                        {cat.label}
-                                    </button>
-                                ))}
+                {
+                    mode === 'orte' && (
+                        <>
+                            <div className={styles.filterSection}>
+                                <div className={styles.categoryFilters}>
+                                    {[
+                                        { key: 'alle', label: 'Alle' },
+                                        { key: 'schenke', label: 'Schenken' },
+                                        { key: 'buehne', label: 'Bühnen' },
+                                        { key: 'gastro', label: 'Gastronomie' },
+                                        { key: 'brauerei', label: 'Brauereien' },
+                                        { key: 'sponsor', label: 'Sponsoren' },
+                                        { key: 'marktstand', label: 'Marktstände' },
+                                    ].map(cat => (
+                                        <button
+                                            key={cat.key}
+                                            className={`${styles.catBtn} ${ortCategory === cat.key ? styles.catActive : ''}`}
+                                            onClick={() => setOrtCategory(cat.key)}
+                                        >
+                                            {CATEGORY_ICONS[cat.key] && (
+                                                <img src={CATEGORY_ICONS[cat.key]} alt="" className={styles.catIcon} />
+                                            )}
+                                            {cat.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        <div className={styles.resultCount}>{filteredOrte.length} Orte gefunden</div>
+                            <div className={styles.resultCount}>{filteredOrte.length} Orte gefunden</div>
 
-                        <div className={styles.ortGrid}>
-                            {filteredOrte.map((ort, idx) => {
-                                const icon = getOrtIcon(ort);
-                                return (
-                                    <div key={`${ort.ortType}-${ort.id}-${idx}`} className={styles.ortCard} onClick={() => handleOrtClick(ort)}>
-                                        {icon ? (
-                                            <img src={icon} alt={ort.name} className={styles.ortIconImg} />
-                                        ) : (
-                                            <div className={styles.ortIconFallback}>{ort.name?.substring(0, 2).toUpperCase()}</div>
-                                        )}
-                                        <div className={styles.ortInfo}>
-                                            <h4 className={styles.ortName}>{ort.name}</h4>
-                                            <span className={styles.ortType}>{ort.ortType}</span>
-                                            {ort.city && <span className={styles.ortCity}>{ort.city.name || ort.city}</span>}
+                            <div className={styles.ortGrid}>
+                                {filteredOrte.map((ort, idx) => {
+                                    const icon = getOrtIcon(ort);
+                                    return (
+                                        <div key={`${ort.ortType}-${ort.id}-${idx}`} className={styles.ortCard} onClick={() => handleOrtClick(ort)}>
+                                            {icon ? (
+                                                <img src={icon} alt={ort.name} className={styles.ortIconImg} />
+                                            ) : (
+                                                <div className={styles.ortIconFallback}>{ort.name?.substring(0, 2).toUpperCase()}</div>
+                                            )}
+                                            <div className={styles.ortInfo}>
+                                                <h4 className={styles.ortName}>{ort.name}</h4>
+                                                <span className={styles.ortType}>{ort.ortType}</span>
+                                                {ort.city && <span className={styles.ortCity}>{ort.city.name || ort.city}</span>}
+                                            </div>
+                                            {(ort.lat && ort.lon) && (
+                                                <button className={styles.ortMapBtn} onClick={e => { e.stopPropagation(); handleJumpToMap(ort); }} title="Auf Karte zeigen">
+                                                    <FaMapMarkedAlt />
+                                                </button>
+                                            )}
                                         </div>
-                                        {(ort.lat && ort.lon) && (
-                                            <button className={styles.ortMapBtn} onClick={e => { e.stopPropagation(); handleJumpToMap(ort); }} title="Auf Karte zeigen">
-                                                <FaMapMarkedAlt />
-                                            </button>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </>
-                )}
+                                    );
+                                })}
+                            </div>
+                        </>
+                    )
+                }
 
                 {/* Central Overlay BottomSheet – navigierbar mit Zurück-Pfeil */}
                 <BottomSheet
@@ -601,8 +668,8 @@ const SuchePage = () => {
                         </div>
                     )}
                 </BottomSheet>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

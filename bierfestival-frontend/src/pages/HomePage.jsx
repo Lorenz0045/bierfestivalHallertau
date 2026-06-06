@@ -157,6 +157,19 @@ const HomePage = () => {
         loadMapData();
     }, []);
 
+    // Listener für "Overlays schließen" (Lageplan scrollt nicht, aber schließt BottomSheets)
+    useEffect(() => {
+        const handleTabReclick = (e) => {
+            if (e.detail === '/') {
+                setSelectedPoi(null);
+                setBreweryDetail(null);
+                setShowInfoPanel(false);
+            }
+        };
+        window.addEventListener('bf-tab-reclick', handleTabReclick);
+        return () => window.removeEventListener('bf-tab-reclick', handleTabReclick);
+    }, []);
+
     const [events, setEvents] = useState([]);
     const [allBeers, setAllBeers] = useState([]);
     const [taverns, setTaverns] = useState([]);

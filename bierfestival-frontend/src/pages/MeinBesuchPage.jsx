@@ -62,6 +62,19 @@ const MeinBesuchPage = () => {
         load();
     }, []);
 
+    // Listener für "Tap to Top" & "Overlays schließen"
+    useEffect(() => {
+        const handleTabReclick = (e) => {
+            if (e.detail === '/mein-besuch') {
+                setSelectedSponsor(null);
+                setBreweryDetail(null);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+        window.addEventListener('bf-tab-reclick', handleTabReclick);
+        return () => window.removeEventListener('bf-tab-reclick', handleTabReclick);
+    }, []);
+
     // Beer lookup
     const beerMap = useMemo(() => {
         const map = {};

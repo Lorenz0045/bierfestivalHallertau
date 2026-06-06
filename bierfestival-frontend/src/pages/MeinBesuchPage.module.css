@@ -1,6 +1,13 @@
 /* =========================================
    MEIN BESUCH PAGE
    ========================================= */
+.wrapper {
+    height: calc(100dvh - var(--bf-topbar-height) - var(--bf-navbar-height));
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
 .page { padding: 0 12px 20px; width: 100%; max-width: 600px; margin: 0 auto; }
 .loading { text-align: center; padding: 60px 20px; color: var(--bf-text-muted); }
 

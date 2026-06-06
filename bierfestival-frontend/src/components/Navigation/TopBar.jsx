@@ -1,9 +1,17 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { FaClipboardList } from 'react-icons/fa';
 import styles from './TopBar.module.css';
 
 const TopBar = () => {
+    const location = useLocation();
+
+    const handleReclick = (path) => {
+        if (location.pathname === path) {
+            window.dispatchEvent(new CustomEvent('bf-tab-reclick', { detail: path }));
+        }
+    };
+
     return (
         <header className={styles.topBar}>
             <div className={styles.logoContainer}>
@@ -13,7 +21,7 @@ const TopBar = () => {
                     <span className={styles.logoTextBottom}>Bierfestival</span>
                 </div>
             </div>
-            <NavLink to="/mein-besuch" className={({ isActive }) => `${styles.userButton} ${isActive ? styles.active : ''}`}>
+            <NavLink to="/mein-besuch" onClick={() => handleReclick('/mein-besuch')} className={({ isActive }) => `${styles.userButton} ${isActive ? styles.active : ''}`}>
                 <FaClipboardList className={styles.icon} />
                 <span>Mein Besuch</span>
             </NavLink>

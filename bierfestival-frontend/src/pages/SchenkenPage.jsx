@@ -41,6 +41,19 @@ const SchenkenPage = () => {
         loadData();
     }, []);
 
+    // Listener für "Tap to Top" & "Overlays schließen"
+    useEffect(() => {
+        const handleTabReclick = (e) => {
+            if (e.detail === '/schenken') {
+                setSelectedTavern(null);
+                setBreweryDetail(null);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+        window.addEventListener('bf-tab-reclick', handleTabReclick);
+        return () => window.removeEventListener('bf-tab-reclick', handleTabReclick);
+    }, []);
+
     // Lookup für BeerCards: Wo wird welches Bier ausgeschenkt?
     const beerTavernMap = useMemo(() => {
         const map = {};

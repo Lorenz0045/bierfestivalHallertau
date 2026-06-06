@@ -79,6 +79,35 @@
 .checkLabel { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 500; white-space: nowrap; cursor: pointer; }
 .checkLabel input[type="checkbox"] { accent-color: var(--bf-primary-green); width: 16px; height: 16px; }
 
+/* Filter Reset Button */
+.resetRow {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--bf-gray-light);
+}
+
+.resetBtn {
+    background: none;
+    border: none;
+    color: var(--bf-text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: var(--bf-radius-full);
+    transition: all 0.2s;
+}
+
+.resetBtn:hover {
+    color: var(--bf-text-dark);
+    background: var(--bf-gray-light);
+}
+
 /* Category Filters (Orte) */
 .categoryFilters { display: flex; flex-wrap: wrap; gap: 6px; }
 .catBtn {

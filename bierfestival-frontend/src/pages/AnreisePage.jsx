@@ -63,6 +63,17 @@ const AnreisePage = () => {
         load();
     }, []);
 
+     // Listener für "Tap to Top" & "Overlays schließen"
+        useEffect(() => {
+            const handleTabReclick = (e) => {
+                if (e.detail === '/anreise') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+            window.addEventListener('bf-tab-reclick', handleTabReclick);
+            return () => window.removeEventListener('bf-tab-reclick', handleTabReclick);
+        }, []);
+
     // Tage ermitteln
     const festivalDays = useMemo(() => {
         const daySet = new Set();

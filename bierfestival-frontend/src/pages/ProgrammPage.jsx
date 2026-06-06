@@ -33,6 +33,17 @@ const ProgrammPage = () => {
         loadProgram();
     }, []);
 
+    // Listener für "Tap to Top" 
+    useEffect(() => {
+        const handleTabReclick = (e) => {
+            if (e.detail === '/programm') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+        window.addEventListener('bf-tab-reclick', handleTabReclick);
+        return () => window.removeEventListener('bf-tab-reclick', handleTabReclick);
+    }, []);
+
     // Events nach Tagen gruppieren
     const { groupedEvents, topDays } = useMemo(() => {
         const groups = {};
