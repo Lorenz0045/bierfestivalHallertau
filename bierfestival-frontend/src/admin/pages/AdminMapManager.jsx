@@ -12,7 +12,8 @@ const POI_ENDPOINTS = [
     { type: 'tavern', url: '/api/taverns', label: 'Schenken' },
     { type: 'stage', url: '/api/stages', label: 'Bühnen' },
     { type: 'gastronomy', url: '/api/gastronomies', label: 'Gastronomie' },
-    { type: 'facility', url: '/api/facilities', label: 'Einrichtungen' }
+    { type: 'facility', url: '/api/facilities', label: 'Einrichtungen' },
+    { type: 'craftmarket', url: '/api/craft-markets', label: 'Handwerkermärkte' }
 ];
 
 // Hilfskomponente um Map-Klicks abzufangen

@@ -128,7 +128,7 @@ const SchenkenPage = () => {
                         <div className={styles.brauermarktContent}>
                             <h3 className={styles.brauermarktTitle}>Brauermarkt</h3>
                             <span className={styles.brauermarktSub}>
-                                {brauermarktBreweries.length} Brauereien · Direktverkauf
+                                {brauermarktBreweries.length + 2} Brauereien · Direktverkauf
                             </span>
                         </div>
                         <FaAngleRight className={styles.brauermarktArrow} />
@@ -264,7 +264,6 @@ const SchenkenPage = () => {
 
                                 {breweryDetail.description && <p className={styles.breweryDesc}>{breweryDetail.description}</p>}
 
-                                {/* NEU: Biere der Brauerei */}
                                 <div className={styles.beerCardList}>
                                     <h4 style={{ fontSize: '0.95rem', color: 'var(--bf-dark-green)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <FaBeer /> Biere dieser Brauerei ({bBeers.length})
@@ -286,6 +285,8 @@ const SchenkenPage = () => {
                                             onLogDrink={logDrink}
                                             onRemoveDrink={removeDrink}
                                             onRate={rateBeer}
+                                            taverns={beerTavernMap[fullBeer.id] || []}
+                                            onJumpToMap={handleJumpToMap}
                                             compact={true}
                                         />
                                     ))}
@@ -303,21 +304,34 @@ const SchenkenPage = () => {
                     title="Brauermarkt"
                 >
                     <div style={{ padding: '8px 0' }}>
-                        <p className={styles.brauermarktInfoText}>
-                            Das Bierfestival wird präsentiert von unseren Sponsoren{' '}
-                            {sponsors.filter(s => s.tier).sort((a, b) => (a.tier?.sortOrder || 99) - (b.tier?.sortOrder || 99)).map((s, i, arr) => (
-                                <span key={s.id}>
-                                    <button
-                                        className={styles.inlineLink}
-                                        onClick={() => setSelectedSponsor(s)}
-                                    >
-                                        {s.name}
-                                    </button>
-                                    {i < arr.length - 1 ? (i === arr.length - 2 ? ' und ' : ', ') : ''}
-                                </span>
-                            ))}.
-                            {' '}Neben deren Ständen könnt ihr auf unserem Brauermarkt auch von folgenden Brauereien Spezialitäten genießen:
-                        </p>
+                        {(() => {
+                            // Filtere nur Sponsoren, deren Tier-Name "Platin" enthält
+                            const platinSponsors = sponsors
+                                .filter(s => s.tier && s.tier.name.toLowerCase().includes('platin'))
+                                .sort((a, b) => (a.tier?.sortOrder || 99) - (b.tier?.sortOrder || 99));
+
+                            return (
+                                <p className={styles.brauermarktInfoText}>
+                                    {platinSponsors.length > 0 && (
+                                        <>
+                                            Das Bierfestival wird präsentiert von unseren Platinsponsoren{' '}
+                                            {platinSponsors.map((s, i, arr) => (
+                                                <span key={s.id}>
+                                                    <button
+                                                        className={styles.inlineLink}
+                                                        onClick={() => setSelectedSponsor(s)}
+                                                    >
+                                                        {s.name}
+                                                    </button>
+                                                    {i < arr.length - 1 ? (i === arr.length - 2 ? ' und ' : ', ') : ''}
+                                                </span>
+                                            ))}.{' '}
+                                        </>
+                                    )}
+                                    Neben deren Ständen könnt ihr euch auf unserem Brauermarkt auch von folgenden Brauereien überraschen lassen und deren Spezialitäten genießen:
+                                </p>
+                            );
+                        })()}
 
                         <div className={styles.brauermarktBreweryList}>
                             {brauermarktBreweries.map(brewery => (

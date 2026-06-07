@@ -10,7 +10,7 @@ import BeerCard from '../components/UI/BeerCard';
 import SponsorBanner from '../components/UI/SponsorBanner';
 import EventItem from '../components/UI/EventItem';
 import useTracking from '../hooks/useTracking';
-import { FaLocationArrow, FaBeer, FaInfoCircle, FaTimes, FaGlobe, FaCalendarAlt } from 'react-icons/fa';
+import { FaLocationArrow, FaBeer, FaInfoCircle, FaTimes, FaGlobe, FaCalendarAlt, FaAngleRight } from 'react-icons/fa';
 import styles from './HomePage.module.css';
 
 // --- User Location Icon ---
@@ -174,6 +174,7 @@ const HomePage = () => {
     const [allBeers, setAllBeers] = useState([]);
     const [taverns, setTaverns] = useState([]);
     const [breweries, setBreweries] = useState([]);
+    const [sponsors, setSponsors] = useState([]);
     const [breweryDetail, setBreweryDetail] = useState(null);
     useEffect(() => {
         Promise.all([
@@ -181,13 +182,20 @@ const HomePage = () => {
             fetchCachedData('/api/beers'),
             fetchCachedData('/api/taverns'),
             fetchCachedData('/api/breweries'),
-        ]).then(([evData, beerData, tavernData, breweryData]) => {
+            fetchCachedData('/api/sponsors'),
+        ]).then(([evData, beerData, tavernData, breweryData, sponsorData]) => {
             if (evData) setEvents(evData);
             if (beerData) setAllBeers(beerData);
             if (tavernData) setTaverns(tavernData);
             if (breweryData) setBreweries(breweryData);
+            if (sponsorData) setSponsors(sponsorData);
         }).catch(() => { });
     }, []);
+
+    // Brauermarkt: Brauereien mit isBrewersMarket=true
+    const brauermarktBreweries = useMemo(() =>
+        breweries.filter(b => b.isBrewersMarket).sort((a, b) => a.name.localeCompare(b.name)),
+        [breweries]);
 
     // Build beer→tavern lookup
     const beerTavernMap = useMemo(() => {
@@ -266,134 +274,199 @@ const HomePage = () => {
                     <div className={styles.poiDetail}>
 
                         {/* =========================================
-                            REGULÄRER POI HEADER (Nicht-Sponsor)
+                            BRAUERMARKT (Spezialfall)
                             ========================================= */}
-                        {selectedPoi.type !== 'sponsor' && (
-                            <div className={styles.detailHeaderRow}>
-                                <div className={styles.detailHeaderIconWrapper}>
-                                    {selectedPoi.imgUrl || selectedPoi.facilityType?.imgUrl ? (
-                                        <img
-                                            src={selectedPoi.imgUrl || selectedPoi.facilityType.imgUrl}
-                                            alt={selectedPoi.name}
-                                            className={styles.detailHeaderImg}
-                                        />
-                                    ) : (
-                                        <div className={styles.detailHeaderFallback}>
-                                            {selectedPoi.name?.substring(0, 2).toUpperCase()}
+                        {selectedPoi.name === 'Brauermarkt' ? (
+                            <div style={{ padding: '8px 0' }}>
+                                {(() => {
+                                    // Filtere nur Sponsoren, deren Tier-Name "Platin" enthält
+                                    const platinSponsors = sponsors
+                                        .filter(s => s.tier && s.tier.name.toLowerCase().includes('platin'))
+                                        .sort((a, b) => (a.tier?.sortOrder || 99) - (b.tier?.sortOrder || 99));
+
+                                    return (
+                                        <p className={styles.brauermarktInfoText}>
+                                            {platinSponsors.length > 0 && (
+                                                <>
+                                                    Das Bierfestival wird präsentiert von unseren Platinsponsoren{' '}
+                                                    {platinSponsors.map((s, i, arr) => (
+                                                        <span key={s.id}>
+                                                            <button
+                                                                className={styles.inlineLink}
+                                                                onClick={() => setSelectedPoi({ ...s, type: 'sponsor' })}
+                                                            >
+                                                                {s.name}
+                                                            </button>
+                                                            {i < arr.length - 1 ? (i === arr.length - 2 ? ' und ' : ', ') : ''}
+                                                        </span>
+                                                    ))}.{' '}
+                                                </>
+                                            )}
+                                            Neben deren Ständen könnt ihr euch auf unserem Brauermarkt auch von folgenden Brauereien überraschen lassen und deren Spezialitäten genießen:
+                                        </p>
+                                    );
+                                })()}
+
+                                <div className={styles.brauermarktBreweryList}>
+                                    {brauermarktBreweries.map(brewery => (
+                                        <div
+                                            key={brewery.id}
+                                            className={styles.brauermarktBreweryItem}
+                                            onClick={() => handleBreweryClick(brewery.id)}
+                                        >
+                                            <div className={styles.detailHeaderIconWrapper} style={{ width: '50px', height: '50px' }}>
+                                                {brewery.imgUrl ? (
+                                                    <img src={brewery.imgUrl} alt={brewery.name} className={styles.detailHeaderImg} />
+                                                ) : (
+                                                    <div className={styles.detailHeaderFallback} style={{ fontSize: '1rem' }}>
+                                                        {brewery.name?.substring(0, 2).toUpperCase()}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <strong style={{ fontSize: '0.9rem', color: 'var(--bf-dark-green)' }}>{brewery.name}</strong>
+                                                {brewery.city && (
+                                                    <span style={{ display: 'block', fontSize: '0.78rem', color: 'var(--bf-text-muted)' }}>📍 {brewery.city.name}</span>
+                                                )}
+                                            </div>
+                                            <FaAngleRight style={{ color: 'var(--bf-text-muted)', flexShrink: 0 }} />
                                         </div>
-                                    )}
-                                </div>
-
-                                <div className={styles.detailHeaderInfo}>
-                                    <span className={styles.detailTypeBadge}>{getPoiTypeLabel(selectedPoi.type)}</span>
-
-                                    {selectedPoi.city && (
-                                        <span className={styles.detailMetaText}>📍 {selectedPoi.city.name || selectedPoi.city}</span>
-                                    )}
-                                    {selectedPoi.district && (
-                                        <span className={styles.detailMetaText}>🗺️ {selectedPoi.district.name || selectedPoi.district}</span>
-                                    )}
-
-                                    {/* Spezifische Typen */}
-                                    {selectedPoi.type === 'gastronomy' && selectedPoi.gastronomyType && (
-                                        <span className={styles.detailMetaText}>🍴 {selectedPoi.gastronomyType.name || selectedPoi.type?.name}</span>
-                                    )}
-                                    {selectedPoi.type === 'facility' && selectedPoi.facilityType && (
-                                        <span className={styles.detailMetaText}>ℹ️ {selectedPoi.facilityType.name}</span>
-                                    )}
-                                </div>
-
-                                <div className={styles.detailHeaderActions}>
-                                    {selectedPoi.website && (
-                                        <div className={styles.actionWrapper}>
-                                            <a href={selectedPoi.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
-                                                <FaGlobe /> Zur Website
-                                            </a>
-                                        </div>
-                                    )}
+                                    ))}
                                 </div>
                             </div>
-                        )}
+                        ) : (
+                            <>
+                                {/* =========================================
+                                    REGULÄRER POI HEADER (Nicht-Sponsor)
+                                    ========================================= */}
+                                {selectedPoi.type !== 'sponsor' && (
+                                    <div className={styles.detailHeaderRow}>
+                                        <div className={styles.detailHeaderIconWrapper}>
+                                            {selectedPoi.imgUrl || selectedPoi.facilityType?.imgUrl ? (
+                                                <img
+                                                    src={selectedPoi.imgUrl || selectedPoi.facilityType.imgUrl}
+                                                    alt={selectedPoi.name}
+                                                    className={styles.detailHeaderImg}
+                                                />
+                                            ) : (
+                                                <div className={styles.detailHeaderFallback}>
+                                                    {selectedPoi.name?.substring(0, 2).toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
 
-                        {/* =========================================
+                                        <div className={styles.detailHeaderInfo}>
+                                            <span className={styles.detailTypeBadge}>{getPoiTypeLabel(selectedPoi.type)}</span>
+
+                                            {selectedPoi.city && (
+                                                <span className={styles.detailMetaText}>📍 {selectedPoi.city.name || selectedPoi.city}</span>
+                                            )}
+                                            {selectedPoi.district && (
+                                                <span className={styles.detailMetaText}>🗺️ {selectedPoi.district.name || selectedPoi.district}</span>
+                                            )}
+
+                                            {/* Spezifische Typen */}
+                                            {selectedPoi.type === 'gastronomy' && selectedPoi.gastronomyType && (
+                                                <span className={styles.detailMetaText}>🍴 {selectedPoi.gastronomyType.name || selectedPoi.type?.name}</span>
+                                            )}
+                                            {selectedPoi.type === 'facility' && selectedPoi.facilityType && (
+                                                <span className={styles.detailMetaText}>ℹ️ {selectedPoi.facilityType.name}</span>
+                                            )}
+                                        </div>
+
+                                        <div className={styles.detailHeaderActions}>
+                                            {selectedPoi.website && (
+                                                <div className={styles.actionWrapper}>
+                                                    <a href={selectedPoi.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                                        <FaGlobe /> Zur Website
+                                                    </a>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* =========================================
                             SPONSOR HEADER
                             ========================================= */}
-                        {selectedPoi.type === 'sponsor' && (
-                            <div className={styles.detailHeaderRow}>
-                                <div className={styles.detailHeaderIconWrapper}>
-                                    {selectedPoi.imgUrl ? (
-                                        <img src={selectedPoi.imgUrl} alt={selectedPoi.name} className={styles.detailHeaderImg} />
-                                    ) : (
-                                        <div className={styles.detailHeaderFallback}>{selectedPoi.name?.substring(0, 2).toUpperCase()}</div>
-                                    )}
-                                </div>
-                                <div className={styles.detailHeaderInfo}>
-                                    {/* HIER: Tier Name & Icon direkt als grünes Badge! */}
-                                    <span className={styles.detailTypeBadge}>
-                                        {selectedPoi.tier?.imgUrl && <img src={selectedPoi.tier.imgUrl} alt="Tier" style={{ height: '14px', marginRight: '4px', verticalAlign: 'middle' }} />}
-                                        {selectedPoi.tier?.name || 'Sponsor'}
-                                    </span>
-                                    {selectedPoi.city && <span className={styles.detailMetaText}>📍 {selectedPoi.city.name || selectedPoi.city}</span>}
-                                </div>
-                                <div className={styles.detailHeaderActions}>
-                                    {selectedPoi.website && (
-                                        <div className={styles.actionWrapper}>
-                                            <a href={selectedPoi.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
-                                                <FaGlobe /> Zur Website
-                                            </a>
+                                {selectedPoi.type === 'sponsor' && (
+                                    <div className={styles.detailHeaderRow}>
+                                        <div className={styles.detailHeaderIconWrapper}>
+                                            {selectedPoi.imgUrl ? (
+                                                <img src={selectedPoi.imgUrl} alt={selectedPoi.name} className={styles.detailHeaderImg} />
+                                            ) : (
+                                                <div className={styles.detailHeaderFallback}>{selectedPoi.name?.substring(0, 2).toUpperCase()}</div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                                        <div className={styles.detailHeaderInfo}>
+                                            {/* HIER: Tier Name & Icon direkt als grünes Badge! */}
+                                            <span className={styles.detailTypeBadge}>
+                                                {selectedPoi.tier?.imgUrl && <img src={selectedPoi.tier.imgUrl} alt="Tier" style={{ height: '14px', marginRight: '4px', verticalAlign: 'middle' }} />}
+                                                {selectedPoi.tier?.name || 'Sponsor'}
+                                            </span>
+                                            {selectedPoi.city && <span className={styles.detailMetaText}>📍 {selectedPoi.city.name || selectedPoi.city}</span>}
+                                        </div>
+                                        <div className={styles.detailHeaderActions}>
+                                            {selectedPoi.website && (
+                                                <div className={styles.actionWrapper}>
+                                                    <a href={selectedPoi.website} target="_blank" rel="noopener noreferrer" className={styles.websiteBtn}>
+                                                        <FaGlobe /> Zur Website
+                                                    </a>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
 
-                        {/* =========================================
+                                {/* =========================================
                             GEMEINSAMER INHALT
                             ========================================= */}
-                        {selectedPoi.description && <p className={styles.poiDesc}>{selectedPoi.description}</p>}
+                                {selectedPoi.description && <p className={styles.poiDesc}>{selectedPoi.description}</p>}
 
-                        {/* Bühne: Programm mit Tagesaufteilung */}
-                        {selectedPoi.type === 'stage' && (
-                            <StageEventsByDay events={events} stageId={selectedPoi.id} />
-                        )}
+                                {/* Bühne: Programm mit Tagesaufteilung */}
+                                {selectedPoi.type === 'stage' && (
+                                    <StageEventsByDay events={events} stageId={selectedPoi.id} />
+                                )}
 
-                        {/* Schenke: Biere */}
-                        {selectedPoi.type === 'tavern' && selectedPoi.beers?.length > 0 && (
-                            <div className={styles.tavernBeers}>
-                                <h4><FaBeer /> Ausgeschenkte Biere ({selectedPoi.beers.length})</h4>
-                                {selectedPoi.beers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(beer => {
-                                    const fullBeer = allBeers.find(b => b.id === beer.beerId);
-                                    return (
-                                        <BeerCard
-                                            key={beer.beerId}
-                                            beer={fullBeer ? {
-                                                beerId: fullBeer.id, name: fullBeer.name,
-                                                breweryName: fullBeer.brewery?.name, breweryId: fullBeer.brewery?.id,
-                                                typeName: fullBeer.beerType?.name,
-                                                alcoholPercentage: fullBeer.alcoholPercentage,
-                                                isNonAlcoholic: fullBeer.isNonAlcoholic,
-                                                description: fullBeer.description,
-                                                originalGravity: fullBeer.originalGravity,
-                                            } : {
-                                                beerId: beer.beerId, name: beer.name,
-                                                breweryName: beer.breweryName, typeName: beer.typeName,
-                                                alcoholPercentage: beer.alcoholPercentage,
-                                                isNonAlcoholic: beer.isNonAlcoholic,
-                                            }}
-                                            trackingState={getBeerState(beer.beerId)}
-                                            onToggleMerkliste={toggleMerkliste}
-                                            onLogDrink={logDrink}
-                                            onRemoveDrink={removeDrink}
-                                            onRate={rateBeer}
-                                            onBreweryClick={handleBreweryClick}
-                                            taverns={beerTavernMap[beer.beerId] || []}
-                                            onJumpToMap={handleJumpToMap}
-                                            compact={true}
-                                            hideTavernLinks={true}
-                                        />
-                                    );
-                                })}
-                            </div>
+                                {/* Schenke: Biere */}
+                                {selectedPoi.type === 'tavern' && selectedPoi.beers?.length > 0 && (
+                                    <div className={styles.tavernBeers}>
+                                        <h4><FaBeer /> Ausgeschenkte Biere ({selectedPoi.beers.length})</h4>
+                                        {selectedPoi.beers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map(beer => {
+                                            const fullBeer = allBeers.find(b => b.id === beer.beerId);
+                                            return (
+                                                <BeerCard
+                                                    key={beer.beerId}
+                                                    beer={fullBeer ? {
+                                                        beerId: fullBeer.id, name: fullBeer.name,
+                                                        breweryName: fullBeer.brewery?.name, breweryId: fullBeer.brewery?.id,
+                                                        typeName: fullBeer.beerType?.name,
+                                                        alcoholPercentage: fullBeer.alcoholPercentage,
+                                                        isNonAlcoholic: fullBeer.isNonAlcoholic,
+                                                        description: fullBeer.description,
+                                                        originalGravity: fullBeer.originalGravity,
+                                                    } : {
+                                                        beerId: beer.beerId, name: beer.name,
+                                                        breweryName: beer.breweryName, typeName: beer.typeName,
+                                                        alcoholPercentage: beer.alcoholPercentage,
+                                                        isNonAlcoholic: beer.isNonAlcoholic,
+                                                    }}
+                                                    trackingState={getBeerState(beer.beerId)}
+                                                    onToggleMerkliste={toggleMerkliste}
+                                                    onLogDrink={logDrink}
+                                                    onRemoveDrink={removeDrink}
+                                                    onRate={rateBeer}
+                                                    onBreweryClick={handleBreweryClick}
+                                                    taverns={beerTavernMap[beer.beerId] || []}
+                                                    onJumpToMap={handleJumpToMap}
+                                                    compact={true}
+                                                    hideTavernLinks={true}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 )}
@@ -440,7 +513,6 @@ const HomePage = () => {
 
                             {breweryDetail.description && <p className={styles.poiDesc}>{breweryDetail.description}</p>}
 
-                            {/* NEU: Biere der Brauerei */}
                             <div className={styles.tavernBeers}>
                                 <h4><FaBeer /> Biere dieser Brauerei ({bBeers.length})</h4>
                                 {bBeers.map(fullBeer => (
@@ -460,8 +532,6 @@ const HomePage = () => {
                                         onLogDrink={logDrink}
                                         onRemoveDrink={removeDrink}
                                         onRate={rateBeer}
-                                        taverns={beerTavernMap[fullBeer.id] || []}
-                                        onJumpToMap={handleJumpToMap}
                                         compact={true}
                                     />
                                 ))}

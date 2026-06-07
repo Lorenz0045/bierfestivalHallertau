@@ -6,7 +6,8 @@ const TYPE_COLORS = {
     tavern: '#8B4513',      // Braun für Schenken
     stage: '#6A5ACD',       // Lila für Bühnen
     gastronomy: '#FF4500',  // Orange für Essen
-    facility: '#4682B4'     // Blau für Einrichtungen (WCs etc.)
+    facility: '#4682B4',    // Blau für Einrichtungen (WCs etc.)
+    craftmarket: '#2E8B57'  // Grün für Handwerkermärkte
 };
 
 export const createPoiIcon = (item) => {
