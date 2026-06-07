@@ -52,11 +52,13 @@ public class BreweryResource {
         public LookupDto city;
         public LookupDto district;
         public Boolean isHallertau;
+        public Boolean isBrewersMarket;
         public String website;
         public String imgUrl;
 
         public static BreweryDto fromEntity(Brewery entity) {
-            if (entity == null) return null;
+            if (entity == null)
+                return null;
             BreweryDto dto = new BreweryDto();
             dto.id = entity.id;
             dto.name = entity.name;
@@ -71,6 +73,7 @@ public class BreweryResource {
                 dto.district.name = entity.district.name;
             }
             dto.isHallertau = entity.isHallertau;
+            dto.isBrewersMarket = entity.isBrewersMarket;
             dto.website = entity.website;
             dto.imgUrl = entity.imgUrl;
             return dto;
@@ -82,9 +85,13 @@ public class BreweryResource {
         public RefId city;
         public RefId district;
         public Boolean isHallertau;
+        public Boolean isBrewersMarket;
         public String website;
         public String imgUrl;
-        public static class RefId { public Long id; }
+
+        public static class RefId {
+            public Long id;
+        }
     }
 
     @GET
@@ -104,7 +111,8 @@ public class BreweryResource {
         Brewery entity = new Brewery();
         mapDto(dto, entity);
         entity.persist();
-        return Response.created(URI.create("/api/breweries/" + entity.id)).entity(BreweryDto.fromEntity(entity)).build();
+        return Response.created(URI.create("/api/breweries/" + entity.id)).entity(BreweryDto.fromEntity(entity))
+                .build();
     }
 
     @PUT
@@ -115,7 +123,8 @@ public class BreweryResource {
     @SecurityRequirement(name = "jwtAuth")
     public Response update(@PathParam("id") Long id, @Valid BreweryUpdateDto dto) {
         Optional<Brewery> existingOpt = Brewery.findByIdOptional(id);
-        if (existingOpt.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
+        if (existingOpt.isEmpty())
+            return Response.status(Response.Status.NOT_FOUND).build();
 
         Brewery existing = existingOpt.get();
         String oldImageUrl = existing.imgUrl;
@@ -150,6 +159,7 @@ public class BreweryResource {
     private void mapDto(BreweryUpdateDto dto, Brewery entity) {
         entity.name = dto.name;
         entity.isHallertau = dto.isHallertau != null ? dto.isHallertau : false;
+        entity.isBrewersMarket = dto.isBrewersMarket != null ? dto.isBrewersMarket : false;
         entity.website = dto.website;
         entity.imgUrl = dto.imgUrl;
         if (dto.city != null && dto.city.id != null) {

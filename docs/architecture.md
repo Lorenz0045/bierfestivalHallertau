@@ -56,7 +56,7 @@
 
 | Entity | Tabelle | Beschreibung |
 |--------|---------|--------------|
-| `Brewery` | `brewery` | Brauereien mit Referenz zu City + District, Website, Logo |
+| `Brewery` | `brewery` | Brauereien mit Referenz zu City + District, Website, Logo, `isHallertau` Flag, `isBrewersMarket` Flag |
 | `Beer` | `beer` | Biere mit Referenz zu Brewery & BeerType, Alkohol, Stammwürze (°P), mehrzeilige Beschreibung (TEXT), `isNonAlcoholic` Flag |
 | `Tavern` | `tavern` | Schenken (Ausschankstellen) auf dem Festival mit Koordinaten |
 | `TavernBeer` | `tavern_beer` | M:N-Zuordnung Schenke↔Bier mit `sort_order` |
@@ -420,3 +420,34 @@ const defaultData = initialData ? { ...initialData } : {};
 ```
 
 Dies verhindert, dass beim Speichern nicht sichtbare Felder überschrieben/gelöscht werden.
+
+### AdminMapManager – POI-Kategorie-Feld (`_poiCategory`)
+
+Der `AdminMapManager` lädt POIs aus verschiedenen API-Endpunkten und muss sie im lokalen State voneinander unterscheiden. Dafür wird das Feld `_poiCategory` verwendet (z.B. `'tavern'`, `'gastronomy'`, `'facility'`).
+
+**Wichtig: Nicht `type` verwenden!** Das Feld `type` ist bei Gastronomie-Einträgen bereits mit dem `GastronomyType`-Lookup-Objekt belegt (`{id: 1, name: "Imbiss"}`). Ein früherer Bug hat `type` als POI-Kategorie überschrieben, was dazu führte, dass beim Speichern über die Karte der Gastronomie-Typ verloren ging.
+
+Beim Speichern werden FK-Relationen (`type`, `city`, `facilityType`) als RefId-Objekte (`{id: X}`) rekonstruiert, wie vom Backend erwartet.
+
+---
+
+## Brauermarkt
+
+### Konzept
+
+Der Brauermarkt ist ein spezieller Bereich auf dem Festival, an dem Brauereien direkt ihr Bier verkaufen (ohne Schenken-Zuordnung). Da das Biersortiment vor Ort nicht vorab bekannt ist, werden keine Bier-Daten zugeordnet, sondern ein Infotext mit interaktiven Links angezeigt.
+
+### Datenmodell
+
+- **Flag auf `Brewery`**: `is_brewers_market BOOLEAN DEFAULT false` — markiert Brauereien, die auf dem Brauermarkt verkaufen.
+- **Kein eigener Entity-Typ** — der Brauermarkt wird vollständig über das Brewery-Flag und die Sponsor-Daten abgebildet.
+
+### Frontend-Anzeige (SchenkenPage)
+
+Auf der SchenkenPage wird oberhalb der Schenken-Liste eine spezielle **Brauermarkt-Karte** angezeigt (gold/amber-farbig, `FaStore`-Icon), sofern mindestens eine Brauerei mit `isBrewersMarket=true` existiert.
+
+Klick auf die Karte öffnet ein BottomSheet mit:
+1. **Infotext** mit klickbaren Sponsor-Namen (öffnen das Sponsor-Detail-BottomSheet)
+2. **Liste der Brauermarkt-Brauereien** — jede Brauerei ist klickbar und öffnet das Brauerei-Detail-BottomSheet (mit Zurück-Pfeil)
+
+Die Navigation nutzt das bestehende Overlay-Pattern: `showBrauermarkt` → `breweryDetail` / `selectedSponsor` als gestapelte Zustände.

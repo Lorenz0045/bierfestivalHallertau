@@ -235,3 +235,8 @@ CREATE TABLE sponsor_tier (
 );
 
 ALTER TABLE sponsor ADD COLUMN sponsor_tier_id BIGINT REFERENCES sponsor_tier(id) ON DELETE SET NULL;
+
+-- ============================================================
+-- BRAUERMARKT: Flag für Brauereien, die auf dem Brauermarkt verkaufen
+-- ============================================================
+ALTER TABLE brewery ADD COLUMN is_brewers_market BOOLEAN DEFAULT false;

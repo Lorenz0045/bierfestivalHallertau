@@ -35,6 +35,9 @@ public class Brewery extends PanacheEntityBase {
     @Column(name = "is_hallertau")
     public Boolean isHallertau = false;
 
+    @Column(name = "is_brewers_market")
+    public Boolean isBrewersMarket = false;
+
     public String website;
 
     @Column(name = "img_url")

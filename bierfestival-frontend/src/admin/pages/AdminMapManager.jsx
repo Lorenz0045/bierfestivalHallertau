@@ -45,7 +45,7 @@ const AdminMapManager = () => {
                     // Mappe die Daten in ein einheitliches Format
                     const mappedData = data.map(item => ({
                         ...item,
-                        type: ep.type, // Identifikator für Icon und API-Put
+                        _poiCategory: ep.type, // Interner Identifikator (bewusst _poiCategory statt type, um Kollisionen mit entity.type zu vermeiden)
                         isDirty: false // Flag, ob Position geändert wurde
                     }));
                     allPois = [...allPois, ...mappedData];
@@ -74,7 +74,7 @@ const AdminMapManager = () => {
         if (!activeItemToPlace) return;
 
         setPois(prev => prev.map(p => 
-            (p.id === activeItemToPlace.id && p.type === activeItemToPlace.type)
+            (p.id === activeItemToPlace.id && p._poiCategory === activeItemToPlace._poiCategory)
                 ? { ...p, lat: latlng.lat, lon: latlng.lng, isDirty: true }
                 : p
         ));
@@ -85,7 +85,7 @@ const AdminMapManager = () => {
     const handleMarkerDragEnd = (e, poi) => {
         const newPos = e.target.getLatLng();
         setPois(prev => prev.map(p => 
-            (p.id === poi.id && p.type === poi.type)
+            (p.id === poi.id && p._poiCategory === poi._poiCategory)
                 ? { ...p, lat: newPos.lat, lon: newPos.lng, isDirty: true }
                 : p
         ));
@@ -94,7 +94,7 @@ const AdminMapManager = () => {
     // Vom Spielfeld nehmen (lat/lon nullen)
     const handleRemoveFromMap = (poi) => {
         setPois(prev => prev.map(p => 
-            (p.id === poi.id && p.type === poi.type)
+            (p.id === poi.id && p._poiCategory === poi._poiCategory)
                 ? { ...p, lat: null, lon: null, isDirty: true }
                 : p
         ));
@@ -107,19 +107,24 @@ const AdminMapManager = () => {
         try {
             for (const poi of dirtyPois) {
                 // Finde die richtige API URL für den Typ
-                const ep = POI_ENDPOINTS.find(e => e.type === poi.type);
+                const ep = POI_ENDPOINTS.find(e => e.type === poi._poiCategory);
                 
-                // Wir müssen das Format bereinigen (isDirty und type gehören nicht ins Backend)
+                // Wir müssen das Format bereinigen (_poiCategory und isDirty gehören nicht ins Backend)
                 const payload = { ...poi };
                 delete payload.isDirty;
-                delete payload.type;
+                delete payload._poiCategory;
                 
-                // Spezialfall Gastronomie/Facility: Relation IDs korrekt setzen
-                if (payload.typeId) payload.type = { id: payload.typeId }; 
-                if (payload.facilityType && payload.facilityType.id) {
-                     payload.facilityType = { id: payload.facilityType.id };
-                } else if (payload.facilityTypeId) {
-                     payload.facilityType = { id: payload.facilityTypeId };
+                // FK-Relationen korrekt als RefId-Objekte setzen (Backend erwartet {id: X})
+                // Gastronomie: type (GastronomyType) und city
+                if (payload.type && typeof payload.type === 'object' && payload.type.id) {
+                    payload.type = { id: payload.type.id };
+                }
+                if (payload.city && typeof payload.city === 'object' && payload.city.id) {
+                    payload.city = { id: payload.city.id };
+                }
+                // Facility: facilityType
+                if (payload.facilityType && typeof payload.facilityType === 'object' && payload.facilityType.id) {
+                    payload.facilityType = { id: payload.facilityType.id };
                 }
  
                 await apiRequest(`${ep.url}/${poi.id}`, 'PUT', payload, keycloakInstance.token);
@@ -135,7 +140,7 @@ const AdminMapManager = () => {
     };
 
     const unplacedPois = pois.filter(p => !p.lat || !p.lon);
-    const displayPois = unplacedPois.filter(p => filterType === 'all' || p.type === filterType);
+    const displayPois = unplacedPois.filter(p => filterType === 'all' || p._poiCategory === filterType);
     const placedPois = pois.filter(p => p.lat && p.lon);
     const dirtyCount = pois.filter(p => p.isDirty).length;
 
@@ -174,14 +179,15 @@ const AdminMapManager = () => {
                     <h3 className={styles.listTitle}>Noch nicht platziert ({displayPois.length})</h3>
                     {loading ? <p>Lade...</p> : (
                         <ul className={styles.list}>
-                            {displayPois.map(poi => (
+                            {displayPois.map(poi => {
+                                return (
                                 <li 
-                                    key={`${poi.type}-${poi.id}`} 
-                                    className={`${styles.listItem} ${(activeItemToPlace?.id === poi.id && activeItemToPlace?.type === poi.type) ? styles.activeItem : ''}`}
+                                    key={`${poi._poiCategory}-${poi.id}`} 
+                                    className={`${styles.listItem} ${(activeItemToPlace?.id === poi.id && activeItemToPlace?._poiCategory === poi._poiCategory) ? styles.activeItem : ''}`}
                                 >
                                     <div>
                                         <strong>{poi.name}</strong>
-                                        <span className={styles.itemMeta}>{POI_ENDPOINTS.find(e => e.type === poi.type)?.label}</span>
+                                        <span className={styles.itemMeta}>{POI_ENDPOINTS.find(e => e.type === poi._poiCategory)?.label}</span>
                                     </div>
                                     <button 
                                         onClick={() => handleSelectForPlacement(poi)}
@@ -190,7 +196,8 @@ const AdminMapManager = () => {
                                         📍 Platzieren
                                     </button>
                                 </li>
-                            ))}
+                                );
+                            })}
                         </ul>
                     )}
                 </div>
@@ -209,11 +216,14 @@ const AdminMapManager = () => {
                 >
                     <MapClickHandler onMapClick={handleMapClick} />
                     
-                    {placedPois.map(poi => (
+                    {placedPois.map(poi => {
+                        // Für createPoiIcon brauchen wir ein sauberes type-Feld (string)
+                        const poiForIcon = { ...poi, type: poi._poiCategory };
+                        return (
                         <Marker 
-                            key={`${poi.type}-${poi.id}`}
+                            key={`${poi._poiCategory}-${poi.id}`}
                             position={[poi.lat, poi.lon]}
-                            icon={createPoiIcon(poi)}
+                            icon={createPoiIcon(poiForIcon)}
                             draggable={true}
                             eventHandlers={{
                                 dragend: (e) => handleMarkerDragEnd(e, poi)
@@ -222,7 +232,7 @@ const AdminMapManager = () => {
                             <Popup>
                                 <div style={{ textAlign: 'center' }}>
                                     <strong style={{ display: 'block', fontSize: '1.1rem' }}>{poi.name}</strong>
-                                    <span style={{ color: '#64748b' }}>{POI_ENDPOINTS.find(e => e.type === poi.type)?.label}</span>
+                                    <span style={{ color: '#64748b' }}>{POI_ENDPOINTS.find(e => e.type === poi._poiCategory)?.label}</span>
                                     <br/><br/>
                                     <button 
                                         onClick={() => handleRemoveFromMap(poi)}
@@ -233,7 +243,7 @@ const AdminMapManager = () => {
                                 </div>
                             </Popup>
                         </Marker>
-                    ))}
+                    )})}
                 </BaseMap>
             </div>
         </div>

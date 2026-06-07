@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchCachedData } from '../services/cacheService';
-import { FaMapMarkerAlt, FaLocationArrow, FaBeer, FaAngleRight, FaGlobe } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaLocationArrow, FaBeer, FaAngleRight, FaGlobe, FaStore } from 'react-icons/fa';
 import BottomSheet from '../components/UI/BottomSheet';
 import SponsorBanner from '../components/UI/SponsorBanner';
 import BeerCard from '../components/UI/BeerCard';
@@ -18,20 +18,24 @@ const SchenkenPage = () => {
     const [allBeers, setAllBeers] = useState([]);
 
     const [selectedSponsor, setSelectedSponsor] = useState(null);
+    const [sponsors, setSponsors] = useState([]);
+    const [showBrauermarkt, setShowBrauermarkt] = useState(false);
 
     const { getBeerState, toggleMerkliste, logDrink, removeDrink, rateBeer } = useTracking();
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [tavernsData, brewData, beersData] = await Promise.all([
+                const [tavernsData, brewData, beersData, sponsorsData] = await Promise.all([
                     fetchCachedData('/api/taverns'),
                     fetchCachedData('/api/breweries'),
-                    fetchCachedData('/api/beers')
+                    fetchCachedData('/api/beers'),
+                    fetchCachedData('/api/sponsors')
                 ]);
                 if (tavernsData) setTaverns(tavernsData.sort((a, b) => a.name.localeCompare(b.name)));
                 if (brewData) setBreweries(brewData);
                 if (beersData) setAllBeers(beersData);
+                if (sponsorsData) setSponsors(sponsorsData);
             } catch (error) {
                 console.error("Fehler beim Laden der Schenken", error);
             } finally {
@@ -47,6 +51,7 @@ const SchenkenPage = () => {
             if (e.detail === '/schenken') {
                 setSelectedTavern(null);
                 setBreweryDetail(null);
+                setShowBrauermarkt(false);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         };
@@ -65,6 +70,11 @@ const SchenkenPage = () => {
         });
         return map;
     }, [taverns]);
+
+    // Brauermarkt: Brauereien mit isBrewersMarket=true
+    const brauermarktBreweries = useMemo(() =>
+        breweries.filter(b => b.isBrewersMarket).sort((a, b) => a.name.localeCompare(b.name)),
+        [breweries]);
 
     const handleJumpToMap = (tavern) => {
         if (tavern?.lat && tavern?.lon) {
@@ -108,6 +118,22 @@ const SchenkenPage = () => {
                     <h1 className={styles.title}>Schenken</h1>
                     <p className={styles.subtitle}>{taverns.length} Schenken am Bierfestival</p>
                 </div>
+
+                {/* Brauermarkt Card */}
+                {brauermarktBreweries.length > 0 && (
+                    <div className={styles.brauermarktCard} onClick={() => setShowBrauermarkt(true)}>
+                        <div className={styles.brauermarktIcon}>
+                            <FaStore />
+                        </div>
+                        <div className={styles.brauermarktContent}>
+                            <h3 className={styles.brauermarktTitle}>Brauermarkt</h3>
+                            <span className={styles.brauermarktSub}>
+                                {brauermarktBreweries.length} Brauereien · Direktverkauf
+                            </span>
+                        </div>
+                        <FaAngleRight className={styles.brauermarktArrow} />
+                    </div>
+                )}
 
                 <div className={styles.tavernList}>
                     {taverns.map(tavern => (
@@ -268,6 +294,58 @@ const SchenkenPage = () => {
                             </div>
                         );
                     })()}
+                </BottomSheet>
+
+                {/* Brauermarkt BottomSheet */}
+                <BottomSheet
+                    isOpen={showBrauermarkt && !breweryDetail && !selectedSponsor}
+                    onClose={() => setShowBrauermarkt(false)}
+                    title="Brauermarkt"
+                >
+                    <div style={{ padding: '8px 0' }}>
+                        <p className={styles.brauermarktInfoText}>
+                            Das Bierfestival wird präsentiert von unseren Sponsoren{' '}
+                            {sponsors.filter(s => s.tier).sort((a, b) => (a.tier?.sortOrder || 99) - (b.tier?.sortOrder || 99)).map((s, i, arr) => (
+                                <span key={s.id}>
+                                    <button
+                                        className={styles.inlineLink}
+                                        onClick={() => setSelectedSponsor(s)}
+                                    >
+                                        {s.name}
+                                    </button>
+                                    {i < arr.length - 1 ? (i === arr.length - 2 ? ' und ' : ', ') : ''}
+                                </span>
+                            ))}.
+                            {' '}Neben deren Ständen könnt ihr auf unserem Brauermarkt auch von folgenden Brauereien Spezialitäten genießen:
+                        </p>
+
+                        <div className={styles.brauermarktBreweryList}>
+                            {brauermarktBreweries.map(brewery => (
+                                <div
+                                    key={brewery.id}
+                                    className={styles.brauermarktBreweryItem}
+                                    onClick={() => handleBreweryClick(brewery.id)}
+                                >
+                                    <div className={styles.detailHeaderIconWrapper} style={{ width: '50px', height: '50px' }}>
+                                        {brewery.imgUrl ? (
+                                            <img src={brewery.imgUrl} alt={brewery.name} className={styles.detailHeaderImg} />
+                                        ) : (
+                                            <div className={styles.detailHeaderFallback} style={{ fontSize: '1rem' }}>
+                                                {brewery.name?.substring(0, 2).toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <strong style={{ fontSize: '0.9rem', color: 'var(--bf-dark-green)' }}>{brewery.name}</strong>
+                                        {brewery.city && (
+                                            <span style={{ display: 'block', fontSize: '0.78rem', color: 'var(--bf-text-muted)' }}>📍 {brewery.city.name}</span>
+                                        )}
+                                    </div>
+                                    <FaAngleRight style={{ color: 'var(--bf-text-muted)', flexShrink: 0 }} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </BottomSheet>
 
                 <BottomSheet

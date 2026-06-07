@@ -8,22 +8,66 @@
 /* =========================================
    SCHENKEN PAGE – Festival Design
    ========================================= */
-.container { padding: 0 12px 100px; width: 100%; max-width: 600px; margin: 0 auto; }
-.loading { text-align: center; padding: 60px 20px; color: var(--bf-text-muted); }
-.emptyState { text-align: center; padding: 60px 20px; color: var(--bf-text-muted); }
-.emptyIcon { font-size: 3rem; color: var(--bf-gray-mid); margin-bottom: 12px; }
+.container {
+    padding: 0 12px 100px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
 
-.header { text-align: center; padding: 16px 0 4px; }
-.headerIcon { font-size: 2rem; color: var(--bf-primary-green); margin-bottom: 4px; }
-.title { font-size: 1.3rem; font-weight: 700; color: var(--bf-dark-green); margin: 0; }
-.subtitle { font-size: 0.8rem; color: var(--bf-text-muted); margin-top: 4px; }
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--bf-text-muted);
+}
 
-.tavernList { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.emptyState {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--bf-text-muted);
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    color: var(--bf-gray-mid);
+    margin-bottom: 12px;
+}
+
+.header {
+    text-align: center;
+    padding: 16px 0 4px;
+}
+
+.headerIcon {
+    font-size: 2rem;
+    color: var(--bf-primary-green);
+    margin-bottom: 4px;
+}
+
+.title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--bf-dark-green);
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 0.8rem;
+    color: var(--bf-text-muted);
+    margin-top: 4px;
+}
+
+.tavernList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
 
 .tavernCard {
-    background: var(--bf-white); 
+    background: var(--bf-white);
     border-radius: var(--bf-radius-md);
-    box-shadow: var(--bf-shadow-sm); 
+    box-shadow: var(--bf-shadow-sm);
     border: 1px solid var(--bf-gray-light);
     transition: box-shadow 0.2s;
     display: flex;
@@ -31,13 +75,17 @@
     padding: 12px;
     gap: 16px;
 }
-.tavernCard:hover { box-shadow: var(--bf-shadow-md); }
+
+.tavernCard:hover {
+    box-shadow: var(--bf-shadow-md);
+}
 
 .imageWrapper {
     width: 70px;
     height: 70px;
     flex-shrink: 0;
-    background: var(--bf-gray-light); /* Leicht grauer Hintergrund wie in der Skizze */
+    background: var(--bf-gray-light);
+    /* Leicht grauer Hintergrund wie in der Skizze */
     border-radius: var(--bf-radius-sm);
     display: flex;
     align-items: center;
@@ -45,10 +93,10 @@
     overflow: hidden;
 }
 
-.tavernImage { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: contain; 
+.tavernImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .placeholderIcon {
@@ -56,42 +104,53 @@
     color: var(--bf-gray-mid);
 }
 
-.tavernContent { 
-    flex: 1; 
+.tavernContent {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px; 
+    gap: 12px;
 }
 
-.tavernName { 
-    font-size: 1rem; 
-    font-weight: 700; 
-    color: var(--bf-dark-green); 
+.tavernName {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--bf-dark-green);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.actionButtons { display: flex; gap: 8px; }
+.actionButtons {
+    display: flex;
+    gap: 8px;
+}
 
 .beersButton {
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 9px 14px;
-    background: var(--bf-light-green); 
+    background: var(--bf-light-green);
     border: 1px solid var(--bf-primary-green);
-    border-radius: var(--bf-radius-sm); 
+    border-radius: var(--bf-radius-sm);
     color: var(--bf-dark-green);
-    font-size: 0.8rem; 
-    font-weight: 600; 
-    cursor: pointer; 
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
     transition: all 0.2s;
-    width: 100%; 
+    width: 100%;
 }
-.beersButton:hover { background: var(--bf-primary-green); color: var(--bf-white); }
-.arrowIcon { margin-left: auto; font-size: 0.9rem; }
+
+.beersButton:hover {
+    background: var(--bf-primary-green);
+    color: var(--bf-white);
+}
+
+.arrowIcon {
+    margin-left: auto;
+    font-size: 0.9rem;
+}
 
 .infoRow {
     display: flex;
@@ -101,49 +160,275 @@
 }
 
 .mapBtn {
-    display: flex; 
-    align-items: center; 
-    gap: 6px; 
+    display: flex;
+    align-items: center;
+    gap: 6px;
     padding: 7px 12px;
-    background: var(--bf-gray-light); 
+    background: var(--bf-gray-light);
     border: 1px solid var(--bf-gray-mid);
-    border-radius: var(--bf-radius-sm); 
+    border-radius: var(--bf-radius-sm);
     color: var(--bf-text-dark);
-    font-size: 0.8rem; 
-    font-weight: 500; 
-    cursor: pointer; 
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
     transition: all 0.2s;
-    flex-shrink: 0; 
+    flex-shrink: 0;
 }
-.mapBtn:hover { background: var(--bf-gray-mid); }
-.jumpIcon { font-size: 0.7rem; }
+
+.mapBtn:hover {
+    background: var(--bf-gray-mid);
+}
+
+.jumpIcon {
+    font-size: 0.7rem;
+}
 
 /* Beer Card List in BottomSheet */
-.beerCardList { display: flex; flex-direction: column; gap: 8px; padding: 4px 0; }
-.noBeersText { font-size: 0.85rem; color: var(--bf-text-muted); text-align: center; padding: 20px 0; }
+.beerCardList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.noBeersText {
+    font-size: 0.85rem;
+    color: var(--bf-text-muted);
+    text-align: center;
+    padding: 20px 0;
+}
 
 /* Brewery Detail */
-.breweryDetail { padding: 8px 0; }
-.breweryDesc { font-size: 0.88rem; line-height: 1.6; color: var(--bf-text-dark); margin-bottom: 14px; white-space: pre-line; }
-.breweryWebsite:hover { background: var(--bf-dark-green); }
+.breweryDetail {
+    padding: 8px 0;
+}
+
+.breweryDesc {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--bf-text-dark);
+    margin-bottom: 14px;
+    white-space: pre-line;
+}
+
+.breweryWebsite:hover {
+    background: var(--bf-dark-green);
+}
 
 /* =========================================
    Detail Header Layout (Flexbox) - Sync
    ========================================= */
-.detailHeaderRow { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
-.detailHeaderIconWrapper { flex-shrink: 0; width: 70px; height: 70px; background: var(--bf-gray-light); border-radius: var(--bf-radius-md); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #e0e0e0; }
-.detailHeaderImg { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
-.detailHeaderFallback { font-size: 1.4rem; font-weight: 700; color: var(--bf-mid-green); background: var(--bf-light-green); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.detailHeaderInfo { flex: 1; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
-.detailTypeBadge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: var(--bf-radius-full); background: var(--bf-light-green); color: var(--bf-mid-green); }
-.detailMetaText { font-size: 0.8rem; color: var(--bf-text-muted); }
-.detailHeaderActions { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.actionWrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.actionLabel { font-size: 0.75rem; font-weight: 700; color: var(--bf-dark-green); }
-.websiteBtn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--bf-primary-green); color: var(--bf-white) !important; border-radius: var(--bf-radius-full); font-size: 0.85rem; font-weight: 600; transition: background 0.2s; text-decoration: none; }
-.websiteBtn:hover { background: var(--bf-dark-green); }
+.detailHeaderRow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.detailHeaderIconWrapper {
+    flex-shrink: 0;
+    width: 70px;
+    height: 70px;
+    background: var(--bf-gray-light);
+    border-radius: var(--bf-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+
+.detailHeaderImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 6px;
+}
+
+.detailHeaderFallback {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--bf-mid-green);
+    background: var(--bf-light-green);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detailHeaderInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+.detailTypeBadge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: var(--bf-radius-full);
+    background: var(--bf-light-green);
+    color: var(--bf-mid-green);
+}
+
+.detailMetaText {
+    font-size: 0.8rem;
+    color: var(--bf-text-muted);
+}
+
+.detailHeaderActions {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.actionWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.actionLabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--bf-dark-green);
+}
+
+.websiteBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--bf-primary-green);
+    color: var(--bf-white) !important;
+    border-radius: var(--bf-radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+
+.websiteBtn:hover {
+    background: var(--bf-dark-green);
+}
 
 
-.sponsorDesc { font-size: 0.88rem; line-height: 1.6; color: var(--bf-text-dark); margin-bottom: 14px; white-space: pre-line; }
+.sponsorDesc {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--bf-text-dark);
+    margin-bottom: 14px;
+    white-space: pre-line;
+}
 
-.sponsorOverlay { }
+.sponsorOverlay {}
+
+/* =========================================
+   BRAUERMARKT
+   ========================================= */
+.brauermarktCard {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    background: linear-gradient(135deg, #fef7e0, #fdf2cc);
+    border: 1.5px solid var(--bf-gold);
+    border-radius: var(--bf-radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(238, 219, 60, 0.15);
+}
+
+.brauermarktCard:hover {
+    box-shadow: 0 4px 16px rgba(238, 219, 60, 0.3);
+}
+
+.brauermarktIcon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--bf-gold);
+    color: #5c4d00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.brauermarktContent {
+    flex: 1;
+}
+
+.brauermarktTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #5c4d00;
+    margin: 0;
+}
+
+.brauermarktSub {
+    font-size: 0.78rem;
+    color: #8b7a20;
+}
+
+.brauermarktArrow {
+    color: #8b7a20;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.brauermarktInfoText {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--bf-text-dark);
+    margin-bottom: 16px;
+}
+
+.inlineLink {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: var(--bf-primary-green);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.2s;
+}
+
+.inlineLink:hover {
+    text-decoration-color: var(--bf-primary-green);
+}
+
+.brauermarktBreweryList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.brauermarktBreweryItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--bf-white);
+    border: 1px solid var(--bf-gray-light);
+    border-radius: var(--bf-radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.brauermarktBreweryItem:hover {
+    background: var(--bf-gray-light);
+    box-shadow: var(--bf-shadow-sm);
+}

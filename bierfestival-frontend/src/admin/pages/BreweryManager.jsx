@@ -29,6 +29,7 @@ const BreweryManager = () => {
         { key: 'city', label: 'Ort', render: (_, row) => row.city?.name || '-' },
         { key: 'district', label: 'Landkreis', render: (_, row) => row.district?.name || '-' },
         { key: 'isHallertau', label: 'Hallertau', render: (val) => val ? 'Ja' : 'Nein' },
+        { key: 'isBrewersMarket', label: 'Brauermarkt', render: (val) => val ? 'Ja' : 'Nein' },
         { key: 'website', label: 'Website', render: (val) => renderExternalLink(val) },
         { key: 'imgUrl', label: 'Logo', sortable: false, render: (val) => val ? <img src={val} alt="Brauerei" style={{ height: '30px', borderRadius: '4px' }} /> : '-' }
     ];
@@ -39,6 +40,7 @@ const BreweryManager = () => {
         { name: 'districtId', label: 'Landkreis', type: 'select', options: districts.map(d => ({ id: d.id, name: d.name })), lookupEndpoint: '/api/districts' },
         { name: 'website', label: 'Website', type: 'text' },
         { name: 'isHallertau', label: 'Kommt aus der Hallertau?', type: 'checkbox' },
+        { name: 'isBrewersMarket', label: 'Verkauft auf dem Brauermarkt?', type: 'checkbox' },
         { name: 'imgUrl', label: 'Logo', type: 'image' }
     ];
 
