@@ -25,7 +25,6 @@ const MeinBesuchPage = () => {
     const { trackingData, getBeerState, toggleMerkliste, logDrink, removeDrink, rateBeer } = useTracking();
 
     // Filters
-    const [dayFilter, setDayFilter] = useState('alle');
     const [showDrunkInMerkliste, setShowDrunkInMerkliste] = useState(true);
     const [showRatedInMerkliste, setShowRatedInMerkliste] = useState(true);
 
@@ -100,21 +99,6 @@ const MeinBesuchPage = () => {
         }
     };
 
-    // Available days from tracking data
-    const availableDays = useMemo(() => {
-        const days = new Set();
-        Object.values(trackingData).forEach(state => {
-            (state.drinkTimestamps || []).forEach(ts => days.add(getDay(ts)));
-        });
-        return ['alle', ...Array.from(days).sort()];
-    }, [trackingData]);
-
-    // Filter drink timestamps by day
-    const getDrinkCountForDay = (timestamps) => {
-        if (dayFilter === 'alle') return timestamps.length;
-        return timestamps.filter(ts => getDay(ts) === dayFilter).length;
-    };
-
     // Gemerkte Biere
     const merklisteBiere = useMemo(() => {
         return Object.entries(trackingData)
@@ -140,7 +124,6 @@ const MeinBesuchPage = () => {
             .sort((a, b) => b.state.rating - a.state.rating || a.beer.name.localeCompare(b.beer.name));
     }, [trackingData, beerMap]);
 
-    // Meistgetrunken
     const mostDrunk = useMemo(() => {
         return Object.entries(trackingData)
             .filter(([_, state]) => (state.drinkTimestamps || []).length > 0)
@@ -148,11 +131,11 @@ const MeinBesuchPage = () => {
                 beerId: Number(beerId),
                 state,
                 beer: beerMap[Number(beerId)],
-                count: getDrinkCountForDay(state.drinkTimestamps || [])
+                count: (state.drinkTimestamps || []).length // Einfach alle zählen
             }))
             .filter(item => item.beer && item.count > 0)
             .sort((a, b) => b.count - a.count || a.beer.name.localeCompare(b.beer.name));
-    }, [trackingData, beerMap, dayFilter]);
+    }, [trackingData, beerMap]);
 
     const mapBeerForCard = (beer) => ({
         beerId: beer.id,
@@ -221,19 +204,6 @@ const MeinBesuchPage = () => {
                     <FaClipboardList className={styles.headerIcon} /> 
                     <h1 className={styles.title}>Mein Besuch</h1>
                     <p className={styles.subtitle}>Deine persönliche Festival-Übersicht</p>
-                </div>
-
-                {/* Datums-Filter */}
-                <div className={styles.dayFilter}>
-                    {availableDays.map(day => (
-                        <button
-                            key={day}
-                            className={`${styles.dayBtn} ${dayFilter === day ? styles.dayActive : ''}`}
-                            onClick={() => setDayFilter(day)}
-                        >
-                            {day === 'alle' ? 'Alle Tage' : day}
-                        </button>
-                    ))}
                 </div>
 
                 {/* Gemerkte Biere */}

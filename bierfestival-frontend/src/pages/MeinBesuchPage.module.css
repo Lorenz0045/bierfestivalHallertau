@@ -8,26 +8,13 @@
     z-index: 1;
 }
 
-.page { padding: 0 12px 20px; width: 100%; max-width: 600px; margin: 0 auto; }
+.page { padding: 0 12px 100px; width: 100%; max-width: 600px; margin: 0 auto; }
 .loading { text-align: center; padding: 60px 20px; color: var(--bf-text-muted); }
 
 .header { text-align: center; padding: 16px 0 4px; }
 .headerIcon { font-size: 2rem; color: var(--bf-primary-green); margin-bottom: 4px; }
 .title { font-size: 1.3rem; font-weight: 700; color: var(--bf-dark-green); margin: 0; }
 .subtitle { font-size: 0.8rem; color: var(--bf-text-muted); margin-top: 4px; }
-
-/* Day Filter */
-.dayFilter {
-    display: flex; gap: 6px; margin: 12px 0; overflow-x: auto;
-    scrollbar-width: none; padding-bottom: 4px;
-}
-.dayFilter::-webkit-scrollbar { display: none; }
-.dayBtn {
-    flex: 0 0 auto; padding: 7px 14px; border: 1px solid var(--bf-gray-mid);
-    border-radius: var(--bf-radius-full); background: var(--bf-white); color: var(--bf-text-dark);
-    font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
-}
-.dayActive { background: var(--bf-primary-green); color: var(--bf-white); border-color: var(--bf-primary-green); }
 
 /* Sections */
 .section {
