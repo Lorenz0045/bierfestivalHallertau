@@ -128,7 +128,7 @@ const SchenkenPage = () => {
                         <div className={styles.brauermarktContent}>
                             <h3 className={styles.brauermarktTitle}>Brauermarkt</h3>
                             <span className={styles.brauermarktSub}>
-                                {brauermarktBreweries.length + 2} Brauereien · Direktverkauf
+                                {brauermarktBreweries.length} Brauereien · Direktverkauf
                             </span>
                         </div>
                         <FaAngleRight className={styles.brauermarktArrow} />
