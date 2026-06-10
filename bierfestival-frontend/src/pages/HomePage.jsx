@@ -256,6 +256,16 @@ const HomePage = () => {
                     <h4>Informationen</h4>
                     <Link to="/impressum" className={styles.infoLink} onClick={() => setShowInfoPanel(false)}>Impressum</Link>
                     <Link to="/datenschutz" className={styles.infoLink} onClick={() => setShowInfoPanel(false)}>Datenschutzerklärung</Link>
+                    <button 
+                        className={styles.infoLink} 
+                        style={{ background: 'none', borderTop: 'none', borderLeft: 'none', borderRight: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}
+                        onClick={() => {
+                            setShowInfoPanel(false);
+                            window.dispatchEvent(new Event('openCookieSettings'));
+                        }}
+                    >
+                        Datenschutzeinstellungen
+                    </button>
                 </div>
             )}
 

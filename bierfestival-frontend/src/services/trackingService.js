@@ -243,3 +243,41 @@ export const rateBeer = (beerId, rating) => {
 if (getRetryQueue().length > 0) {
     startRetryTimer();
 }
+
+// ====================================
+// Bulk-Sync (Nachträgliche Zustimmung)
+// ====================================
+export const bulkSyncToBackend = () => {
+    if (!hasTrackingConsent()) return;
+    const tracking = getLocalTracking();
+    const now = new Date().toISOString();
+
+    Object.entries(tracking).forEach(([beerIdStr, state]) => {
+        const beerId = Number(beerIdStr);
+
+        // 1. Gemerkte Biere syncen
+        if (state.isOnMerkliste) {
+            syncToBackend(`/api/tracking/${beerId}/merkliste`, 'PUT', {
+                isOnMerkliste: true,
+                merklisteAddedAt: state.merklisteAddedAt || now
+            });
+        }
+
+        // 2. Getrunkene Biere syncen (jedes einzeln)
+        if (state.drinkTimestamps && state.drinkTimestamps.length > 0) {
+            state.drinkTimestamps.forEach(ts => {
+                syncToBackend(`/api/tracking/${beerId}/getrunken`, 'POST', {
+                    consumedAt: ts
+                });
+            });
+        }
+
+        // 3. Bewertungen syncen
+        if (state.rating) {
+            syncToBackend(`/api/tracking/${beerId}/rating`, 'PUT', {
+                rating: state.rating,
+                ratedAt: state.ratedAt || now
+            });
+        }
+    });
+};

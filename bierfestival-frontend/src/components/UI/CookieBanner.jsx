@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { bulkSyncToBackend } from '../../services/trackingService';
 import styles from './CookieBanner.module.css';
 
 export const CONSENT_KEY = 'bierfestival_consents';
@@ -23,14 +24,31 @@ const CookieBanner = () => {
                 setShowBanner(true);
             }
         }
+
+        const handleOpenSettings = () => {
+            setShowBanner(true);
+            setShowSettings(true);
+        };
+        window.addEventListener('openCookieSettings', handleOpenSettings);
+        return () => window.removeEventListener('openCookieSettings', handleOpenSettings);
     }, []);
 
+    
+
     const saveConsents = (marketing, festivalSync) => {
-        // Gleiche Struktur beim Speichern beibehalten
+        
+        const previousData = localStorage.getItem(CONSENT_KEY);
+        const previousConsents = previousData ? JSON.parse(previousData) : {};
+        const wasSyncedBefore = previousConsents.festivalSync === true;
+
         const consents = { marketing, festivalSync, necessary: true };
         localStorage.setItem(CONSENT_KEY, JSON.stringify(consents));
         
         setShowBanner(false);
+
+        if (festivalSync && !wasSyncedBefore) {
+            bulkSyncToBackend();
+        }
     };
 
     const handleAcceptAll = () => saveConsents(true, true); // Google-Analytics wurde entfernt, platzhalter dafür existiert bereits mit marketing... zustimmung -> aktuell macht das nichts.
