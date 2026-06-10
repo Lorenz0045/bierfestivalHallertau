@@ -9,6 +9,7 @@ import TavernManager from './pages/TavernManager';
 import EventManager from './pages/EventManager';
 import FacilityManager from './pages/FacilityManager';
 import CraftMarketManager from './pages/CraftMarketManager';
+import BusplanManager from './pages/BusplanManager';
 import styles from './MasterDataPage.module.css';
 
 const MasterDataPage = () => {
@@ -27,6 +28,7 @@ const MasterDataPage = () => {
           <NavLink to="/admin/master-data/facilities" className={({isActive}) => isActive ? styles.active : ''}>Einrichtungen</NavLink>
           <NavLink to="/admin/master-data/craft-markets" className={({isActive}) => isActive ? styles.active : ''}>Handwerkermarkt</NavLink>
           <NavLink to="/admin/master-data/lookups" className={({isActive}) => isActive ? styles.active : ''}>Lookups</NavLink>
+          <NavLink to="/admin/master-data/busplan" className={({isActive}) => isActive ? styles.active : ''}>Busplan</NavLink>
         </nav>
       </header>
 
@@ -43,6 +45,7 @@ const MasterDataPage = () => {
           <Route path="facilities" element={<FacilityManager />} />
           <Route path="craft-markets" element={<CraftMarketManager />} />
           <Route path="lookups" element={<LookupManager />} />
+          <Route path="busplan" element={<BusplanManager />} />
         </Routes>
       </div>
     </div>

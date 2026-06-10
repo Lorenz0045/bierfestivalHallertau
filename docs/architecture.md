@@ -157,6 +157,19 @@ Jede Entity folgt einem einheitlichen Muster:
 /api/{entity-plural}/{id}     DELETE → Eintrag löschen (admin)
 ```
 
+### Analytics-API Pattern
+
+Auswertungen werden live über JPQL/SQL aggregiert und über dedizierte Endpunkte im Admin-Bereich bereitgestellt:
+
+```
+/api/admin/analytics/beers/overview  GET → Übersicht aller Biere mit Rankings
+/api/admin/analytics/beers/{id}      GET → Detailauswertung inkl. Bewertungsverteilung
+/api/admin/analytics/breweries/{id}  GET → Auswertung für eine Brauerei
+/api/admin/analytics/taverns/{id}    GET → Auswertung für eine Schenke
+/api/admin/analytics/cities/{id}     GET → Auswertung für einen Ort
+/api/admin/analytics/master-data-summary GET → Kachel-Übersicht und Kreisdiagramme
+```
+
 ### DTO-Pattern
 
 - **ReadDto** (`XyzDto`): Enthält aufgelöste Referenzen als verschachtelte `LookupDto` (z.B. `{ id: 1, name: "München" }` statt nur `city_id`).
@@ -231,6 +244,11 @@ Fehlgeschlagene Sync-Requests werden **silent** in eine `localStorage`-basierte 
 
 - Wenn `isNonAlcoholic === true`, wird das `alcoholPercentage`-Feld im Admin-Formular ausgegraut (nicht editierbar, Wert bleibt bestehen).
 - In allen öffentlichen Anzeigen wird bei alkoholfreien Bieren **"< 0,5%"** statt des gespeicherten Werts angezeigt.
+
+### Performance-Entscheidungen (Analytics)
+
+Obwohl die Entity `Beer` die Felder `ratingCount` und `ratingAverage` besitzt, werden diese während des Festivals **nicht** aktiv befüllt. 
+**Grund:** Ein Write-Heavy vs. Read-Heavy Tradeoff. Da tausende Ratings pro Stunde eintreffen, aber Admin-Analytics nur selten abgefragt werden, ist es performanter, die Ratings auf den Tracking-Tabellen `user_beer_interaction` und `user_drink_event` **live zu aggregieren**, anstatt bei jedem Write Update-Overheads zu erzeugen. Für schnelle Query-Performance wurden entsprechende Indizes (`idx_ubi_beer_rating` und `idx_ude_beer_id`) angelegt.
 
 ---
 
@@ -389,6 +407,9 @@ Auto-Scroll alle 5s um 2 Logos, 4 sichtbar, pausiert bei Touch (8s Cooldown). Kl
 | `/api/bus/lines` | GET | Alle Buslinien |
 | `/api/bus/stops` | GET | Alle Haltestellen mit Facility-Referenz |
 | `/api/bus/schedule` | GET | Vollständiger Fahrplan gruppiert nach Linie |
+| `/api/bus/lines` | POST/PUT/DELETE | Admin CRUD Buslinien |
+| `/api/bus/stops` | POST/PUT/DELETE | Admin CRUD Haltestellen |
+| `/api/bus/departures`| POST/PUT/DELETE | Admin CRUD Abfahrten |
 
 **Nachtfahrt-Regel**: 00:00–04:00 Uhr → Vortag.
 **Rückfahrt**: Nur Abfahrtszeit + Karten-Jump-Button zur Haltestelle.

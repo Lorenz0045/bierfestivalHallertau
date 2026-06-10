@@ -1,0 +1,155 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.header h1 {
+  color: #1b4332;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+}
+
+.subNav {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.subNav::-webkit-scrollbar {
+  display: none;
+}
+
+.subNav a {
+  padding: 0.75rem 1.25rem;
+  color: #495057;
+  text-decoration: none;
+  font-weight: 500;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.subNav a:hover {
+  color: #2d6a4f;
+  background-color: #f8f9fa;
+  border-radius: 4px 4px 0 0;
+}
+
+.active {
+  color: #2d6a4f !important;
+  border-bottom-color: #2d6a4f !important;
+  background-color: transparent !important;
+}
+
+.content {
+  background-color: transparent;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.statCard h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValueContainer {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1b4332;
+  margin: 0;
+}
+
+.statRank {
+  font-size: 1rem;
+  color: #adb5bd;
+  font-weight: 600;
+}
+
+.chartContainer {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.chartContainer h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #1b4332;
+}
+
+.ratingBarContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ratingLabel {
+  min-width: 60px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.ratingBarTrack {
+  flex: 1;
+  height: 12px;
+  background-color: #e9ecef;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ratingBarFill {
+  height: 100%;
+  background-color: #EEDB3C; /* bf-gold */
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.ratingValue {
+  min-width: 100px;
+  font-size: 0.9rem;
+  color: #6c757d;
+  text-align: right;
+}

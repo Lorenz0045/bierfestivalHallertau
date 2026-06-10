@@ -13,7 +13,7 @@ export default function AdminApp() {
         <Route element={<AdminRoute />}>
           <Route element={<AdminLayout />}>
             <Route path="/" element={<Navigate to="analytics" replace />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="analytics/*" element={<AnalyticsPage />} />
             <Route path="master-data/*" element={<MasterDataPage />} />
             <Route path="map" element={<AdminMapManager />} />
           </Route>

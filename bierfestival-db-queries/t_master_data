@@ -141,6 +141,8 @@ CREATE INDEX idx_ubi_device_id ON user_beer_interaction(device_id);
 CREATE INDEX idx_ude_device_id ON user_drink_event(device_id);
 
 
+
+
 -- Migration: beer.description auf TEXT umstellen für mehrzeilige Beschreibungen
 ALTER TABLE beer ALTER COLUMN description TYPE TEXT;
 
@@ -239,4 +241,9 @@ ALTER TABLE sponsor ADD COLUMN sponsor_tier_id BIGINT REFERENCES sponsor_tier(id
 -- ============================================================
 -- BRAUERMARKT: Flag für Brauereien, die auf dem Brauermarkt verkaufen
 -- ============================================================
-ALTER TABLE brewery ADD COLUMN is_brewers_market BOOLEAN DEFAULT false;
+ALTER TABLE brewery ADD COLUMN is_brewers_market BOOLEAN DEFAULT false;
+
+
+-- Analytics Indices
+CREATE INDEX idx_ubi_beer_rating ON user_beer_interaction(beer_id, rating);
+CREATE INDEX idx_ude_beer_id ON user_drink_event(beer_id);

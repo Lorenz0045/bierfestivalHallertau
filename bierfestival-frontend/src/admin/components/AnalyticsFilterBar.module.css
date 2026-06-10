@@ -1,0 +1,39 @@
+.filterBar {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 1.5rem;
+}
+
+.filterItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 150px;
+}
+
+.filterItem label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.filterItem input, .filterItem select {
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background-color: #fff;
+    color: #212529;
+}
+
+.filterItem input:focus, .filterItem select:focus {
+    outline: none;
+    border-color: #2d6a4f;
+    box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.2);
+}
