@@ -540,9 +540,10 @@ const HomePage = () => {
                                         trackingState={getBeerState(fullBeer.id)}
                                         onToggleMerkliste={toggleMerkliste}
                                         onLogDrink={logDrink}
+                                        taverns={beerTavernMap[fullBeer.id] || []}
                                         onRemoveDrink={removeDrink}
                                         onRate={rateBeer}
-                                        compact={true}
+                                        compact={false}
                                     />
                                 ))}
                                 {bBeers.length === 0 && <p className={styles.poiMeta}>Derzeit keine Biere gelistet.</p>}
