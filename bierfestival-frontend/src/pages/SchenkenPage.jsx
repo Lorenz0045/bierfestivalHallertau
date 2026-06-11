@@ -71,6 +71,8 @@ const SchenkenPage = () => {
         return map;
     }, [taverns]);
 
+    const brauermarktTavern = taverns.find(t => t.name === 'Brauermarkt');
+
     // Brauermarkt: Brauereien mit isBrewersMarket=true
     const brauermarktBreweries = useMemo(() =>
         breweries.filter(b => b.isBrewersMarket).sort((a, b) => a.name.localeCompare(b.name)),
@@ -131,12 +133,27 @@ const SchenkenPage = () => {
                                 {brauermarktBreweries.length} Brauereien · Direktverkauf
                             </span>
                         </div>
-                        <FaAngleRight className={styles.brauermarktArrow} />
+                        
+                        {brauermarktTavern?.lat && (
+                            <button
+                                className={styles.mapBtn}
+                                style={{ marginLeft: 'auto', marginRight: '10px', backgroundColor: 'var(--bf-white)', borderColor: 'var(--bf-gold-dark)' }}
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Verhindert, dass sich das Overlay öffnet
+                                    handleJumpToMap(brauermarktTavern);
+                                }}
+                            >
+                                <FaMapMarkerAlt /> Karte
+                                <FaLocationArrow className={styles.jumpIcon} />
+                            </button>
+                        )}
+                        
+                        <FaAngleRight className={styles.brauermarktArrow} style={{ marginLeft: brauermarktTavern?.lat ? '0' : 'auto' }} />
                     </div>
                 )}
 
                 <div className={styles.tavernList}>
-                    {taverns.map(tavern => (
+                    {taverns.filter(t => t.name !== 'Brauermarkt').map(tavern => (
                         <div key={tavern.id} className={styles.tavernCard}>
 
                             <div className={styles.imageWrapper}>
